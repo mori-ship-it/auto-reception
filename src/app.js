@@ -1,7 +1,7 @@
 // ===== FIREBASE CONFIG =====
 // ===== FIREBASE INIT (遅延) =====
 let db;
-const STORE_ID = 'muuk-hiratsuka';
+const STORE_ID = new URLSearchParams(window.location.search).get('store') || 'muuk-hiratsuka';
 document.addEventListener('DOMContentLoaded', () => {
   const firebaseConfig = {
     apiKey: "AIzaSyDopvxzyHEcm8KChamvVVaN9YVxHCamGx0",
