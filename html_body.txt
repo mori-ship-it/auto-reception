@@ -330,9 +330,9 @@
     <div class="admin-section">
       <span class="admin-label">Slack 設定</span>
       <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.05em;">Webhook URL（飛び込み・呼び出し → チャンネル）</div>
-      <input class="admin-field" id="webhookInput" placeholder="https://hooks.slack.com/services/...">
+      <input class="admin-field" id="webhookInput" placeholder="https://hooks.slack.com/services/..." oninput="markDirty()">
       <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.05em;">Bot Token（指名あり → 個人DM）</div>
-      <input class="admin-field" id="botTokenInput" placeholder="xoxb-...">
+      <input class="admin-field" id="botTokenInput" placeholder="xoxb-..." oninput="markDirty()">
     </div>
 
     <!-- スタッフ管理 -->

@@ -490,8 +490,8 @@ function onDrop(e, targetId){
   renderAdminStaff();
 }
 function onDragEnd(e){ e.currentTarget.style.opacity = '1'; }
-function toggleStaff(id){staffList=staffList.map(s=>s.id===id?{...s,on:!s.on}:s);renderAdminStaff();}
-function updateStaff(id,key,val){staffList=staffList.map(s=>s.id===id?{...s,[key]:val}:s);}
+function toggleStaff(id){staffList=staffList.map(s=>s.id===id?{...s,on:!s.on}:s);renderAdminStaff();markDirty();}
+function updateStaff(id,key,val){staffList=staffList.map(s=>s.id===id?{...s,[key]:val}:s);markDirty();}
 function updateSlackId(id,val){updateStaff(id,'slackId',val);}
 function removeStaff(id){
   const s=staffList.find(x=>x.id===id);
@@ -530,12 +530,12 @@ function addStaff(){
   document.getElementById('newName').value='';
   document.getElementById('newNameEn').value='';
   document.getElementById('newRole').value='スタイリスト';
-  renderAdminStaff(); showToast(`${name} を追加しました`);
+  renderAdminStaff(); showToast(`${name} を追加しました`); markDirty();
 }
 function uploadPhoto(id,input){
   const file=input.files[0]; if(!file)return;
   const reader=new FileReader();
-  reader.onload=e=>{staffList=staffList.map(s=>s.id===id?{...s,photo:e.target.result}:s);renderAdminStaff();showToast('写真を登録しました');};
+  reader.onload=e=>{staffList=staffList.map(s=>s.id===id?{...s,photo:e.target.result}:s);renderAdminStaff();showToast('写真を登録しました');markDirty();};
   reader.readAsDataURL(file);
 }
 
