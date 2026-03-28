@@ -496,6 +496,22 @@ body {
   font-family:'DM Sans',sans-serif; letter-spacing:0.03em;
 }
 .cust-tab.active { border-bottom-color:var(--accent); color:var(--text); font-weight:500; }
+.cust-layout { display:flex; flex-direction:column; gap:16px; }
+.cust-left { width:100%; }
+.cust-right { width:100%; }
+@media (min-width:768px) and (orientation:landscape) {
+  .cust-layout { flex-direction:row; align-items:flex-start; }
+  .cust-left { flex:0 0 48%; }
+  .cust-right { flex:1; min-width:0; }
+  .cust-ipad-scr { min-height:180px !important; }
+  .cust-ipad-scr .prev-title { font-size:16px; }
+  .cust-ipad-scr .prev-body { gap:5px; padding:4px 16px 10px; }
+  .cust-ipad-scr .prev-ring { width:40px; height:40px; }
+  .cust-ipad-scr .prev-ring svg { width:16px; height:16px; }
+  .cust-ipad-scr .prev-btn { padding:5px 18px; font-size:10px; }
+  .cust-ipad-scr .prev-btn-out { padding:3px 12px; font-size:8px; }
+  .cust-fields { grid-template-columns:1fr; }
+}
 .cust-ipad {
   background:#1a1e2e; border-radius:16px; padding:8px 26px;
   position:relative; margin-bottom:16px;

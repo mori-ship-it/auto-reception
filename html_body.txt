@@ -266,11 +266,15 @@
         <div class="cust-tab" onclick="switchCustTab(3)">業者</div>
         <div class="cust-tab" onclick="switchCustTab(4)">呼び出し</div>
       </div>
+      <div class="cust-layout">
+      <div class="cust-left">
       <div class="cust-ipad">
         <div class="cust-ipad-dot"></div>
         <div class="cust-ipad-cam"></div>
         <div class="cust-ipad-scr" id="custPreview"></div>
       </div>
+      </div>
+      <div class="cust-right">
       <!-- パネル0: トップ -->
       <div class="cust-panel active" id="cp0">
         <div class="cust-fields">
@@ -314,7 +318,8 @@
         <div class="cust-fl" style="margin-bottom:4px;">PINコード（4桁）</div>
         <input class="admin-field" id="c-pin" placeholder="4桁" maxlength="4" type="tel" style="letter-spacing:0.3em;max-width:120px;" oninput="markDirty()">
       </div>
-    </div>
+      </div>
+      </div>
 
     <!-- Slack -->
     <div class="admin-section">
