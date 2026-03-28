@@ -32,12 +32,19 @@ let current = 's1';
 let custom = {
   salonName:'SALON', welcome:'いらっしゃいませ',
   welcomeSub:'タッチして受付を開始してください',
+  startBtn:'受付はこちら', callBtn:'スタッフを呼ぶ',
   checkinDone:'受付が完了しました',
   pleaseWait:'お席にお座りになってお待ちください',
   pleaseWaitWalkin:'お席にお座りになってお待ちください',
+  pleaseWaitWalkinSub:'しばらくお待ちください',
   pleaseWaitVendor:'そのままお待ちください',
-  coming:'スタッフが参ります', waitHere:'そのままお待ちください',
+  pleaseWaitVendorSub:'スタッフが参ります',
+  coming:'スタッフが参ります',
+  comingSub:'お席にお座りになってお待ちください',
+  waitHere:'そのままお待ちください',
 };
+let adminDirty = false;
+let custTabIdx = 0;
 
 let staffList = [
   {id:1,name:'田中 美咲',nameEn:'Misaki Tanaka',role:'スタイリスト',on:true,slackId:'',photo:''},
@@ -193,18 +200,23 @@ function applyLang(){
 
 function applyCustom(){
   document.querySelectorAll('.top-logo').forEach(el=>el.textContent=custom.salonName);
+  if(custom.startBtn){const e=document.getElementById('t-start');if(e)e.textContent=custom.startBtn;}
+  if(custom.callBtn){const e=document.getElementById('t-call-staff');if(e)e.textContent=custom.callBtn;}
   if(lang==='ja'){
     const m = {
       't-welcome':custom.welcome,'t-welcome-sub':custom.welcomeSub,
       't-checkin-done':custom.checkinDone,
-      't-please-wait':custom.pleaseWait,'t-please-wait2':custom.pleaseWait,
-      't-please-wait3':custom.pleaseWaitWalkin,'t-please-wait4':custom.pleaseWaitWalkin,
-      't-please-wait5':custom.pleaseWaitVendor,
+      't-please-wait':custom.pleaseWait,
+      't-coming':custom.coming,
+      't-please-wait2':custom.comingSub||custom.pleaseWait,
+      't-coming2':custom.pleaseWaitWalkin,
+      't-please-wait3':custom.pleaseWaitWalkinSub||'',
+      't-coming3':custom.pleaseWaitWalkin,
+      't-please-wait4':custom.pleaseWaitWalkinSub||'',
+      't-coming-vendor':custom.pleaseWaitVendor,
+      't-please-wait5':custom.pleaseWaitVendorSub||'',
     };
     Object.entries(m).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v;});
-    ['t-coming','t-coming2','t-coming3','t-coming-vendor'].forEach(id=>{
-      const e=document.getElementById(id);if(e)e.textContent=custom.coming;
-    });
   }
 }
 
@@ -348,30 +360,52 @@ function openHomePanel(){
   document.getElementById('c-salonName').value=custom.salonName;
   document.getElementById('c-welcome').value=custom.welcome;
   document.getElementById('c-welcomeSub').value=custom.welcomeSub;
+  document.getElementById('c-startBtn').value=custom.startBtn||'受付はこちら';
+  document.getElementById('c-callBtn').value=custom.callBtn||'スタッフを呼ぶ';
   document.getElementById('c-checkinDone').value=custom.checkinDone;
   document.getElementById('c-pleaseWait').value=custom.pleaseWait;
   document.getElementById('c-pleaseWaitWalkin').value=custom.pleaseWaitWalkin;
+  document.getElementById('c-pleaseWaitWalkinSub').value=custom.pleaseWaitWalkinSub||'';
   document.getElementById('c-pleaseWaitVendor').value=custom.pleaseWaitVendor;
+  document.getElementById('c-pleaseWaitVendorSub').value=custom.pleaseWaitVendorSub||'';
   document.getElementById('c-coming').value=custom.coming;
+  document.getElementById('c-comingSub').value=custom.comingSub||'';
   document.getElementById('c-pin').value='';
+  adminDirty=false; custTabIdx=0;
+  switchCustTab(0);
   renderAdminStaff(); renderLog();
   document.getElementById('homeScreen').classList.add('active');
 }
-function closeHome(){document.getElementById('homeScreen').classList.remove('active');}
+function closeHome(){
+  if(adminDirty){
+    showConfirm('設定した内容が保存されていません。破棄しますか？',()=>{
+      adminDirty=false;
+      document.getElementById('homeScreen').classList.remove('active');
+    });
+  } else {
+    document.getElementById('homeScreen').classList.remove('active');
+  }
+}
 function saveAll(){
   const g=id=>document.getElementById(id)?.value.trim()||'';
   if(g('c-salonName'))custom.salonName=g('c-salonName');
   if(g('c-welcome'))custom.welcome=g('c-welcome');
   if(g('c-welcomeSub'))custom.welcomeSub=g('c-welcomeSub');
+  if(g('c-startBtn'))custom.startBtn=g('c-startBtn');
+  if(g('c-callBtn'))custom.callBtn=g('c-callBtn');
   if(g('c-checkinDone'))custom.checkinDone=g('c-checkinDone');
   if(g('c-pleaseWait'))custom.pleaseWait=g('c-pleaseWait');
   if(g('c-pleaseWaitWalkin'))custom.pleaseWaitWalkin=g('c-pleaseWaitWalkin');
+  if(g('c-pleaseWaitWalkinSub'))custom.pleaseWaitWalkinSub=g('c-pleaseWaitWalkinSub');
   if(g('c-pleaseWaitVendor'))custom.pleaseWaitVendor=g('c-pleaseWaitVendor');
+  if(g('c-pleaseWaitVendorSub'))custom.pleaseWaitVendorSub=g('c-pleaseWaitVendorSub');
   if(g('c-coming'))custom.coming=g('c-coming');
+  if(g('c-comingSub'))custom.comingSub=g('c-comingSub');
   const pin=g('c-pin');
   if(pin){if(!/^\d{4}$/.test(pin)){showToast('PINは4桁の数字で入力してください');return;}pinCode=pin;}
   const wh=g('webhookInput'); if(wh)webhookUrl=wh;
   const bt=g('botTokenInput'); if(bt)botToken=bt;
+  adminDirty=false;
   applyCustom();
   document.getElementById('homeScreen').classList.remove('active');
   showToast('保存中...');
@@ -387,8 +421,8 @@ function savePin(){saveAll();}
 
 // ===== AUTO TRANSLATE =====
 async function autoTranslateCustom(){
-  const fields = ['welcome','welcomeSub','checkinDone','pleaseWait','pleaseWaitWalkin','pleaseWaitVendor','coming'];
-  const keys   = ['welcome','welcome-sub','checkin-done','please-wait','please-wait-walkin','please-wait-vendor','coming'];
+  const fields = ['welcome','welcomeSub','checkinDone','pleaseWait','pleaseWaitWalkin','pleaseWaitWalkinSub','pleaseWaitVendor','pleaseWaitVendorSub','coming','comingSub'];
+  const keys   = ['welcome','welcome-sub','checkin-done','please-wait','please-wait-walkin','please-wait-walkin-sub','please-wait-vendor','please-wait-vendor-sub','coming','coming-sub'];
   const langs  = ['en','zh','ko','es'];
   try{
     for(const tl of langs){
@@ -400,11 +434,6 @@ async function autoTranslateCustom(){
         const data = await res.json();
         const translated = data[0].map(x=>x[0]).join('');
         TX[tl][keys[i]] = translated;
-        if(keys[i]==='coming'){
-          TX[tl]['coming2']=translated;
-          TX[tl]['coming3']=translated;
-          TX[tl]['coming-vendor']=translated;
-        }
       }
     }
     applyLang();
@@ -466,7 +495,34 @@ function onDragEnd(e){ e.currentTarget.style.opacity = '1'; }
 function toggleStaff(id){staffList=staffList.map(s=>s.id===id?{...s,on:!s.on}:s);renderAdminStaff();}
 function updateStaff(id,key,val){staffList=staffList.map(s=>s.id===id?{...s,[key]:val}:s);}
 function updateSlackId(id,val){updateStaff(id,'slackId',val);}
-function removeStaff(id){staffList=staffList.filter(s=>s.id!==id);renderAdminStaff();}
+function removeStaff(id){
+  const s=staffList.find(x=>x.id===id);
+  if(!s)return;
+  showConfirm(s.name+' をリストから削除しますか？',()=>{
+    staffList=staffList.filter(x=>x.id!==id);renderAdminStaff();saveToStorage();
+  });
+}
+
+function showConfirm(msg,onYes){
+  let overlay=document.getElementById('confirmOverlay');
+  if(!overlay){
+    overlay=document.createElement('div');
+    overlay.id='confirmOverlay';
+    overlay.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(26,30,46,.4);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;transition:opacity 0.2s;';
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML=
+    '<div style="background:rgba(255,255,255,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.5);border-radius:20px;padding:32px 28px 24px;text-align:center;width:min(320px,85vw);box-shadow:0 20px 60px rgba(0,0,0,.12);">'+
+      '<div style="font-size:15px;color:#1a1e2e;line-height:1.7;margin-bottom:24px;">'+msg+'</div>'+
+      '<div style="display:flex;gap:10px;">'+
+        '<button id="confirmNo" style="flex:1;padding:12px;border-radius:12px;border:1px solid rgba(104,120,160,.2);background:transparent;color:#5a6278;font-size:14px;cursor:pointer;">いいえ</button>'+
+        '<button id="confirmYes" style="flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#c04040,#d05050);color:#fff;font-size:14px;cursor:pointer;">はい</button>'+
+      '</div>'+
+    '</div>';
+  overlay.style.display='flex';
+  document.getElementById('confirmNo').onclick=function(){overlay.style.display='none';};
+  document.getElementById('confirmYes').onclick=function(){overlay.style.display='none';onYes();};
+}
 function addStaff(){
   const name=document.getElementById('newName').value.trim();
   const nameEn=document.getElementById('newNameEn').value.trim();
@@ -593,6 +649,68 @@ async function loadFromStorage(){
     applyLang();
   }catch(e){ console.warn('Storage load error:', e); applyLang(); }
 }
+
+// ===== CUSTOMIZE PREVIEW =====
+function markDirty(){ adminDirty=true; }
+function switchCustTab(n){
+  custTabIdx=n;
+  document.querySelectorAll('.cust-tab').forEach(function(t,i){t.classList.toggle('active',i===n)});
+  for(var i=0;i<5;i++){
+    var p=document.getElementById('cp'+i);
+    if(p) p.classList.toggle('active',i===n);
+  }
+  updateCustPreview();
+}
+function _cv(id){ var el=document.getElementById(id); return el?el.value:''; }
+function _pmk(bg,n){ return '<div class="pmk" style="background:'+bg+';top:-8px;right:-22px">'+n+'</div>'; }
+function _prevRing(color){ return '<div class="prev-ring" style="border-color:'+color+'"><svg viewBox="0 0 24 24" style="stroke:'+color+'"><polyline points="20 6 9 17 4 12"/></svg></div>'; }
+function _prevDone(color,bg,m1id,m2id,badge){
+  var h='<div class="prev-bar"><div class="prev-logo">'+_cv('c-salonName')+'</div><div class="prev-actions"><div class="prev-langbtn">English</div><div class="prev-gearbtn"></div></div></div>';
+  h+='<div class="prev-body">';
+  h+=_prevRing(color);
+  if(badge) h+='<div class="prev-badge">田中 様</div>';
+  h+='<div style="position:relative;display:inline-block"><span style="font-size:15px;font-weight:500;color:#1a1e2e">'+_cv(m1id)+'</span>'+_pmk(bg,'1')+'</div>';
+  h+='<div style="position:relative;display:inline-block"><span class="prev-sub">'+_cv(m2id)+'</span>'+_pmk(bg,'2')+'</div>';
+  h+='<div class="prev-bartrack"><div class="prev-barfill"></div></div>';
+  h+='<div class="prev-home">ホームに戻る</div>';
+  h+='</div>';
+  return h;
+}
+function _prevSingle(color,mid){
+  var h='<div class="prev-bar"><div class="prev-logo">'+_cv('c-salonName')+'</div><div class="prev-actions"><div class="prev-langbtn">English</div><div class="prev-gearbtn"></div></div></div>';
+  h+='<div class="prev-body">';
+  h+=_prevRing(color);
+  h+='<div style="position:relative;display:inline-block"><span style="font-size:15px;font-weight:500;color:#1a1e2e">'+_cv(mid)+'</span>'+_pmk(color,'1')+'</div>';
+  h+='<div class="prev-bartrack"><div class="prev-barfill"></div></div>';
+  h+='<div class="prev-home">ホームに戻る</div>';
+  h+='</div>';
+  return h;
+}
+function updateCustPreview(){
+  var s=document.getElementById('custPreview'); if(!s) return;
+  if(custTabIdx===0){
+    s.innerHTML=
+      '<div class="prev-bar"><div class="prev-logo" style="position:relative">'+_cv('c-salonName')+_pmk('#E24B4A','1')+'</div><div class="prev-actions"><div class="prev-langbtn">English</div><div class="prev-gearbtn"></div></div></div>'+
+      '<div class="prev-body">'+
+        '<div style="position:relative;display:inline-block"><span class="prev-title">'+_cv('c-welcome')+'</span>'+_pmk('#E24B4A','2')+'</div>'+
+        '<div class="prev-divider"></div>'+
+        '<div style="position:relative;display:inline-block"><span class="prev-sub">'+_cv('c-welcomeSub')+'</span>'+_pmk('#E24B4A','3')+'</div>'+
+        '<div style="height:8px"></div>'+
+        '<div style="position:relative;display:inline-block"><div class="prev-btn">'+_cv('c-startBtn')+'</div>'+_pmk('#E24B4A','4')+'</div>'+
+        '<div style="height:2px"></div>'+
+        '<div style="position:relative;display:inline-block"><div class="prev-btn-out">'+_cv('c-callBtn')+'</div>'+_pmk('#E24B4A','5')+'</div>'+
+      '</div>';
+  } else if(custTabIdx===1){
+    s.innerHTML=_prevDone('#1D9E75','#1D9E75','c-checkinDone','c-pleaseWait',true);
+  } else if(custTabIdx===2){
+    s.innerHTML=_prevDone('#378ADD','#378ADD','c-pleaseWaitWalkin','c-pleaseWaitWalkinSub',false);
+  } else if(custTabIdx===3){
+    s.innerHTML=_prevDone('#BA7517','#BA7517','c-pleaseWaitVendor','c-pleaseWaitVendorSub',false);
+  } else {
+    s.innerHTML=_prevDone('#7F77DD','#7F77DD','c-coming','c-comingSub',false);
+  }
+}
+
 // ===== グローバル公開（HTML onclick互換） =====
 const _fns = {
   goTo, submitName, doWalkin, doVendor, doCallStaff, skipStylist,
@@ -602,7 +720,8 @@ const _fns = {
   toggleStaff, updateStaff, updateSlackId, uploadPhoto,
   pinInput, pinDelete, showToast, saveCustom, saveWebhook,
   saveBotToken, savePin, toggleLang,
-  onDragStart, onDragOver, onDrop, onDragEnd
+  onDragStart, onDragOver, onDrop, onDragEnd,
+  switchCustTab, updateCustPreview, markDirty
 };
 Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
 

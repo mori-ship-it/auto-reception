@@ -259,24 +259,61 @@
     <!-- カスタマイズ -->
     <div class="admin-section">
       <span class="admin-label">カスタマイズ</span>
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;letter-spacing:0.05em;">サロン名（ロゴ表示）</div>
-      <input class="admin-field" id="c-salonName" placeholder="SALON">
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;letter-spacing:0.05em;">ウェルカム画面・大テキスト</div>
-      <input class="admin-field" id="c-welcome" placeholder="いらっしゃいませ">
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;letter-spacing:0.05em;">ウェルカム画面・小テキスト</div>
-      <input class="admin-field" id="c-welcomeSub" placeholder="タッチして受付を開始してください">
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;letter-spacing:0.05em;">受付完了メッセージ</div>
-      <input class="admin-field" id="c-checkinDone" placeholder="受付が完了しました">
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;letter-spacing:0.05em;">お待ちメッセージ（予約あり）</div>
-      <input class="admin-field" id="c-pleaseWait" placeholder="お席にお座りになってお待ちください">
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;letter-spacing:0.05em;">お待ちメッセージ（飛び込み）</div>
-      <input class="admin-field" id="c-pleaseWaitWalkin" placeholder="お席にお座りになってお待ちください">
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;letter-spacing:0.05em;">お待ちメッセージ（業者・配達）</div>
-      <input class="admin-field" id="c-pleaseWaitVendor" placeholder="そのままお待ちください">
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;letter-spacing:0.05em;">スタッフ呼び出しメッセージ</div>
-      <input class="admin-field" id="c-coming" placeholder="スタッフが参ります">
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;letter-spacing:0.05em;">PINコード変更（4桁）</div>
-      <input class="admin-field" id="c-pin" placeholder="新しいPINコードを入力" maxlength="4" type="tel" style="letter-spacing:0.3em;">
+      <div class="cust-tabs">
+        <div class="cust-tab active" onclick="switchCustTab(0)">トップ</div>
+        <div class="cust-tab" onclick="switchCustTab(1)">予約あり</div>
+        <div class="cust-tab" onclick="switchCustTab(2)">予約なし</div>
+        <div class="cust-tab" onclick="switchCustTab(3)">業者</div>
+        <div class="cust-tab" onclick="switchCustTab(4)">呼び出し</div>
+      </div>
+      <div class="cust-ipad">
+        <div class="cust-ipad-dot"></div>
+        <div class="cust-ipad-cam"></div>
+        <div class="cust-ipad-scr" id="custPreview"></div>
+      </div>
+      <!-- パネル0: トップ -->
+      <div class="cust-panel active" id="cp0">
+        <div class="cust-fields">
+          <div class="cust-row"><div class="cust-mk" style="background:#E24B4A">1</div><div class="cust-f"><div class="cust-fl">店舗名（左上）</div><input class="admin-field" id="c-salonName" placeholder="SALON" oninput="markDirty();updateCustPreview()"></div></div>
+          <div class="cust-row"><div class="cust-mk" style="background:#E24B4A">2</div><div class="cust-f"><div class="cust-fl">ウェルカムメッセージ</div><input class="admin-field" id="c-welcome" placeholder="いらっしゃいませ" oninput="markDirty();updateCustPreview()"></div></div>
+          <div class="cust-row"><div class="cust-mk" style="background:#E24B4A">3</div><div class="cust-f"><div class="cust-fl">サブテキスト</div><input class="admin-field" id="c-welcomeSub" placeholder="タッチして受付を開始してください" oninput="markDirty();updateCustPreview()"></div></div>
+          <div class="cust-row"><div class="cust-mk" style="background:#E24B4A">4</div><div class="cust-f"><div class="cust-fl">受付ボタン</div><input class="admin-field" id="c-startBtn" placeholder="受付はこちら" oninput="markDirty();updateCustPreview()"></div></div>
+          <div class="cust-row"><div class="cust-mk" style="background:#E24B4A">5</div><div class="cust-f"><div class="cust-fl">呼び出しボタン</div><input class="admin-field" id="c-callBtn" placeholder="スタッフを呼ぶ" oninput="markDirty();updateCustPreview()"></div></div>
+        </div>
+      </div>
+      <!-- パネル1: 予約あり -->
+      <div class="cust-panel" id="cp1">
+        <div class="cust-fields">
+          <div class="cust-row"><div class="cust-mk" style="background:#1D9E75">1</div><div class="cust-f"><div class="cust-fl">完了メッセージ</div><input class="admin-field" id="c-checkinDone" placeholder="受付が完了しました" oninput="markDirty();updateCustPreview()"></div></div>
+          <div class="cust-row"><div class="cust-mk" style="background:#1D9E75">2</div><div class="cust-f"><div class="cust-fl">お待ちメッセージ</div><input class="admin-field" id="c-pleaseWait" placeholder="お席にお座りになってお待ちください" oninput="markDirty();updateCustPreview()"></div></div>
+        </div>
+      </div>
+      <!-- パネル2: 飛び込み -->
+      <div class="cust-panel" id="cp2">
+        <div class="cust-fields">
+          <div class="cust-row"><div class="cust-mk" style="background:#378ADD">1</div><div class="cust-f"><div class="cust-fl">メインメッセージ</div><input class="admin-field" id="c-pleaseWaitWalkin" placeholder="お席にお座りになってお待ちください" oninput="markDirty();updateCustPreview()"></div></div>
+          <div class="cust-row"><div class="cust-mk" style="background:#378ADD">2</div><div class="cust-f"><div class="cust-fl">サブメッセージ</div><input class="admin-field" id="c-pleaseWaitWalkinSub" placeholder="しばらくお待ちください" oninput="markDirty();updateCustPreview()"></div></div>
+        </div>
+      </div>
+      <!-- パネル3: 業者 -->
+      <div class="cust-panel" id="cp3">
+        <div class="cust-fields">
+          <div class="cust-row"><div class="cust-mk" style="background:#BA7517">1</div><div class="cust-f"><div class="cust-fl">メインメッセージ</div><input class="admin-field" id="c-pleaseWaitVendor" placeholder="そのままお待ちください" oninput="markDirty();updateCustPreview()"></div></div>
+          <div class="cust-row"><div class="cust-mk" style="background:#BA7517">2</div><div class="cust-f"><div class="cust-fl">サブメッセージ</div><input class="admin-field" id="c-pleaseWaitVendorSub" placeholder="スタッフが参ります" oninput="markDirty();updateCustPreview()"></div></div>
+        </div>
+      </div>
+      <!-- パネル4: 呼び出し -->
+      <div class="cust-panel" id="cp4">
+        <div class="cust-fields">
+          <div class="cust-row"><div class="cust-mk" style="background:#7F77DD">1</div><div class="cust-f"><div class="cust-fl">メインメッセージ</div><input class="admin-field" id="c-coming" placeholder="スタッフが参ります" oninput="markDirty();updateCustPreview()"></div></div>
+          <div class="cust-row"><div class="cust-mk" style="background:#7F77DD">2</div><div class="cust-f"><div class="cust-fl">サブメッセージ</div><input class="admin-field" id="c-comingSub" placeholder="お席にお座りになってお待ちください" oninput="markDirty();updateCustPreview()"></div></div>
+        </div>
+      </div>
+      <!-- PIN -->
+      <div style="margin-top:16px;">
+        <div class="cust-fl" style="margin-bottom:4px;">PINコード（4桁）</div>
+        <input class="admin-field" id="c-pin" placeholder="4桁" maxlength="4" type="tel" style="letter-spacing:0.3em;max-width:120px;" oninput="markDirty()">
+      </div>
     </div>
 
     <!-- Slack -->
