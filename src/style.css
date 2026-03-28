@@ -19,7 +19,7 @@
   --glass-blur:   blur(16px);
 }
 
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 
 body {
   font-family:'Noto Sans JP', sans-serif;
