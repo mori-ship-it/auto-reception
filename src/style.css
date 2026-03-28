@@ -355,8 +355,8 @@ body {
   font-family:'DM Sans',sans-serif; font-size:10px; letter-spacing:0.08em;
   padding:3px 10px; border-radius:10px; flex-shrink:0;
 }
-.status-badge.on { background:rgba(106,140,120,.12); color:var(--success); }
-.status-badge.off { background:var(--border); color:var(--text-muted); }
+.status-badge.on { background:#4a9a7a; color:#fff; }
+.status-badge.off { background:#c45050; color:#fff; }
 
 .slack-id-field {
   width:100px; padding:5px 8px; background:var(--bg);
@@ -604,11 +604,12 @@ body {
   .cd-track { width:160px; }
 
   /* 管理画面 */
-  .home-body { padding:16px; }
-  .home-hd { padding:16px; }
-  .admin-section { margin-bottom:20px; }
-  .admin-field { font-size:12px; padding:9px 12px; }
-  .admin-row { flex-wrap:wrap; }
+  .home-body { padding:14px; }
+  .home-hd { padding:14px; }
+  .admin-section { margin-bottom:16px; }
+  .admin-label { font-size:9px; }
+  .admin-field { font-size:10px; padding:7px 10px; border-color:rgba(104,120,160,.1); }
+  .admin-row { flex-wrap:wrap; gap:3px; }
   .admin-row .admin-field { flex:1 1 45%; min-width:120px; }
   .admin-btn { width:100%; margin-top:4px; padding:12px; }
 
@@ -620,21 +621,45 @@ body {
 
   /* スタッフカード - モバイル */
   .staff-card {
-    flex-wrap:wrap; gap:6px; padding:12px;
+    flex-wrap:wrap; gap:5px; padding:10px;
     align-items:center;
   }
-  .staff-card .staff-info { flex-basis:calc(100% - 130px); min-width:120px; }
-  .staff-card .staff-info .admin-field { font-size:13px !important; padding:6px 8px !important; }
+  .staff-card .staff-info { flex:1; min-width:80px; }
+  .staff-card .staff-info .admin-field {
+    font-size:10px !important; padding:1px 0 !important;
+    border:none !important; border-bottom:1px solid rgba(90,106,150,.06) !important;
+    border-radius:0 !important; background:none !important;
+    margin:0 !important;
+  }
+  .staff-card .staff-info .admin-field:focus {
+    border-bottom-color:rgba(90,106,150,.2) !important;
+  }
+  .staff-card .staff-info .role-select {
+    font-size:7px !important; padding:1px 5px !important;
+    border:none !important; border-radius:3px !important;
+    background:rgba(90,106,150,.05) !important; color:#5a6a96 !important;
+    -webkit-appearance:none !important; appearance:none !important;
+    margin:1px 0 0 !important;
+  }
   .staff-card .slack-id-field {
     flex-basis:100%; width:100%;
-    font-size:11px; padding:8px 10px;
-    margin-top:2px;
+    font-size:8px; padding:3px 6px;
+    margin-top:3px;
+    border:none; border-radius:5px;
+    background:rgba(240,242,246,.4);
   }
-  .staff-name { font-size:13px; }
-  .staff-role { font-size:9px; }
-  .status-badge { font-size:9px; padding:3px 8px; }
-  .photo-btn { width:36px; height:36px; }
-  .toggle { width:32px; height:18px; }
+  .staff-name { font-size:10px; }
+  .staff-role { font-size:7px; }
+  .status-badge { font-size:7px; padding:2px 6px; }
+  .photo-btn { width:28px; height:28px; }
+  .toggle { width:22px; height:12px; }
+  .toggle-knob { width:8px; height:8px; }
+  .del-btn { font-size:11px; }
+
+  /* 追加行 - モバイル */
+  .admin-row .admin-field { flex:1 1 45%; min-width:60px; font-size:9px !important; padding:5px 6px !important; }
+  .admin-row select.admin-field { min-width:68px; -webkit-appearance:none; appearance:none; }
+  .admin-btn { width:auto; margin-top:0; padding:5px 12px; font-size:9px; }
 
   /* PINモーダル */
   .pin-box { padding:32px 24px 28px; width:min(280px,90vw); }

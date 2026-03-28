@@ -460,14 +460,12 @@ function renderAdminStaff(){
         <input type="file" accept="image/*" onchange="uploadPhoto(${s.id},this)">
       </label>
       <div class="staff-info" style="flex:1;min-width:0;">
-        <input class="admin-field" style="margin:0 0 4px;padding:4px 8px;font-family:'Shippori Mincho',serif;font-size:14px;" value="${s.name}" oninput="updateStaff(${s.id},'name',this.value)">
-        <div style="display:flex;gap:4px;">
-          <input class="admin-field" style="margin:0;padding:4px 8px;font-size:11px;flex:1;" value="${s.nameEn||''}" placeholder="Name (EN)" oninput="updateStaff(${s.id},'nameEn',this.value)">
-          <select class="admin-field" style="margin:0;padding:4px 6px;font-size:11px;flex:1;" onchange="updateStaff(${s.id},'role',this.value)">
-            <option value="スタイリスト" ${s.role==='スタイリスト'?'selected':''}>スタイリスト</option>
-            <option value="アシスタント" ${s.role==='アシスタント'?'selected':''}>アシスタント</option>
-          </select>
-        </div>
+        <input class="admin-field" style="margin:0 0 2px;padding:4px 8px;font-family:'Shippori Mincho',serif;font-size:14px;" value="${s.name}" oninput="updateStaff(${s.id},'name',this.value)">
+        <input class="admin-field" style="margin:0 0 2px;padding:3px 8px;font-size:11px;font-family:'DM Sans',sans-serif;" value="${s.nameEn||''}" placeholder="Name (EN)" oninput="updateStaff(${s.id},'nameEn',this.value)">
+        <select class="role-select admin-field" style="margin:0;padding:2px 6px;font-size:10px;width:auto;display:inline-block;border-radius:4px;background:rgba(90,106,150,.06);border:none;" onchange="updateStaff(${s.id},'role',this.value)">
+          <option value="スタイリスト" ${s.role==='スタイリスト'?'selected':''}>スタイリスト</option>
+          <option value="アシスタント" ${s.role==='アシスタント'?'selected':''}>アシスタント</option>
+        </select>
       </div>
       <input class="slack-id-field" placeholder="Slack ID" value="${s.slackId||''}" oninput="updateStaff(${s.id},'slackId',this.value)">
       <span class="status-badge ${s.on?'on':'off'}">${s.on?'出勤中':'休み'}</span>
