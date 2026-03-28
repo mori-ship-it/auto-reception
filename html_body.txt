@@ -315,8 +315,13 @@
       </div>
       <!-- PIN -->
       <div style="margin-top:16px;">
-        <div class="cust-fl" style="margin-bottom:4px;">PINコード（4桁）</div>
-        <input class="admin-field" id="c-pin" placeholder="4桁" maxlength="4" type="tel" style="letter-spacing:0.3em;max-width:120px;" oninput="markDirty()">
+        <div class="cust-row">
+          <div class="cust-mk" style="background:var(--accent)">🔒</div>
+          <div class="cust-f">
+            <div class="cust-fl">PINコード変更（4桁の数字）</div>
+            <input class="admin-field" id="c-pin" placeholder="新しいPINを入力" maxlength="4" type="tel" style="letter-spacing:0.3em;max-width:160px;" oninput="markDirty()">
+          </div>
+        </div>
       </div>
       </div>
       </div>
