@@ -41,29 +41,17 @@
   <div class="divider"></div>
   <div class="choice-row">
     <div class="card" onclick="goTo('s3')">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      </div>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
       <div class="card-title" id="t-yes-res">ご予約の<br>ある方</div>
       <div class="card-sub">Reservation</div>
     </div>
     <div class="card" onclick="doWalkin()">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24">
-          <circle cx="12" cy="4.5" r="2"/>
-          <line x1="12" y1="7" x2="12" y2="14" stroke-width="2"/>
-          <line x1="8.5" y1="10" x2="15.5" y2="10"/>
-          <line x1="12" y1="14" x2="9" y2="20"/>
-          <line x1="12" y1="14" x2="15" y2="20"/>
-        </svg>
-      </div>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="2"/><line x1="12" y1="7" x2="12" y2="14" stroke-width="2"/><line x1="8.5" y1="10" x2="15.5" y2="10"/><line x1="12" y1="14" x2="9" y2="20"/><line x1="12" y1="14" x2="15" y2="20"/></svg></div>
       <div class="card-title" id="t-no-res">ご予約の<br>ない方</div>
       <div class="card-sub">Walk-in</div>
     </div>
     <div class="card" onclick="doVendor()">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-      </div>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
       <div class="card-title" id="t-vendor">業者・<br>配達の方</div>
       <div class="card-sub">Vendor</div>
     </div>
@@ -72,14 +60,7 @@
 
 <!-- ══ S3 名前入力 ═══════════════════════════════ -->
 <div class="screen" id="s3">
-  <div class="top-bar">
-    <div class="top-logo">SALON</div>
-    <div class="top-actions">
-      <button class="icon-btn" onclick="goTo('s1')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </button>
-    </div>
-  </div>
+  <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
   <div class="eyebrow" id="t-name-heading">お名前の入力</div>
   <div class="display" id="t-name-title" style="font-size:clamp(20px,5vw,32px);">お名前をご入力ください</div>
   <div class="divider"></div>
@@ -91,21 +72,12 @@
 
 <!-- ══ S3b スタイリスト検索 ══════════════════════ -->
 <div class="screen" id="s3b">
-  <div class="top-bar">
-    <div class="top-logo">SALON</div>
-    <div class="top-actions">
-      <button class="icon-btn" onclick="goTo('s1')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </button>
-    </div>
-  </div>
+  <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
   <div class="eyebrow" id="t-stylist-heading">担当スタイリスト</div>
   <div class="display" id="t-stylist-title" style="font-size:clamp(18px,4vw,28px);">担当のお名前を入力してください</div>
   <div class="divider"></div>
   <div class="search-wrap">
-    <span class="search-ico">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b8aaa4" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    </span>
+    <span class="search-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b8aaa4" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
     <input class="search-field" id="stylistSearch" type="text" placeholder="例）田中" maxlength="10" oninput="onStylistSearch(this.value)">
   </div>
   <div class="stylist-list" id="stylistResults"></div>
@@ -115,36 +87,18 @@
 
 <!-- ══ S4 受付完了 ═══════════════════════════════ -->
 <div class="screen" id="s4">
-  <div class="top-bar">
-    <div class="top-logo">SALON</div>
-    <div class="top-actions">
-      <button class="icon-btn" onclick="goTo('s1')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </button>
-    </div>
-  </div>
-  <div class="status-ring ok">
-    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-  </div>
+  <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
+  <div class="status-ring ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
   <div class="display" id="t-checkin-done" style="font-size:clamp(20px,5vw,32px);">受付が完了しました</div>
   <div class="name-badge" id="displayName"></div>
   <div class="sub" id="t-please-wait">お席にお座りになってお待ちください</div>
   <div class="cd-track"><div class="cd-bar" id="cb1"></div></div>
 </div>
 
-<!-- ══ S5 呼び出し完了（予約） ═══════════════════ -->
+<!-- ══ S5 呼び出し（予約） ═══════════════════════ -->
 <div class="screen" id="s5">
-  <div class="top-bar">
-    <div class="top-logo">SALON</div>
-    <div class="top-actions">
-      <button class="icon-btn" onclick="goTo('s1')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </button>
-    </div>
-  </div>
-  <div class="status-ring wait">
-    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-  </div>
+  <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
+  <div class="status-ring wait"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
   <div class="display" id="t-coming" style="font-size:clamp(20px,5vw,32px);">スタッフが参ります</div>
   <div class="divider"></div>
   <div class="sub" id="t-please-wait2">お席にお座りになってお待ちください</div>
@@ -153,17 +107,8 @@
 
 <!-- ══ S6 飛び込み ═══════════════════════════════ -->
 <div class="screen" id="s6">
-  <div class="top-bar">
-    <div class="top-logo">SALON</div>
-    <div class="top-actions">
-      <button class="icon-btn" onclick="goTo('s1')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </button>
-    </div>
-  </div>
-  <div class="status-ring wait">
-    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-  </div>
+  <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
+  <div class="status-ring wait"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
   <div class="display" id="t-coming2" style="font-size:clamp(20px,5vw,32px);">スタッフが参ります</div>
   <div class="divider"></div>
   <div class="sub" id="t-please-wait3">お席にお座りになってお待ちください</div>
@@ -172,17 +117,8 @@
 
 <!-- ══ S7 飛び込み呼び出し ═══════════════════════ -->
 <div class="screen" id="s7">
-  <div class="top-bar">
-    <div class="top-logo">SALON</div>
-    <div class="top-actions">
-      <button class="icon-btn" onclick="goTo('s1')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </button>
-    </div>
-  </div>
-  <div class="status-ring wait">
-    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-  </div>
+  <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
+  <div class="status-ring wait"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
   <div class="display" id="t-coming3" style="font-size:clamp(20px,5vw,32px);">スタッフが参ります</div>
   <div class="divider"></div>
   <div class="sub" id="t-please-wait4">お席にお座りになってお待ちください</div>
@@ -191,17 +127,8 @@
 
 <!-- ══ S8 業者 ════════════════════════════════════ -->
 <div class="screen" id="s8">
-  <div class="top-bar">
-    <div class="top-logo">SALON</div>
-    <div class="top-actions">
-      <button class="icon-btn" onclick="goTo('s1')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </button>
-    </div>
-  </div>
-  <div class="status-ring dlv">
-    <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-  </div>
+  <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
+  <div class="status-ring dlv"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
   <div class="display" id="t-coming-vendor" style="font-size:clamp(20px,5vw,32px);">スタッフが参ります</div>
   <div class="divider"></div>
   <div class="sub" id="t-please-wait5">お席にお座りになってお待ちください</div>
@@ -211,15 +138,10 @@
 <!-- ══ PIN MODAL ══════════════════════════════════ -->
 <div class="pin-modal" id="pinModal">
   <div class="pin-box">
-    <button onclick="document.getElementById('pinModal').classList.remove('active');pinEntry='';[0,1,2,3].forEach(i=>document.getElementById('pd'+i).className='pin-dot');" style="position:absolute;top:14px;right:14px;background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:18px;line-height:1;">×</button>
+    <button onclick="document.getElementById('pinModal').classList.remove('active');pinEntry='';[0,1,2,3].forEach(function(i){document.getElementById('pd'+i).className='pin-dot';});" style="position:absolute;top:14px;right:14px;background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:18px;line-height:1;">×</button>
     <div class="pin-title">管理画面</div>
     <div class="pin-sub">Enter PIN Code</div>
-    <div class="pin-dots">
-      <div class="pin-dot" id="pd0"></div>
-      <div class="pin-dot" id="pd1"></div>
-      <div class="pin-dot" id="pd2"></div>
-      <div class="pin-dot" id="pd3"></div>
-    </div>
+    <div class="pin-dots"><div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div><div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div></div>
     <div class="pin-pad">
       <button class="pin-key" onclick="pinInput('1')">1</button>
       <button class="pin-key" onclick="pinInput('2')">2</button>
@@ -238,7 +160,7 @@
   </div>
 </div>
 
-<!-- ══ HOME SCREEN (管理画面) ═════════════════════ -->
+<!-- ══ HOME SCREEN (INLINE EDIT) ═════════════════ -->
 <div class="home-screen" id="homeScreen">
   <div class="home-hd">
     <div class="home-hd-title">管理画面</div>
@@ -248,135 +170,85 @@
   </div>
   <div class="home-body">
 
-    <!-- ══ カスタマイズ（インライン編集） ══ -->
     <div class="admin-section">
-      <span class="admin-label">カスタマイズ</span>
-
-      <!-- ヒントバナー -->
+      <span class="admin-label">画面カスタマイズ</span>
+      <div class="edit-tabs">
+        <button class="edit-tab active" data-tab="tab-welcome" onclick="switchEditTab(this)">ウェルカム</button>
+        <button class="edit-tab" data-tab="tab-checkin" onclick="switchEditTab(this)">予約完了</button>
+        <button class="edit-tab" data-tab="tab-walkin" onclick="switchEditTab(this)">飛込み</button>
+        <button class="edit-tab" data-tab="tab-vendor" onclick="switchEditTab(this)">業者</button>
+        <button class="edit-tab" data-tab="tab-call" onclick="switchEditTab(this)">呼出し</button>
+      </div>
       <div class="edit-hint" id="editHint">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        <span>テキストをタップして編集できます</span>
-        <button onclick="dismissHint()">×</button>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+        テキストをタップして直接編集できます
       </div>
-
-      <!-- タブバー -->
-      <div class="preview-tabs" id="previewTabs">
-        <button class="ptab active" data-tab="tab-welcome" onclick="switchPreviewTab(this)">ウェルカム</button>
-        <button class="ptab" data-tab="tab-reserved" onclick="switchPreviewTab(this)">予約完了</button>
-        <button class="ptab" data-tab="tab-walkin" onclick="switchPreviewTab(this)">飛込み</button>
-        <button class="ptab" data-tab="tab-vendor" onclick="switchPreviewTab(this)">業者</button>
-        <button class="ptab" data-tab="tab-call" onclick="switchPreviewTab(this)">呼出し</button>
-      </div>
-
-      <!-- iPad プレビューフレーム -->
-      <div class="ipad-frame">
-        <div class="ipad-inner">
-
-          <!-- ── ウェルカム ── -->
-          <div class="pv-panel active" id="tab-welcome">
-            <div class="pv-topbar">
-              <div class="pv-logo" contenteditable="true" data-field="salonName" spellcheck="false">SALON</div>
-              <div class="pv-topbar-icons">
-                <div class="pv-icon-dot"></div>
-                <div class="pv-icon-dot"></div>
-              </div>
-            </div>
-            <div class="pv-body">
-              <div class="pv-display" contenteditable="true" data-field="welcome" spellcheck="false">いらっしゃいませ</div>
-              <div class="pv-divider"></div>
-              <div class="pv-sub" contenteditable="true" data-field="welcomeSub" spellcheck="false">タッチして受付を開始してください</div>
-              <div style="height:16px"></div>
-              <div class="pv-btn-mock fill">受付はこちら</div>
-              <div class="pv-btn-mock outline">スタッフを呼ぶ</div>
-            </div>
+      <div class="preview-frame">
+        <div class="preview-panel active" id="tab-welcome">
+          <div class="pv-topbar"><div class="pv-logo" contenteditable="true" data-field="salonName" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)"></div></div>
+          <div class="pv-body">
+            <div class="pv-display" contenteditable="true" data-field="welcome" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)"></div>
+            <div class="pv-divider"></div>
+            <div class="pv-sub" contenteditable="true" data-field="welcomeSub" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)"></div>
+            <div style="height:20px"></div>
+            <div class="pv-btn-fill">受付はこちら</div>
+            <div style="height:8px"></div>
+            <div class="pv-btn-outline">スタッフを呼ぶ</div>
           </div>
-
-          <!-- ── 予約完了 ── -->
-          <div class="pv-panel" id="tab-reserved">
-            <div class="pv-topbar">
-              <div class="pv-logo" contenteditable="true" data-field="salonName" spellcheck="false">SALON</div>
-              <div class="pv-topbar-icons"><div class="pv-icon-dot"></div></div>
-            </div>
-            <div class="pv-body">
-              <div class="pv-ring ok">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#4a9a7a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <div class="pv-display" contenteditable="true" data-field="checkinDone" spellcheck="false">受付が完了しました</div>
-              <div class="pv-badge">山田 太郎 様</div>
-              <div class="pv-divider"></div>
-              <div class="pv-sub" contenteditable="true" data-field="pleaseWait" spellcheck="false">お席にお座りになってお待ちください</div>
-            </div>
+        </div>
+        <div class="preview-panel" id="tab-checkin">
+          <div class="pv-topbar"><div class="pv-logo" contenteditable="true" data-field="salonName" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)"></div></div>
+          <div class="pv-body">
+            <div class="pv-ring ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="pv-display" contenteditable="true" data-field="checkinDone" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)" style="font-size:18px;"></div>
+            <div class="pv-name-badge">山田 太郎様</div>
+            <div class="pv-sub" contenteditable="true" data-field="pleaseWait" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)"></div>
           </div>
-
-          <!-- ── 飛込み ── -->
-          <div class="pv-panel" id="tab-walkin">
-            <div class="pv-topbar">
-              <div class="pv-logo" contenteditable="true" data-field="salonName" spellcheck="false">SALON</div>
-              <div class="pv-topbar-icons"><div class="pv-icon-dot"></div></div>
-            </div>
-            <div class="pv-body">
-              <div class="pv-ring wait">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#b89040" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              </div>
-              <div class="pv-display" contenteditable="true" data-field="coming" spellcheck="false">スタッフが参ります</div>
-              <div class="pv-divider"></div>
-              <div class="pv-sub" contenteditable="true" data-field="pleaseWaitWalkin" spellcheck="false">お席にお座りになってお待ちください</div>
-            </div>
+        </div>
+        <div class="preview-panel" id="tab-walkin">
+          <div class="pv-topbar"><div class="pv-logo" contenteditable="true" data-field="salonName" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)"></div></div>
+          <div class="pv-body">
+            <div class="pv-ring wait"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+            <div class="pv-display" contenteditable="true" data-field="coming" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)" style="font-size:18px;"></div>
+            <div class="pv-divider"></div>
+            <div class="pv-sub" contenteditable="true" data-field="pleaseWaitWalkin" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)"></div>
           </div>
-
-          <!-- ── 業者 ── -->
-          <div class="pv-panel" id="tab-vendor">
-            <div class="pv-topbar">
-              <div class="pv-logo" contenteditable="true" data-field="salonName" spellcheck="false">SALON</div>
-              <div class="pv-topbar-icons"><div class="pv-icon-dot"></div></div>
-            </div>
-            <div class="pv-body">
-              <div class="pv-ring dlv">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#5088a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-              </div>
-              <div class="pv-display" contenteditable="true" data-field="coming" spellcheck="false">スタッフが参ります</div>
-              <div class="pv-divider"></div>
-              <div class="pv-sub" contenteditable="true" data-field="pleaseWaitVendor" spellcheck="false">そのままお待ちください</div>
-            </div>
+        </div>
+        <div class="preview-panel" id="tab-vendor">
+          <div class="pv-topbar"><div class="pv-logo" contenteditable="true" data-field="salonName" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)"></div></div>
+          <div class="pv-body">
+            <div class="pv-ring dlv"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+            <div class="pv-display" contenteditable="true" data-field="coming" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)" style="font-size:18px;"></div>
+            <div class="pv-divider"></div>
+            <div class="pv-sub" contenteditable="true" data-field="pleaseWaitVendor" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)"></div>
           </div>
-
-          <!-- ── 呼出し ── -->
-          <div class="pv-panel" id="tab-call">
-            <div class="pv-topbar">
-              <div class="pv-logo" contenteditable="true" data-field="salonName" spellcheck="false">SALON</div>
-              <div class="pv-topbar-icons"><div class="pv-icon-dot"></div></div>
-            </div>
-            <div class="pv-body">
-              <div class="pv-ring wait">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#b89040" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              </div>
-              <div class="pv-display" contenteditable="true" data-field="coming" spellcheck="false">スタッフが参ります</div>
-              <div class="pv-divider"></div>
-              <div class="pv-sub" contenteditable="true" data-field="pleaseWait" spellcheck="false">お席にお座りになってお待ちください</div>
-            </div>
+        </div>
+        <div class="preview-panel" id="tab-call">
+          <div class="pv-topbar"><div class="pv-logo" contenteditable="true" data-field="salonName" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)"></div></div>
+          <div class="pv-body">
+            <div class="pv-ring wait"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+            <div class="pv-display" contenteditable="true" data-field="coming" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)" style="font-size:18px;"></div>
+            <div class="pv-divider"></div>
+            <div class="pv-sub" contenteditable="true" data-field="pleaseWait" oninput="onInlineEdit(this)" onblur="onInlineBlur(this)"></div>
           </div>
-
         </div>
       </div>
     </div>
 
-    <!-- ══ PIN設定 ══ -->
     <div class="admin-section">
-      <span class="admin-label">PIN設定</span>
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;letter-spacing:0.05em;">PINコード変更（4桁）</div>
+      <span class="admin-label">PINコード</span>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.05em;">4桁の数字を入力</div>
       <input class="admin-field" id="c-pin" placeholder="新しいPINコードを入力" maxlength="4" type="tel" style="letter-spacing:0.3em;">
     </div>
 
-    <!-- ══ Slack ══ -->
     <div class="admin-section">
       <span class="admin-label">Slack 設定</span>
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.05em;">Webhook URL（飛び込み・呼び出し → チャンネル）</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.05em;">Webhook URL</div>
       <input class="admin-field" id="webhookInput" placeholder="https://hooks.slack.com/services/...">
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.05em;">Bot Token（指名あり → 個人DM）</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.05em;">Bot Token</div>
       <input class="admin-field" id="botTokenInput" placeholder="xoxb-...">
     </div>
 
-    <!-- ══ スタッフ管理 ══ -->
     <div class="admin-section">
       <span class="admin-label">スタッフ管理</span>
       <div id="adminStaffList" style="margin-bottom:12px;"></div>
@@ -391,17 +263,14 @@
       </div>
     </div>
 
-    <!-- ══ 来店履歴 ══ -->
     <div class="admin-section">
       <span class="admin-label">本日の来店履歴</span>
       <div id="logContainer"><div class="log-empty">まだ来店記録がありません</div></div>
     </div>
 
-    <!-- ══ 保存 ══ -->
     <div style="padding:16px 0 40px;">
       <button class="btn btn-fill" style="max-width:100%;" onclick="saveAll()">すべて保存して閉じる</button>
     </div>
-
   </div>
 </div>
 
