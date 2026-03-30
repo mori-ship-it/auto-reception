@@ -406,5 +406,5 @@ body {
 }
 @keyframes welcomePulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.45; }
+  50% { opacity: 0.08; }
 }
