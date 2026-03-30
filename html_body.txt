@@ -128,6 +128,7 @@
   </div>
 </div>
 
+
 <!-- ══ HOME SCREEN ═══════════════════════════════ -->
 <div class="home-screen" id="homeScreen">
   <div class="home-hd">
@@ -136,14 +137,12 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
-
-  <!-- メインタブ -->
   <div class="admin-main-tabs">
     <button class="amt active" data-amt="admin-settings" onclick="switchAdminTab(this)">設定</button>
     <button class="amt" data-amt="admin-analytics" onclick="switchAdminTab(this)">データ</button>
   </div>
 
-  <!-- ══ 設定パネル ══ -->
+  <!-- ══ 設定 ══ -->
   <div class="home-body admin-panel active" id="admin-settings">
     <div class="admin-section">
       <span class="admin-label">画面カスタマイズ</span>
@@ -181,37 +180,42 @@
         </div>
       </div>
     </div>
-    <div class="admin-section"><span class="admin-label">PINコード</span><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.05em;">4桁の数字を入力</div><input class="admin-field" id="c-pin" placeholder="新しいPINコードを入力" maxlength="4" type="tel" style="letter-spacing:0.3em;"></div>
-    <div class="admin-section"><span class="admin-label">Slack 設定</span><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.05em;">Webhook URL</div><input class="admin-field" id="webhookInput" placeholder="https://hooks.slack.com/services/..."><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.05em;">Bot Token</div><input class="admin-field" id="botTokenInput" placeholder="xoxb-..."></div>
+    <div class="admin-section"><span class="admin-label">PINコード</span><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">4桁の数字を入力</div><input class="admin-field" id="c-pin" placeholder="新しいPINコードを入力" maxlength="4" type="tel" style="letter-spacing:0.3em;"></div>
+    <div class="admin-section"><span class="admin-label">Slack 設定</span><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">Webhook URL</div><input class="admin-field" id="webhookInput" placeholder="https://hooks.slack.com/services/..."><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">Bot Token</div><input class="admin-field" id="botTokenInput" placeholder="xoxb-..."></div>
     <div class="admin-section"><span class="admin-label">スタッフ管理</span><div id="adminStaffList" style="margin-bottom:12px;"></div><div class="admin-row"><input class="admin-field" id="newName" placeholder="名前（日本語）" style="margin:0;flex:2;"><input class="admin-field" id="newNameEn" placeholder="Name (EN)" style="margin:0;flex:2;"><select class="admin-field" id="newRole" style="margin:0;flex:1;"><option value="スタイリスト">スタイリスト</option><option value="アシスタント">アシスタント</option></select><button class="admin-btn" onclick="addStaff()">追加</button></div></div>
+    <div style="padding:16px 0 40px;"><button class="btn btn-fill" style="max-width:100%;" onclick="saveAll()">すべて保存して閉じる</button></div>
+  </div>
+
+  <!-- ══ データ ══ -->
+  <div class="home-body admin-panel" id="admin-analytics">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <button class="edit-tab active" id="ar-day" onclick="setAnalyticsRange('day')">日</button>
+      <button class="edit-tab" id="ar-week" onclick="setAnalyticsRange('week')">週</button>
+      <button class="edit-tab" id="ar-month" onclick="setAnalyticsRange('month')">月</button>
+      <div style="flex:1"></div>
+      <div id="analyticsLoading" style="font-size:10px;color:var(--text-muted);display:none;">読込中...</div>
+    </div>
+    <div class="edit-tabs" id="stylistFilter" style="margin-bottom:16px;"></div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:20px;">
+      <div class="stat-card"><div class="stat-label">来店数</div><div class="stat-val" id="a-total">0</div></div>
       <div class="stat-card"><div class="stat-label">予約</div><div class="stat-val" id="a-reserved" style="color:var(--success);">0</div></div>
       <div class="stat-card"><div class="stat-label">飛込み</div><div class="stat-val" id="a-walkin" style="color:var(--warn);">0</div></div>
       <div class="stat-card"><div class="stat-label">ピーク</div><div class="stat-val" id="a-peak">—</div></div>
     </div>
-
-    <!-- 時間帯チャート -->
-    <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.1em;">時間帯別 来店数</div>
+    <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">時間帯別 来店数</div>
     <div style="position:relative;width:100%;height:180px;margin-bottom:8px;"><canvas id="chartHour"></canvas></div>
-
-    <!-- ドリルダウン -->
     <div id="drillPanel" style="display:none;background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:12px;margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span id="drillTitle" style="font-size:12px;font-weight:500;"></span><button onclick="document.getElementById('drillPanel').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;">×</button></div>
       <div id="drillList"></div>
     </div>
-
-    <!-- タイプ内訳 -->
-    <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.1em;">訪問タイプ内訳</div>
+    <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">訪問タイプ内訳</div>
     <div id="typeLegend" style="display:flex;gap:12px;margin-bottom:6px;font-size:10px;color:var(--text-muted);"></div>
     <div style="position:relative;width:100%;height:20px;margin-bottom:20px;"><canvas id="chartType"></canvas></div>
-
-    <!-- 曜日チャート -->
     <div id="dowSection" style="display:none;">
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.1em;">曜日別 来店数</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">曜日別 来店数</div>
       <div style="position:relative;width:100%;height:160px;margin-bottom:20px;"><canvas id="chartDow"></canvas></div>
     </div>
-
-    <!-- 来店一覧 -->
-    <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;letter-spacing:0.1em;">来店一覧</div>
+    <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">来店一覧</div>
     <div id="analyticsVisitList"></div>
   </div>
 </div>
