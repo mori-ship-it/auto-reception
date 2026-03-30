@@ -108,8 +108,8 @@ function nowFull(){var d=new Date();return dateLabel()+' '+d.getHours()+':'+Stri
 function showToast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show');},2500);}
 
 // ===== STORAGE =====
-async function saveToStorage(){try{localStorage.setItem('salon_custom',JSON.stringify(custom));localStorage.setItem('salon_pin',pinCode);localStorage.setItem('salon_webhook',webhookUrl);localStorage.setItem('salon_bottoken',botToken);localStorage.setItem('salon_staff',JSON.stringify(staffList));localStorage.setItem('salon_nextid',nextStaffId);localStorage.setItem('salon_log_'+today(),JSON.stringify(visitLog));if(!db)return;await db.collection('salon').doc(STORE_ID).set({custom:custom,pinCode:pinCode,webhookUrl:webhookUrl,botToken:botToken,staffList:staffList,nextStaffId:nextStaffId,txCache:{en:TX.en,zh:TX.zh,ko:TX.ko,es:TX.es}});await db.collection('logs').doc(today()).set({entries:visitLog});}catch(e){console.warn('Storage error:',e);}}
-async function loadFromStorage(){try{var c=localStorage.getItem('salon_custom');if(c)Object.assign(custom,JSON.parse(c));var p=localStorage.getItem('salon_pin');if(p)pinCode=p;var w=localStorage.getItem('salon_webhook');if(w)webhookUrl=w;var b=localStorage.getItem('salon_bottoken');if(b)botToken=b;var s=localStorage.getItem('salon_staff');if(s)staffList=JSON.parse(s);var ni=localStorage.getItem('salon_nextid');if(ni)nextStaffId=parseInt(ni);var l=localStorage.getItem('salon_log_'+today());if(l)visitLog=JSON.parse(l);applyLang();var snap=await db.collection('salon').doc(STORE_ID).get();if(snap.exists){var d=snap.data();if(d.custom)Object.assign(custom,d.custom);if(d.pinCode)pinCode=d.pinCode;if(d.webhookUrl)webhookUrl=d.webhookUrl;if(d.botToken)botToken=d.botToken;if(d.staffList)staffList=d.staffList;if(d.nextStaffId)nextStaffId=d.nextStaffId;if(d.txCache){if(d.txCache.en)Object.assign(TX.en,d.txCache.en);if(d.txCache.zh)Object.assign(TX.zh,d.txCache.zh);if(d.txCache.ko)Object.assign(TX.ko,d.txCache.ko);if(d.txCache.es)Object.assign(TX.es,d.txCache.es);}}var logSnap=await db.collection('logs').doc(today()).get();if(logSnap.exists&&logSnap.data().entries)visitLog=logSnap.data().entries;applyLang();}catch(e){console.warn('Storage load error:',e);applyLang();}}
+async function saveToStorage(){try{localStorage.setItem('salon_custom_'+STORE_ID,JSON.stringify(custom));localStorage.setItem('salon_pin_'+STORE_ID,pinCode);localStorage.setItem('salon_webhook_'+STORE_ID,webhookUrl);localStorage.setItem('salon_bottoken_'+STORE_ID,botToken);localStorage.setItem('salon_staff_'+STORE_ID,JSON.stringify(staffList));localStorage.setItem('salon_nextid_'+STORE_ID,nextStaffId);localStorage.setItem('salon_log_'+STORE_ID+'_'+today(),JSON.stringify(visitLog));if(!db)return;await db.collection('salon').doc(STORE_ID).set({custom:custom,pinCode:pinCode,webhookUrl:webhookUrl,botToken:botToken,staffList:staffList,nextStaffId:nextStaffId,txCache:{en:TX.en,zh:TX.zh,ko:TX.ko,es:TX.es}});await db.collection('logs').doc(today()).set({entries:visitLog});}catch(e){console.warn('Storage error:',e);}}
+async function loadFromStorage(){try{var c=localStorage.getItem('salon_custom_'+STORE_ID);if(c)Object.assign(custom,JSON.parse(c));var p=localStorage.getItem('salon_pin_'+STORE_ID);if(p)pinCode=p;var w=localStorage.getItem('salon_webhook_'+STORE_ID);if(w)webhookUrl=w;var b=localStorage.getItem('salon_bottoken_'+STORE_ID);if(b)botToken=b;var s=localStorage.getItem('salon_staff_'+STORE_ID);if(s)staffList=JSON.parse(s);var ni=localStorage.getItem('salon_nextid_'+STORE_ID);if(ni)nextStaffId=parseInt(ni);var l=localStorage.getItem('salon_log_'+STORE_ID+'_'+today());if(l)visitLog=JSON.parse(l);applyLang();var snap=await db.collection('salon').doc(STORE_ID).get();if(snap.exists){var d=snap.data();if(d.custom)Object.assign(custom,d.custom);if(d.pinCode)pinCode=d.pinCode;if(d.webhookUrl)webhookUrl=d.webhookUrl;if(d.botToken)botToken=d.botToken;if(d.staffList)staffList=d.staffList;if(d.nextStaffId)nextStaffId=d.nextStaffId;if(d.txCache){if(d.txCache.en)Object.assign(TX.en,d.txCache.en);if(d.txCache.zh)Object.assign(TX.zh,d.txCache.zh);if(d.txCache.ko)Object.assign(TX.ko,d.txCache.ko);if(d.txCache.es)Object.assign(TX.es,d.txCache.es);}}var logSnap=await db.collection('logs').doc(today()).get();if(logSnap.exists&&logSnap.data().entries)visitLog=logSnap.data().entries;applyLang();}catch(e){console.warn('Storage load error:',e);applyLang();}}
 
 // ===== ANALYTICS =====
 var analyticsData=[];var analyticsRange='day';var analyticsStylistFilter='all';
@@ -220,7 +220,7 @@ function renderAnalytics(){
     });
   }
   // 来店一覧
-  renderAnalyticsVisitList(data);
+  
   // ドリルダウン閉じる
   document.getElementById('drillPanel').style.display='none';
 }
@@ -235,16 +235,6 @@ function showAnalyticsDrill(hourIdx){
   document.getElementById('drillPanel').style.display='block';
 }
 
-function renderAnalyticsVisitList(data){
-  var el=document.getElementById('analyticsVisitList');
-  if(!data.length){el.innerHTML='<div class="log-empty">データがありません</div>';return;}
-  var typeColors={reserved:'#1D9E75',walkin:'#BA7517',call:'#E24B4A',vendor:'#378ADD'};
-  var typeLabels={reserved:'予約',walkin:'飛込み',call:'呼出し',vendor:'業者'};
-  el.innerHTML=data.slice(0,50).map(function(e){
-    var dn=e.name||(e.type==='walkin'?'飛び込み':e.type==='vendor'?'業者':'—');
-    return '<div class="log-card"><span class="log-time" style="width:60px;">'+e.time+'</span><span class="log-name" style="font-size:13px;">'+dn+'</span><span style="font-size:10px;color:var(--text-muted);">'+(e.stylist||'')+'</span><span class="log-badge '+e.type+'" style="font-size:9px;">'+(typeLabels[e.type]||'')+'</span></div>';
-  }).join('')+(data.length>50?'<div style="text-align:center;font-size:10px;color:var(--text-muted);padding:12px;">他 '+(data.length-50)+'件</div>':'');
-}
 
 // ===== グローバル公開 =====
 var _fns={goTo:goTo,submitName:submitName,doWalkin:doWalkin,doVendor:doVendor,doCallStaff:doCallStaff,skipStylist:skipStylist,selectStylist:selectStylist,onStylistSearch:onStylistSearch,setLang:setLang,clearErr:clearErr,openHome:openHome,closeHome:closeHome,saveAll:saveAll,addStaff:addStaff,removeStaff:removeStaff,toggleStaff:toggleStaff,updateStaff:updateStaff,updateSlackId:updateSlackId,uploadPhoto:uploadPhoto,pinInput:pinInput,pinDelete:pinDelete,showToast:showToast,saveCustom:saveCustom,saveWebhook:saveWebhook,saveBotToken:saveBotToken,savePin:savePin,toggleLang:toggleLang,onDragStart:onDragStart,onDragOver:onDragOver,onDrop:onDrop,onDragEnd:onDragEnd,switchEditTab:switchEditTab,onInlineEdit:onInlineEdit,onInlineBlur:onInlineBlur,switchAdminTab:switchAdminTab,setAnalyticsRange:setAnalyticsRange,filterAnalyticsStylist:filterAnalyticsStylist};
