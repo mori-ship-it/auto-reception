@@ -28,7 +28,7 @@
 <div class="screen" id="s2">
   <div class="top-bar"><div class="top-logo" id="t-logo2">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
   <div class="eyebrow" id="t-sys-name">自動受付システム</div>
-  <div class="display" id="t-has-reservation" style="font-size:clamp(22px,5vw,34px);">ご用件をお選びください</div>
+  <div class="display" id="t-has-reservation" style="font-size:clamp(26px,6vw,40px);">ご用件をお選びください</div>
   <div class="divider"></div>
   <div class="choice-row">
     <div class="card" onclick="goTo('s3')"><div class="card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="card-title" id="t-yes-res">ご予約の<br>ある方</div><div class="card-sub">Reservation</div></div>
@@ -41,7 +41,7 @@
 <div class="screen" id="s3">
   <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
   <div class="eyebrow" id="t-name-heading">お名前の入力</div>
-  <div class="display" id="t-name-title" style="font-size:clamp(20px,5vw,32px);">お名前をご入力ください</div>
+  <div class="display" id="t-name-title" style="font-size:clamp(24px,6vw,38px);">お名前をご入力ください</div>
   <div class="divider"></div>
   <input class="field" id="nameInput" type="text" placeholder="例）山田 太郎" maxlength="20" oninput="clearErr()">
   <div class="field-err" id="errMsg">お名前を入力してから次へを押してください</div>
@@ -53,7 +53,7 @@
 <div class="screen" id="s3b">
   <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
   <div class="eyebrow" id="t-stylist-heading">担当スタイリスト</div>
-  <div class="display" id="t-stylist-title" style="font-size:clamp(18px,4vw,28px);">担当のお名前を入力してください</div>
+  <div class="display" id="t-stylist-title" style="font-size:clamp(22px,5vw,34px);">担当のお名前を入力してください</div>
   <div class="divider"></div>
   <div class="search-wrap"><span class="search-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b8aaa4" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span><input class="search-field" id="stylistSearch" type="text" placeholder="例）田中" maxlength="10" oninput="onStylistSearch(this.value)"></div>
   <div class="stylist-list" id="stylistResults"></div>
@@ -65,7 +65,7 @@
 <div class="screen" id="s4">
   <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
   <div class="status-ring ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-  <div class="display" id="t-checkin-done" style="font-size:clamp(20px,5vw,32px);">受付が完了しました</div>
+  <div class="display" id="t-checkin-done" style="font-size:clamp(24px,6vw,38px);">受付が完了しました</div>
   <div class="name-badge" id="displayName"></div>
   <div class="sub" id="t-please-wait">お席にお座りになってお待ちください</div>
   <div class="cd-track"><div class="cd-bar" id="cb1"></div></div>
@@ -75,7 +75,7 @@
 <div class="screen" id="s5">
   <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
   <div class="status-ring wait"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-  <div class="display" id="t-coming" style="font-size:clamp(20px,5vw,32px);">スタッフが参ります</div>
+  <div class="display" id="t-coming" style="font-size:clamp(24px,6vw,38px);">スタッフが参ります</div>
   <div class="divider"></div>
   <div class="sub" id="t-please-wait2">お席にお座りになってお待ちください</div>
   <div class="cd-track"><div class="cd-bar" id="cb2"></div></div>
@@ -85,7 +85,7 @@
 <div class="screen" id="s6">
   <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
   <div class="status-ring wait"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-  <div class="display" id="t-coming2" style="font-size:clamp(20px,5vw,32px);">スタッフが参ります</div>
+  <div class="display" id="t-coming2" style="font-size:clamp(24px,6vw,38px);">スタッフが参ります</div>
   <div class="divider"></div>
   <div class="sub" id="t-please-wait3">お席にお座りになってお待ちください</div>
   <div class="cd-track"><div class="cd-bar" id="cb3"></div></div>
@@ -95,7 +95,7 @@
 <div class="screen" id="s7">
   <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
   <div class="status-ring wait"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-  <div class="display" id="t-coming3" style="font-size:clamp(20px,5vw,32px);">スタッフが参ります</div>
+  <div class="display" id="t-coming3" style="font-size:clamp(24px,6vw,38px);">スタッフが参ります</div>
   <div class="divider"></div>
   <div class="sub" id="t-please-wait4">お席にお座りになってお待ちください</div>
   <div class="cd-track"><div class="cd-bar" id="cb4"></div></div>
@@ -105,7 +105,7 @@
 <div class="screen" id="s8">
   <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
   <div class="status-ring dlv"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
-  <div class="display" id="t-coming-vendor" style="font-size:clamp(20px,5vw,32px);">スタッフが参ります</div>
+  <div class="display" id="t-coming-vendor" style="font-size:clamp(24px,6vw,38px);">スタッフが参ります</div>
   <div class="divider"></div>
   <div class="sub" id="t-please-wait5">お席にお座りになってお待ちください</div>
   <div class="cd-track"><div class="cd-bar" id="cb5"></div></div>
