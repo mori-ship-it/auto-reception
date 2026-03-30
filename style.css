@@ -399,3 +399,12 @@ body {
 .status-ring.ok { animation:ringPop 0.5s cubic-bezier(.4,0,.2,1) forwards; }
 .status-ring.ok svg polyline { stroke-dasharray:40; stroke-dashoffset:40; animation:checkDraw 0.4s 0.3s cubic-bezier(.4,0,.2,1) forwards; }
 .status-ring.wait svg { animation:bellSwing 0.7s 0.3s ease forwards; transform-origin:top center; }
+
+/* ── ウェルカム点滅 ── */
+#s1 .display {
+  animation: welcomePulse 3s ease-in-out infinite;
+}
+@keyframes welcomePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
