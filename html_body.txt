@@ -231,8 +231,6 @@
     </div>
 
     <!-- 来店一覧 -->
-    <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;letter-spacing:0.1em;">来店一覧</div>
-    <div id="analyticsVisitList"></div>
   </div>
 </div>
 
