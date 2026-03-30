@@ -94,7 +94,7 @@ function uploadPhoto(id,input){var file=input.files[0];if(!file)return;var reade
 // ===== LOG =====
 function logDocId(){return STORE_ID+'_'+today();}
 function addLog(name,type,stylist){visitLog.unshift({time:nowFull(),name:name,type:type,stylist:stylist||null});renderLog();saveToStorage();}
-function renderLog(){var el=document.getElementById('logContainer');if(!visitLog.length){el.innerHTML='<div class="log-empty">'+tx('log-empty')+'</div>';return;}el.innerHTML=visitLog.map(function(l){var badge=tx('log-'+l.type);var dn=l.name?l.name+tx('suffix'):(lang==='ja'?'飛び込み':'Walk-in');var st=l.stylist?'<span style="font-size:10px;color:var(--accent);margin-left:6px;">/ '+l.stylist+'</span>':'';return '<div class="log-card"><span class="log-time">'+l.time+'</span><span class="log-name">'+dn+st+'</span><span class="log-badge '+l.type+'">'+badge+'</span></div>';}).join('');}
+function renderLog(){var el=document.getElementById('logContainer');if(!el)return;if(!visitLog.length){el.innerHTML='<div class="log-empty">'+tx('log-empty')+'</div>';return;}el.innerHTML=visitLog.map(function(l){var badge=tx('log-'+l.type);var dn=l.name?l.name+tx('suffix'):(lang==='ja'?'飛び込み':'Walk-in');var st=l.stylist?'<span style="font-size:10px;color:var(--accent);margin-left:6px;">/ '+l.stylist+'</span>':'';return '<div class="log-card"><span class="log-time">'+l.time+'</span><span class="log-name">'+dn+st+'</span><span class="log-badge '+l.type+'">'+badge+'</span></div>';}).join('');}
 
 // ===== SLACK =====
 async function sendSlack(msg){if(!webhookUrl)return;try{await fetch(webhookUrl,{method:'POST',body:JSON.stringify({text:msg})});}catch(e){}}
@@ -251,17 +251,29 @@ function renderAnalytics(){
     if(chartDow)chartDow.destroy();
     chartDow=new Chart(document.getElementById('chartDow'),{type:'bar',data:{labels:dowLabels,datasets:[{data:dowCounts,backgroundColor:dowCounts.map(function(v){return v>=10?'#0F6E56':(v>=5?'#5DCAA5':'#E1F5EE');}),borderRadius:4,barPercentage:0.6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw+'人';}}}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{font:{size:10},stepSize:Math.max(1,Math.ceil(Math.max.apply(null,dowCounts)/5))},beginAtZero:true}}}});
   }
-  document.getElementById('drillPanel').style.display='none';
+  document.getElementById('drillPanel').style.display='none';renderAnalyticsVisitList(data);
 }
 
 function showAnalyticsDrill(hourIdx){
   var data=getFiltered().filter(function(e){return getHour(e.time)===hourIdx;});
-  if(!data.length){document.getElementById('drillPanel').style.display='none';return;}
+  if(!data.length){document.getElementById('drillPanel').style.display='none';renderAnalyticsVisitList(data);return;}
   document.getElementById('drillTitle').textContent=hourIdx+'時台 — '+data.length+'人';
   var typeColors={reserved:'#1D9E75',walkin:'#BA7517',call:'#E24B4A',vendor:'#378ADD'};
   var typeLabels={reserved:'予約',walkin:'飛込み',call:'呼出し',vendor:'業者'};
   document.getElementById('drillList').innerHTML=data.map(function(e){var dn=e.name||(e.type==='walkin'?'飛び込み':e.type==='vendor'?'業者':'—');return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;"><span style="flex:1;">'+dn+'</span><span style="color:'+(typeColors[e.type]||'var(--text-muted)')+';font-size:10px;background:var(--accent-light);padding:2px 8px;border-radius:6px;">'+((typeLabels[e.type])||e.type)+'</span><span style="color:var(--text-muted);font-size:10px;">'+(e.stylist||'—')+'</span></div>';}).join('');
   document.getElementById('drillPanel').style.display='block';
+}
+
+function renderAnalyticsVisitList(data){
+  var el=document.getElementById("analyticsVisitList");
+  if(!el)return;
+  if(!data.length){el.innerHTML='<div class="log-empty">データがありません</div>';return;}
+  var typeColors={reserved:'#1D9E75',walkin:'#BA7517',call:'#E24B4A',vendor:'#378ADD'};
+  var typeLabels={reserved:'予約',walkin:'飛込み',call:'呼出し',vendor:'業者'};
+  el.innerHTML=data.slice(0,50).map(function(e){
+    var dn=e.name||(e.type==='walkin'?'飛び込み':e.type==='vendor'?'業者':'—');
+    return '<div class="log-card"><span class="log-time" style="width:60px;">'+e.time+'</span><span class="log-name" style="font-size:13px;">'+dn+'</span><span style="font-size:10px;color:var(--text-muted);">'+(e.stylist||'')+'</span><span class="log-badge '+e.type+'" style="font-size:9px;">'+(typeLabels[e.type]||'')+'</span></div>';
+  }).join('')+(data.length>50?'<div style="text-align:center;font-size:10px;color:var(--text-muted);padding:12px;">他 '+(data.length-50)+'件</div>':'');
 }
 
 // ===== グローバル公開 =====
