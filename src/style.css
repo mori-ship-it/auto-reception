@@ -323,8 +323,8 @@ body {
 .photo-btn .ph-ico { font-size:14px; color:var(--text-muted); pointer-events:none; }
 .photo-btn input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
 .status-badge { font-family:'DM Sans',sans-serif; font-size:10px; letter-spacing:0.08em; padding:3px 10px; border-radius:10px; flex-shrink:0; }
-.status-badge.on { background:rgba(106,140,120,.12); color:var(--success); }
-.status-badge.off { background:var(--border); color:var(--text-muted); }
+.status-badge.on { background:var(--success); color:#fff; }
+.status-badge.off { background:var(--danger); color:#fff; }
 .slack-id-field { width:100px; padding:5px 8px; background:var(--bg); border:1px solid var(--border); border-radius:6px; font-size:10px; color:var(--text); outline:none; flex-shrink:0; }
 .slack-id-field:focus { border-color:var(--accent); }
 .del-btn { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px; padding:0 2px; flex-shrink:0; opacity:0.5; }
