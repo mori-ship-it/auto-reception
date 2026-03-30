@@ -58,28 +58,28 @@ body {
 
 /* ── DIVIDER ── */
 .divider {
-  width:40px; height:3px; background:linear-gradient(90deg, var(--accent), var(--accent2));
+  width:48px; height:3px; background:linear-gradient(90deg, var(--accent), var(--accent2));
   margin:20px auto; border-radius:2px;
 }
 
 /* ── TYPOGRAPHY ── */
 .eyebrow {
-  font-family:'DM Sans', sans-serif; font-size:10px; letter-spacing:0.3em;
+  font-family:'DM Sans', sans-serif; font-size:12px; letter-spacing:0.3em;
   color:var(--text-muted); text-transform:uppercase; text-align:center; margin-bottom:16px;
 }
 .display {
-  font-family:'Shippori Mincho', serif; font-size:clamp(30px, 7vw, 50px);
+  font-family:'Shippori Mincho', serif; font-size:clamp(36px, 8vw, 58px);
   font-weight:400; line-height:1.4; text-align:center; letter-spacing:0.1em; color:var(--text);
 }
 .sub {
-  font-family:'Noto Sans JP', sans-serif; font-size:12px; color:var(--text-mid) !important;
+  font-family:'Noto Sans JP', sans-serif; font-size:16px; color:var(--text-mid) !important;
   text-align:center; letter-spacing:0.2em; margin-top:12px; font-weight:300; opacity:1 !important;
 }
 
 /* ── BUTTONS ── */
 .btn {
-  width:100%; max-width:320px; padding:18px 32px; border:none; border-radius:100px;
-  font-family:'DM Sans', sans-serif; font-size:13px; font-weight:400;
+  width:100%; max-width:360px; padding:22px 36px; border:none; border-radius:100px;
+  font-family:'DM Sans', sans-serif; font-size:15px; font-weight:400;
   letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; transition:all 0.3s; display:block;
 }
 .btn:active { transform:scale(0.97); }
@@ -105,14 +105,14 @@ body {
 .card:active { transform:scale(0.97) translateY(0); }
 .card-icon { width:44px; height:44px; margin:0 auto 16px; display:flex; align-items:center; justify-content:center; }
 .card-icon svg { width:38px; height:38px; stroke:var(--accent); fill:none; stroke-width:1.3; stroke-linecap:round; stroke-linejoin:round; }
-.card-title { font-family:'Shippori Mincho', serif; font-size:14px; line-height:1.7; color:var(--text); letter-spacing:0.08em; }
+.card-title { font-family:'Shippori Mincho', serif; font-size:16px; line-height:1.7; color:var(--text); letter-spacing:0.08em; }
 .card-sub { font-family:'DM Sans', sans-serif; font-size:9px; color:var(--text-muted); letter-spacing:0.12em; margin-top:6px; text-transform:uppercase; }
 
 /* ── INPUT ── */
 .field {
-  width:100%; max-width:320px; padding:18px 24px; background:transparent;
+  width:100%; max-width:360px; padding:18px 24px; background:transparent;
   border:none; border-bottom:1px solid var(--border);
-  font-family:'Shippori Mincho', serif; font-size:22px; color:var(--text);
+  font-family:'Shippori Mincho', serif; font-size:26px; color:var(--text);
   text-align:center; outline:none; transition:border-color 0.3s; letter-spacing:0.08em;
 }
 .field:focus { border-color:var(--accent); }
@@ -122,7 +122,7 @@ body {
 
 /* ── COMPLETE ── */
 .status-ring {
-  width:96px; height:96px; border-radius:50%; border:3px solid var(--muted-rose);
+  width:110px; height:110px; border-radius:50%; border:3px solid var(--muted-rose);
   display:flex; align-items:center; justify-content:center; margin:0 auto 28px;
   background:var(--glass); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); position:relative;
 }
@@ -134,7 +134,7 @@ body {
 .status-ring.dlv  { border-color:#5088a0; background:rgba(80,136,160,.08); box-shadow:0 0 0 4px rgba(80,136,160,.1); }
 .status-ring.dlv svg { stroke:#5088a0; }
 .name-badge {
-  display:inline-block; font-family:'Shippori Mincho', serif; font-size:20px; color:var(--accent);
+  display:inline-block; font-family:'Shippori Mincho', serif; font-size:24px; color:var(--accent);
   background:var(--glass); border:1px solid var(--glass-border);
   backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
   padding:8px 24px; margin:14px 0; letter-spacing:0.12em; border-radius:40px;
