@@ -1,6 +1,6 @@
 // ===== FIREBASE INIT =====
 let db;
-const STORE_ID = (function(){var p=new URLSearchParams(location.search);return p.get('store')||'muuk-hiratsuka';})();
+const STORE_ID = (function(){var p=new URLSearchParams(location.search);var s=p.get('store');if(s){localStorage.setItem('salon_store_id',s);return s;}var saved=localStorage.getItem('salon_store_id');if(saved)return saved;return 'muuk-hiratsuka';})();
 var firestoreReady = false;
 document.addEventListener('DOMContentLoaded', function(){
   firebase.initializeApp({
