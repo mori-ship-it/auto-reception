@@ -609,7 +609,7 @@ async function saveToStorage(){
       staffList, nextStaffId,
       txCache: {en: TX.en, zh: TX.zh, ko: TX.ko, es: TX.es},
     });
-    await db.collection('logs').doc(today()).set({ entries: visitLog });
+    await db.collection('logs').doc(STORE_ID + '_' + today()).set({ entries: visitLog });
   }catch(e){ console.warn('Storage error:', e); }
 }
 
@@ -642,7 +642,7 @@ async function loadFromStorage(){
         if(d.txCache.es) Object.assign(TX.es, d.txCache.es);
       }
     }
-    const logSnap = await db.collection('logs').doc(today()).get();
+    const logSnap = await db.collection('logs').doc(STORE_ID + '_' + today()).get();
     if(logSnap.exists&&logSnap.data().entries) visitLog=logSnap.data().entries;
     applyLang();
   }catch(e){ console.warn('Storage load error:', e); applyLang(); }
