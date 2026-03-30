@@ -184,26 +184,6 @@
     <div class="admin-section"><span class="admin-label">PINコード</span><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.05em;">4桁の数字を入力</div><input class="admin-field" id="c-pin" placeholder="新しいPINコードを入力" maxlength="4" type="tel" style="letter-spacing:0.3em;"></div>
     <div class="admin-section"><span class="admin-label">Slack 設定</span><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.05em;">Webhook URL</div><input class="admin-field" id="webhookInput" placeholder="https://hooks.slack.com/services/..."><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.05em;">Bot Token</div><input class="admin-field" id="botTokenInput" placeholder="xoxb-..."></div>
     <div class="admin-section"><span class="admin-label">スタッフ管理</span><div id="adminStaffList" style="margin-bottom:12px;"></div><div class="admin-row"><input class="admin-field" id="newName" placeholder="名前（日本語）" style="margin:0;flex:2;"><input class="admin-field" id="newNameEn" placeholder="Name (EN)" style="margin:0;flex:2;"><select class="admin-field" id="newRole" style="margin:0;flex:1;"><option value="スタイリスト">スタイリスト</option><option value="アシスタント">アシスタント</option></select><button class="admin-btn" onclick="addStaff()">追加</button></div></div>
-    <div class="admin-section"><span class="admin-label">本日の来店履歴</span><div id="logContainer"><div class="log-empty">まだ来店記録がありません</div></div></div>
-    <div style="padding:16px 0 40px;"><button class="btn btn-fill" style="max-width:100%;" onclick="saveAll()">すべて保存して閉じる</button></div>
-  </div>
-
-  <!-- ══ データパネル ══ -->
-  <div class="home-body admin-panel" id="admin-analytics">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
-      <button class="edit-tab active" id="ar-day" onclick="setAnalyticsRange('day')">日</button>
-      <button class="edit-tab" id="ar-week" onclick="setAnalyticsRange('week')">週</button>
-      <button class="edit-tab" id="ar-month" onclick="setAnalyticsRange('month')">月</button>
-      <div style="flex:1"></div>
-      <div id="analyticsLoading" style="font-size:10px;color:var(--text-muted);display:none;">読込中...</div>
-    </div>
-
-    <!-- スタイリストフィルタ -->
-    <div class="edit-tabs" id="stylistFilter" style="margin-bottom:16px;"></div>
-
-    <!-- サマリーカード -->
-    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:20px;">
-      <div class="stat-card"><div class="stat-label">来店数</div><div class="stat-val" id="a-total">0</div></div>
       <div class="stat-card"><div class="stat-label">予約</div><div class="stat-val" id="a-reserved" style="color:var(--success);">0</div></div>
       <div class="stat-card"><div class="stat-label">飛込み</div><div class="stat-val" id="a-walkin" style="color:var(--warn);">0</div></div>
       <div class="stat-card"><div class="stat-label">ピーク</div><div class="stat-val" id="a-peak">—</div></div>
@@ -231,6 +211,8 @@
     </div>
 
     <!-- 来店一覧 -->
+    <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;letter-spacing:0.1em;">来店一覧</div>
+    <div id="analyticsVisitList"></div>
   </div>
 </div>
 
