@@ -1,5 +1,5 @@
 // ===== FIREBASE CONFIG =====
-// ===== FIREBASE INIT (éå»¶) =====
+// ===== FIREBASE INIT (遅延) =====
 let db;
 const STORE_ID = new URLSearchParams(window.location.search).get('store') || 'muuk-hiratsuka';
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,56 +30,56 @@ let cdTimer = null;
 let current = 's1';
 
 let custom = {
-  salonName:'SALON', welcome:'ããã£ãããã¾ã',
-  welcomeSub:'ã¿ãããã¦åä»ãéå§ãã¦ãã ãã',
-  startBtn:'åä»ã¯ãã¡ã', callBtn:'ã¹ã¿ãããå¼ã¶',
-  checkinDone:'åä»ãå®äºãã¾ãã',
-  pleaseWait:'ãå¸­ã«ãåº§ãã«ãªã£ã¦ãå¾ã¡ãã ãã',
-  pleaseWaitWalkin:'ãå¸­ã«ãåº§ãã«ãªã£ã¦ãå¾ã¡ãã ãã',
-  pleaseWaitWalkinSub:'ãã°ãããå¾ã¡ãã ãã',
-  pleaseWaitVendor:'ãã®ã¾ã¾ãå¾ã¡ãã ãã',
-  pleaseWaitVendorSub:'ã¹ã¿ãããåãã¾ã',
-  coming:'ã¹ã¿ãããåãã¾ã',
-  comingSub:'ãå¸­ã«ãåº§ãã«ãªã£ã¦ãå¾ã¡ãã ãã',
-  waitHere:'ãã®ã¾ã¾ãå¾ã¡ãã ãã',
+  salonName:'SALON', welcome:'いらっしゃいませ',
+  welcomeSub:'タッチして受付を開始してください',
+  startBtn:'受付はこちら', callBtn:'スタッフを呼ぶ',
+  checkinDone:'受付が完了しました',
+  pleaseWait:'お席にお座りになってお待ちください',
+  pleaseWaitWalkin:'お席にお座りになってお待ちください',
+  pleaseWaitWalkinSub:'しばらくお待ちください',
+  pleaseWaitVendor:'そのままお待ちください',
+  pleaseWaitVendorSub:'スタッフが参ります',
+  coming:'スタッフが参ります',
+  comingSub:'お席にお座りになってお待ちください',
+  waitHere:'そのままお待ちください',
 };
 let adminDirty = false;
 let custTabIdx = 0;
 
 let staffList = [
-  {id:1,name:'ç°ä¸­ ç¾å²',nameEn:'Misaki Tanaka',role:'ã¹ã¿ã¤ãªã¹ã',on:true,slackId:'',photo:''},
-  {id:2,name:'é´æ¨ å¥å¤ª',nameEn:'Kenta Suzuki',role:'ã¹ã¿ã¤ãªã¹ã',on:true,slackId:'',photo:''},
-  {id:3,name:'å±±æ¬ ããã',nameEn:'Sakura Yamamoto',role:'ã¹ã¿ã¤ãªã¹ã',on:false,slackId:'',photo:''},
-  {id:4,name:'ä½è¤ ããª',nameEn:'Rina Sato',role:'ã¢ã·ã¹ã¿ã³ã',on:true,slackId:'',photo:''},
+  {id:1,name:'田中 美咲',nameEn:'Misaki Tanaka',role:'スタイリスト',on:true,slackId:'',photo:''},
+  {id:2,name:'鈴木 健太',nameEn:'Kenta Suzuki',role:'スタイリスト',on:true,slackId:'',photo:''},
+  {id:3,name:'山本 さくら',nameEn:'Sakura Yamamoto',role:'スタイリスト',on:false,slackId:'',photo:''},
+  {id:4,name:'佐藤 りな',nameEn:'Rina Sato',role:'アシスタント',on:true,slackId:'',photo:''},
 ];
 let nextStaffId = 5;
 
 // ===== i18n =====
 const TX = {
   ja:{
-    'welcome':'ããã£ãããã¾ã','welcome-sub':'ã¿ãããã¦åä»ãéå§ãã¦ãã ãã',
-    'start':'åä»ã¯ãã¡ã','sys-name':'èªååä»ã·ã¹ãã ',
-    'has-reservation':'ãç¨ä»¶ããé¸ã³ãã ãã',
-    'yes-res':'ãäºç´ã®<br>ããæ¹','no-res':'ãäºç´ã®<br>ãªãæ¹',
-    'vendor':'æ¥­èã»<br>ééã®æ¹',
-    'name-heading':'ãååã®å¥å','name-title':'ãååããå¥åãã ãã',
-    'name-ph':'ä¾ï¼å±±ç° å¤ªé','next':'æ¬¡ãã¸',
-    'err':'ãååãå¥åãã¦ããæ¬¡ã¸ãæ¼ãã¦ãã ãã',
-    'checkin-done':'åä»ãå®äºãã¾ãã',
-    'please-wait':'ãå¸­ã«ãåº§ãã«ãªã£ã¦ãå¾ã¡ãã ãã',
-    'please-wait-walkin':'ãå¸­ã«ãåº§ãã«ãªã£ã¦ãå¾ã¡ãã ãã',
-    'please-wait-vendor':'ãã®ã¾ã¾ãå¾ã¡ãã ãã',
-    'coming':'ã¹ã¿ãããåãã¾ã','coming2':'ã¹ã¿ãããåãã¾ã',
-    'coming3':'ã¹ã¿ãããåãã¾ã','coming-vendor':'ã¹ã¿ãããåãã¾ã',
-    'wait-here':'ãã®ã¾ã¾ãå¾ã¡ãã ãã','wait-here2':'ãã®ã¾ã¾ãå¾ã¡ãã ãã',
-    'wait-here3':'ãã®ã¾ã¾ãå¾ã¡ãã ãã','wait-here-vendor':'ãã®ã¾ã¾ãå¾ã¡ãã ãã',
-    'cd-note':'ãã°ãããå¾ã¡ãã ãã',
-    'suffix':'æ§','log-reserved':'äºç´','log-walkin':'é£ã³è¾¼ã¿',
-    'log-call':'å¼ã³åºã','log-vendor':'æ¥­è','log-empty':'ã¾ã æ¥åºè¨é²ãããã¾ãã',
-    'stylist-heading':'æå½ã¹ã¿ã¤ãªã¹ã','stylist-title':'æå½ã®ãååãå¥åãã¦ãã ãã',
-    'search-ph':'ä¾ï¼ç°ä¸­','skip-stylist':'æåãªãã»ããããªã',
-    'no-results':'ä¸è´ããã¹ã¿ã¤ãªã¹ããè¦ã¤ããã¾ãã',
-    'call-staff':'ã¹ã¿ãããå¼ã¶',
+    'welcome':'いらっしゃいませ','welcome-sub':'タッチして受付を開始してください',
+    'start':'受付はこちら','sys-name':'自動受付システム',
+    'has-reservation':'ご用件をお選びください',
+    'yes-res':'ご予約の<br>ある方','no-res':'ご予約の<br>ない方',
+    'vendor':'業者・<br>配達の方',
+    'name-heading':'お名前の入力','name-title':'お名前をご入力ください',
+    'name-ph':'例）山田 太郎','next':'次　へ',
+    'err':'お名前を入力してから次へを押してください',
+    'checkin-done':'受付が完了しました',
+    'please-wait':'お席にお座りになってお待ちください',
+    'please-wait-walkin':'お席にお座りになってお待ちください',
+    'please-wait-vendor':'そのままお待ちください',
+    'coming':'スタッフが参ります','coming2':'スタッフが参ります',
+    'coming3':'スタッフが参ります','coming-vendor':'スタッフが参ります',
+    'wait-here':'そのままお待ちください','wait-here2':'そのままお待ちください',
+    'wait-here3':'そのままお待ちください','wait-here-vendor':'そのままお待ちください',
+    'cd-note':'しばらくお待ちください',
+    'suffix':'様','log-reserved':'予約','log-walkin':'飛び込み',
+    'log-call':'呼び出し','log-vendor':'業者','log-empty':'まだ来店記録がありません',
+    'stylist-heading':'担当スタイリスト','stylist-title':'担当のお名前を入力してください',
+    'search-ph':'例）田中','skip-stylist':'指名なし・わからない',
+    'no-results':'一致するスタイリストが見つかりません',
+    'call-staff':'スタッフを呼ぶ',
   },
   en:{
     'welcome':'Welcome','welcome-sub':'Touch to begin check-in',
@@ -107,60 +107,60 @@ const TX = {
     'call-staff':'Call Staff',
   },
   zh:{
-    'welcome':'æ¬¢è¿åä¸´','welcome-sub':'è¯·è§¦æ¸å±å¹å¼å§åçå¥ä½',
-    'start':'ç¹å»åçå¥ä½','sys-name':'èªå©å¥ä½ç³»ç»',
-    'has-reservation':'è¯·éæ©æ¨çæ¥è®¿ç±»å',
-    'yes-res':'ææ<br>é¢çº¦','no-res':'æ²¡æé¢çº¦<br>ï¼ç´æ¥æ¥è®¿ï¼',
-    'vendor':'ä¾åºå/<br>å¿«é',
-    'name-heading':'æ¨çå§å','name-title':'è¯·è¾å¥æ¨çå§å',
-    'name-ph':'ä¾ï¼å±±ç° å¤ªé','next':'ä¸ä¸æ­¥',
-    'err':'è¯·è¾å¥å§åååç»§ç»­',
-    'checkin-done':'åçå®æ',
-    'please-wait':'è¯·å°±åº§ç­å',
-    'please-wait-walkin':'è¯·å°±åº§ç­å',
-    'please-wait-vendor':'è¯·å¨æ­¤ç­å',
-    'coming':'å·¥ä½äººåé©¬ä¸å°','coming2':'å·¥ä½äººåé©¬ä¸å°',
-    'coming3':'å·¥ä½äººåé©¬ä¸å°','coming-vendor':'å·¥ä½äººåé©¬ä¸å°',
-    'wait-here':'è¯·å¨æ­¤ç­å','wait-here2':'è¯·å¨æ­¤ç­å',
-    'wait-here3':'è¯·å¨æ­¤ç­å','wait-here-vendor':'è¯·å¨æ­¤ç­å',
-    'cd-note':'è¯·ç¨å',
-    'suffix':'','log-reserved':'é¢çº¦','log-walkin':'ç´æ¥æ¥è®¿',
-    'log-call':'å·²å¼å«','log-vendor':'ä¾åºå','log-empty':'ææ å°è®¿è®°å½',
-    'stylist-heading':'éæ©é åå¸','stylist-title':'è¯·è¾å¥æ¨çé åå¸å§å',
-    'search-ph':'ä¾ï¼ç°ä¸­','skip-stylist':'æ æå®ï¼ä¸ç¡®å®',
-    'no-results':'æªæ¾å°å¹éçé åå¸',
-    'call-staff':'å¼å«å·¥ä½äººå',
+    'welcome':'欢迎光临','welcome-sub':'请触摸屏幕开始办理入住',
+    'start':'点击办理入住','sys-name':'自助入住系统',
+    'has-reservation':'请选择您的来访类型',
+    'yes-res':'我有<br>预约','no-res':'没有预约<br>（直接来访）',
+    'vendor':'供应商/<br>快递',
+    'name-heading':'您的姓名','name-title':'请输入您的姓名',
+    'name-ph':'例）山田 太郎','next':'下一步',
+    'err':'请输入姓名后再继续',
+    'checkin-done':'办理完成',
+    'please-wait':'请就座等候',
+    'please-wait-walkin':'请就座等候',
+    'please-wait-vendor':'请在此等候',
+    'coming':'工作人员马上到','coming2':'工作人员马上到',
+    'coming3':'工作人员马上到','coming-vendor':'工作人员马上到',
+    'wait-here':'请在此等候','wait-here2':'请在此等候',
+    'wait-here3':'请在此等候','wait-here-vendor':'请在此等候',
+    'cd-note':'请稍候',
+    'suffix':'','log-reserved':'预约','log-walkin':'直接来访',
+    'log-call':'已呼叫','log-vendor':'供应商','log-empty':'暂无到访记录',
+    'stylist-heading':'选择造型师','stylist-title':'请输入您的造型师姓名',
+    'search-ph':'例）田中','skip-stylist':'无指定／不确定',
+    'no-results':'未找到匹配的造型师',
+    'call-staff':'呼叫工作人员',
   },
   ko:{
-    'welcome':'ì´ì ì¤ì¸ì','welcome-sub':'íë©´ì í°ì¹íì¬ ì²´í¬ì¸ì ììíì¸ì',
-    'start':'ì²´í¬ì¸íê¸°','sys-name':'ìí ì²´í¬ì¸',
-    'has-reservation':'ë°©ë¬¸ ì íì ì íí´ ì£¼ì¸ì',
-    'yes-res':'ìì½ì´<br>ììµëë¤','no-res':'ìì½ ìì<br>ï¼ìí¬ì¸ï¼',
-    'vendor':'ìì²´/<br>ë°°ë¬',
-    'name-heading':'ì±í¨','name-title':'ì±í¨ì ìë ¥í´ ì£¼ì¸ì',
-    'name-ph':'ìï¼ì¼ë§ë¤ íë¡','next':'ë¤ì',
-    'err':'ì±í¨ì ìë ¥í í ë¤ìì ëë¬ì£¼ì¸ì',
-    'checkin-done':'ì²´í¬ì¸ ìë£',
-    'please-wait':'ìë¦¬ì ììì ê¸°ë¤ë ¤ ì£¼ì¸ì',
-    'please-wait-walkin':'ìë¦¬ì ììì ê¸°ë¤ë ¤ ì£¼ì¸ì',
-    'please-wait-vendor':'ê·¸ ìë¦¬ìì ê¸°ë¤ë ¤ ì£¼ì¸ì',
-    'coming':'ì§ìì´ ê³§ ê°ëë¤','coming2':'ì§ìì´ ê³§ ê°ëë¤',
-    'coming3':'ì§ìì´ ê³§ ê°ëë¤','coming-vendor':'ì§ìì´ ê³§ ê°ëë¤',
-    'wait-here':'ê·¸ ìë¦¬ìì ê¸°ë¤ë ¤ ì£¼ì¸ì','wait-here2':'ê·¸ ìë¦¬ìì ê¸°ë¤ë ¤ ì£¼ì¸ì',
-    'wait-here3':'ê·¸ ìë¦¬ìì ê¸°ë¤ë ¤ ì£¼ì¸ì','wait-here-vendor':'ê·¸ ìë¦¬ìì ê¸°ë¤ë ¤ ì£¼ì¸ì',
-    'cd-note':'ì ìë§ ê¸°ë¤ë ¤ ì£¼ì¸ì',
-    'suffix':'','log-reserved':'ìì½','log-walkin':'ìí¬ì¸',
-    'log-call':'í¸ì¶ë¨','log-vendor':'ìì²´','log-empty':'ìì§ ë°©ë¬¸ ê¸°ë¡ì´ ììµëë¤',
-    'stylist-heading':'ì¤íì¼ë¦¬ì¤í¸ ì í','stylist-title':'ë´ë¹ ì¤íì¼ë¦¬ì¤í¸ ì´ë¦ì ìë ¥í´ ì£¼ì¸ì',
-    'search-ph':'ìï¼ë¤ëì¹´','skip-stylist':'ì§ì  ììï¼ëª¨ë¦',
-    'no-results':'ì¼ì¹íë ì¤íì¼ë¦¬ì¤í¸ë¥¼ ì°¾ì ì ììµëë¤',
-    'call-staff':'ì§ì í¸ì¶',
+    'welcome':'어서 오세요','welcome-sub':'화면을 터치하여 체크인을 시작하세요',
+    'start':'체크인하기','sys-name':'셀프 체크인',
+    'has-reservation':'방문 유형을 선택해 주세요',
+    'yes-res':'예약이<br>있습니다','no-res':'예약 없음<br>（워크인）',
+    'vendor':'업체/<br>배달',
+    'name-heading':'성함','name-title':'성함을 입력해 주세요',
+    'name-ph':'예）야마다 타로','next':'다음',
+    'err':'성함을 입력한 후 다음을 눌러주세요',
+    'checkin-done':'체크인 완료',
+    'please-wait':'자리에 앉아서 기다려 주세요',
+    'please-wait-walkin':'자리에 앉아서 기다려 주세요',
+    'please-wait-vendor':'그 자리에서 기다려 주세요',
+    'coming':'직원이 곧 갑니다','coming2':'직원이 곧 갑니다',
+    'coming3':'직원이 곧 갑니다','coming-vendor':'직원이 곧 갑니다',
+    'wait-here':'그 자리에서 기다려 주세요','wait-here2':'그 자리에서 기다려 주세요',
+    'wait-here3':'그 자리에서 기다려 주세요','wait-here-vendor':'그 자리에서 기다려 주세요',
+    'cd-note':'잠시만 기다려 주세요',
+    'suffix':'','log-reserved':'예약','log-walkin':'워크인',
+    'log-call':'호출됨','log-vendor':'업체','log-empty':'아직 방문 기록이 없습니다',
+    'stylist-heading':'스타일리스트 선택','stylist-title':'담당 스타일리스트 이름을 입력해 주세요',
+    'search-ph':'예）다나카','skip-stylist':'지정 없음／모름',
+    'no-results':'일치하는 스타일리스트를 찾을 수 없습니다',
+    'call-staff':'직원 호출',
   },
   es:{
     'welcome':'Bienvenido','welcome-sub':'Toque para comenzar el registro',
-    'start':'Registrarse aquÃ­','sys-name':'Registro automÃ¡tico',
+    'start':'Registrarse aquí','sys-name':'Registro automático',
     'has-reservation':'Seleccione su tipo de visita',
-    'yes-res':'Tengo una<br>reservaciÃ³n','no-res':'Sin reservaciÃ³n<br>(Sin cita)',
+    'yes-res':'Tengo una<br>reservación','no-res':'Sin reservación<br>(Sin cita)',
     'vendor':'Proveedor/<br>Entrega',
     'name-heading':'Su nombre','name-title':'Por favor ingrese su nombre',
     'name-ph':'ej.) Yamada Taro','next':'Siguiente',
@@ -168,17 +168,17 @@ const TX = {
     'checkin-done':'Registro completado',
     'please-wait':'Por favor tome asiento y espere',
     'please-wait-walkin':'Por favor tome asiento y espere',
-    'please-wait-vendor':'Por favor espere aquÃ­',
+    'please-wait-vendor':'Por favor espere aquí',
     'coming':'El personal viene en camino','coming2':'El personal viene en camino',
     'coming3':'El personal viene en camino','coming-vendor':'El personal viene en camino',
-    'wait-here':'Por favor espere aquÃ­','wait-here2':'Por favor espere aquÃ­',
-    'wait-here3':'Por favor espere aquÃ­','wait-here-vendor':'Por favor espere aquÃ­',
+    'wait-here':'Por favor espere aquí','wait-here2':'Por favor espere aquí',
+    'wait-here3':'Por favor espere aquí','wait-here-vendor':'Por favor espere aquí',
     'cd-note':'Por favor espere un momento',
-    'suffix':'','log-reserved':'ReservaciÃ³n','log-walkin':'Sin cita',
-    'log-call':'Llamado','log-vendor':'Proveedor','log-empty':'No hay registros aÃºn',
+    'suffix':'','log-reserved':'Reservación','log-walkin':'Sin cita',
+    'log-call':'Llamado','log-vendor':'Proveedor','log-empty':'No hay registros aún',
     'stylist-heading':'Seleccionar estilista','stylist-title':'Ingrese el nombre de su estilista',
-    'search-ph':'ej.) Tanaka','skip-stylist':'Sin preferencia / No sÃ©',
-    'no-results':'No se encontrÃ³ estilista',
+    'search-ph':'ej.) Tanaka','skip-stylist':'Sin preferencia / No sé',
+    'no-results':'No se encontró estilista',
     'call-staff':'Llamar al personal',
   }
 };
@@ -224,7 +224,7 @@ function setLang(v){ lang=v; applyLang(); updateLangToggle(); }
 function toggleLangQuick(){ setLang(lang==='ja'?'en':'ja'); closeLangPicker(); }
 function updateLangToggle(){
   const btn=document.getElementById('langToggle');
-  if(btn) btn.textContent = lang==='ja' ? 'English' : 'æ¥æ¬èª';
+  if(btn) btn.textContent = lang==='ja' ? 'English' : '日本語';
 }
 function openLangPicker(){
   const p=document.getElementById('langPicker');
@@ -235,7 +235,7 @@ function closeLangPicker(){
   if(p) p.style.display='none';
 }
 function setLangAndClose(v){ setLang(v); closeLangPicker(); }
-// ããã«ã¼å¤ã¯ãªãã¯ã§éãã
+// ピッカー外クリックで閉じる
 document.addEventListener('click', function(e){
   const picker=document.getElementById('langPicker');
   const more=document.getElementById('langMore');
@@ -284,7 +284,7 @@ function onStylistSearch(q){
         <div class="stylist-name">${dn}</div>
         <div class="stylist-role">${s.role}</div>
       </div>
-      <span class="stylist-arr">âº</span>
+      <span class="stylist-arr">›</span>
     </div>`;
   }).join('');
 }
@@ -301,15 +301,15 @@ function finishCheckin(){
 }
 
 function doWalkin(){
-  addLog('','walkin'); sendSlack(now()+' é£ã³è¾¼ã¿ã®ãå®¢æ§ããå¼ã³ã§ã');
+  addLog('','walkin'); sendSlack(now()+' 飛び込みのお客様がお呼びです');
   goTo('s6'); startCD('cb3',10,()=>goTo('s1'));
 }
 function doVendor(){
-  addLog('','vendor'); sendSlack(now()+' æ¥­èã»ééã®æ¹ãããã£ãããã¾ãã');
+  addLog('','vendor'); sendSlack(now()+' 業者・配達の方がいらっしゃいました');
   goTo('s8'); startCD('cb5',10,()=>goTo('s1'));
 }
 function doCallStaff(type){
-  addLog('','call'); sendSlack(now()+' å¼ã³åºããã¿ã³ãæ¼ããã¾ãã');
+  addLog('','call'); sendSlack(now()+' 呼び出しボタンが押されました');
   if(type==='reserved'){goTo('s5');startCD('cb2',10,()=>goTo('s1'));}
   else{goTo('s7');startCD('cb4',10,()=>goTo('s1'));}
 }
@@ -360,8 +360,8 @@ function openHomePanel(){
   document.getElementById('c-salonName').value=custom.salonName;
   document.getElementById('c-welcome').value=custom.welcome;
   document.getElementById('c-welcomeSub').value=custom.welcomeSub;
-  document.getElementById('c-startBtn').value=custom.startBtn||'åä»ã¯ãã¡ã';
-  document.getElementById('c-callBtn').value=custom.callBtn||'ã¹ã¿ãããå¼ã¶';
+  document.getElementById('c-startBtn').value=custom.startBtn||'受付はこちら';
+  document.getElementById('c-callBtn').value=custom.callBtn||'スタッフを呼ぶ';
   document.getElementById('c-checkinDone').value=custom.checkinDone;
   document.getElementById('c-pleaseWait').value=custom.pleaseWait;
   document.getElementById('c-pleaseWaitWalkin').value=custom.pleaseWaitWalkin;
@@ -378,7 +378,7 @@ function openHomePanel(){
 }
 function closeHome(){
   if(adminDirty){
-    showConfirm('è¨­å®ããåå®¹ãä¿å­ããã¦ãã¾ãããç ´æ£ãã¾ããï¼',()=>{
+    showConfirm('設定した内容が保存されていません。破棄しますか？',()=>{
       adminDirty=false;
       document.getElementById('homeScreen').classList.remove('active');
     });
@@ -402,16 +402,16 @@ function saveAll(){
   if(g('c-coming'))custom.coming=g('c-coming');
   if(g('c-comingSub'))custom.comingSub=g('c-comingSub');
   const pin=g('c-pin');
-  if(pin){if(!/^\d{4}$/.test(pin)){showToast('PINã¯4æ¡ã®æ°å­ã§å¥åãã¦ãã ãã');return;}pinCode=pin;}
+  if(pin){if(!/^\d{4}$/.test(pin)){showToast('PINは4桁の数字で入力してください');return;}pinCode=pin;}
   const wh=g('webhookInput'); if(wh)webhookUrl=wh;
   const bt=g('botTokenInput'); if(bt)botToken=bt;
   adminDirty=false;
   applyCustom();
   document.getElementById('homeScreen').classList.remove('active');
-  showToast('ä¿å­ä¸­...');
+  showToast('保存中...');
   autoTranslateCustom().then(()=>{
     saveToStorage();
-    showToast('ä¿å­ãã¾ãã');
+    showToast('保存しました');
   });
 }
 function saveCustom(){saveAll();}
@@ -437,7 +437,7 @@ async function autoTranslateCustom(){
       }
     }
     applyLang();
-  }catch(e){ console.warn('ç¿»è¨³ã¨ã©ã¼:', e); }
+  }catch(e){ console.warn('翻訳エラー:', e); }
 }
 
 // ===== STAFF ADMIN =====
@@ -451,25 +451,25 @@ function renderAdminStaff(){
       ondragover="onDragOver(event)"
       ondrop="onDrop(event,${s.id})"
       ondragend="onDragEnd(event)">
-      <div style="cursor:grab;color:var(--text-muted);font-size:16px;padding:0 4px;flex-shrink:0;touch-action:none;">â ¿</div>
+      <div style="cursor:grab;color:var(--text-muted);font-size:16px;padding:0 4px;flex-shrink:0;touch-action:none;">⠿</div>
       <div class="toggle ${s.on?'on':'off'}" onclick="toggleStaff(${s.id})">
         <div class="toggle-knob"></div>
       </div>
-      <label class="photo-btn" title="åçãå¤æ´">
-        ${s.photo?`<img src="${s.photo}">`:`<span class="ph-ico">ð·</span>`}
+      <label class="photo-btn" title="写真を変更">
+        ${s.photo?`<img src="${s.photo}">`:`<span class="ph-ico">📷</span>`}
         <input type="file" accept="image/*" onchange="uploadPhoto(${s.id},this)">
       </label>
       <div class="staff-info" style="flex:1;min-width:0;">
         <input class="admin-field" style="margin:0 0 2px;padding:4px 8px;font-family:'Shippori Mincho',serif;font-size:14px;" value="${s.name}" oninput="updateStaff(${s.id},'name',this.value)">
         <input class="admin-field" style="margin:0 0 2px;padding:3px 8px;font-size:11px;font-family:'DM Sans',sans-serif;" value="${s.nameEn||''}" placeholder="Name (EN)" oninput="updateStaff(${s.id},'nameEn',this.value)">
         <select class="role-select admin-field" style="margin:0;padding:2px 6px;font-size:10px;width:auto;display:inline-block;border-radius:4px;background:rgba(90,106,150,.06);border:none;" onchange="updateStaff(${s.id},'role',this.value)">
-          <option value="ã¹ã¿ã¤ãªã¹ã" ${s.role==='ã¹ã¿ã¤ãªã¹ã'?'selected':''}>ã¹ã¿ã¤ãªã¹ã</option>
-          <option value="ã¢ã·ã¹ã¿ã³ã" ${s.role==='ã¢ã·ã¹ã¿ã³ã'?'selected':''}>ã¢ã·ã¹ã¿ã³ã</option>
+          <option value="スタイリスト" ${s.role==='スタイリスト'?'selected':''}>スタイリスト</option>
+          <option value="アシスタント" ${s.role==='アシスタント'?'selected':''}>アシスタント</option>
         </select>
       </div>
       <input class="slack-id-field" placeholder="Slack ID" value="${s.slackId||''}" oninput="updateStaff(${s.id},'slackId',this.value)">
-      <span class="status-badge ${s.on?'on':'off'}">${s.on?'åºå¤ä¸­':'ä¼ã¿'}</span>
-      <button class="del-btn" onclick="removeStaff(${s.id})">Ã</button>
+      <span class="status-badge ${s.on?'on':'off'}">${s.on?'出勤中':'休み'}</span>
+      <button class="del-btn" onclick="removeStaff(${s.id})">×</button>
     </div>`).join('');
 }
 
@@ -496,7 +496,7 @@ function updateSlackId(id,val){updateStaff(id,'slackId',val);}
 function removeStaff(id){
   const s=staffList.find(x=>x.id===id);
   if(!s)return;
-  showConfirm(s.name+' ããªã¹ãããåé¤ãã¾ããï¼',()=>{
+  showConfirm(s.name+' をリストから削除しますか？',()=>{
     staffList=staffList.filter(x=>x.id!==id);renderAdminStaff();saveToStorage();
   });
 }
@@ -513,8 +513,8 @@ function showConfirm(msg,onYes){
     '<div style="background:rgba(255,255,255,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.5);border-radius:20px;padding:32px 28px 24px;text-align:center;width:min(320px,85vw);box-shadow:0 20px 60px rgba(0,0,0,.12);">'+
       '<div style="font-size:15px;color:#1a1e2e;line-height:1.7;margin-bottom:24px;">'+msg+'</div>'+
       '<div style="display:flex;gap:10px;">'+
-        '<button id="confirmNo" style="flex:1;padding:12px;border-radius:12px;border:1px solid rgba(104,120,160,.2);background:transparent;color:#5a6278;font-size:14px;cursor:pointer;">ããã</button>'+
-        '<button id="confirmYes" style="flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#c04040,#d05050);color:#fff;font-size:14px;cursor:pointer;">ã¯ã</button>'+
+        '<button id="confirmNo" style="flex:1;padding:12px;border-radius:12px;border:1px solid rgba(104,120,160,.2);background:transparent;color:#5a6278;font-size:14px;cursor:pointer;">いいえ</button>'+
+        '<button id="confirmYes" style="flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#c04040,#d05050);color:#fff;font-size:14px;cursor:pointer;">はい</button>'+
       '</div>'+
     '</div>';
   overlay.style.display='flex';
@@ -529,13 +529,13 @@ function addStaff(){
   staffList.push({id:nextStaffId++,name,nameEn,role,on:true,slackId:'',photo:''});
   document.getElementById('newName').value='';
   document.getElementById('newNameEn').value='';
-  document.getElementById('newRole').value='ã¹ã¿ã¤ãªã¹ã';
-  renderAdminStaff(); showToast(`${name} ãè¿½å ãã¾ãã`); markDirty();
+  document.getElementById('newRole').value='スタイリスト';
+  renderAdminStaff(); showToast(`${name} を追加しました`); markDirty();
 }
 function uploadPhoto(id,input){
   const file=input.files[0]; if(!file)return;
   const reader=new FileReader();
-  reader.onload=e=>{staffList=staffList.map(s=>s.id===id?{...s,photo:e.target.result}:s);renderAdminStaff();showToast('åçãç»é²ãã¾ãã');markDirty();};
+  reader.onload=e=>{staffList=staffList.map(s=>s.id===id?{...s,photo:e.target.result}:s);renderAdminStaff();showToast('写真を登録しました');markDirty();};
   reader.readAsDataURL(file);
 }
 
@@ -550,7 +550,7 @@ function renderLog(){
   if(!visitLog.length){el.innerHTML=`<div class="log-empty">${tx('log-empty')}</div>`;return;}
   el.innerHTML=visitLog.map(l=>{
     const badge=tx('log-'+l.type);
-    const dn=l.name?l.name+tx('suffix'):(lang==='ja'?'é£ã³è¾¼ã¿':'Walk-in');
+    const dn=l.name?l.name+tx('suffix'):(lang==='ja'?'飛び込み':'Walk-in');
     const st=l.stylist?`<span style="font-size:10px;color:var(--accent);margin-left:6px;font-family:'DM Sans',sans-serif;">/ ${l.stylist}</span>`:'';
     return `<div class="log-card">
       <span class="log-time">${l.time}</span>
@@ -577,9 +577,9 @@ async function sendSlackDM(uid,msg){
 }
 async function notifyCheckin(name,stylist){
   const t=now();
-  if(stylist&&stylist.slackId) await sendSlackDM(stylist.slackId,`${t} ${name}${tx('suffix')}ããæ¥åºããã¾ãã`);
-  else if(stylist) await sendSlack(`${t} ${name}${tx('suffix')}ãæ¥åºï¼æå½ï¼${stylist.name}ï¼`);
-  else await sendSlack(`${t} ${name}${tx('suffix')}ãæ¥åºï¼æåãªãï¼`);
+  if(stylist&&stylist.slackId) await sendSlackDM(stylist.slackId,`${t} ${name}${tx('suffix')}がご来店されました`);
+  else if(stylist) await sendSlack(`${t} ${name}${tx('suffix')}ご来店（担当：${stylist.name}）`);
+  else await sendSlack(`${t} ${name}${tx('suffix')}ご来店（指名なし）`);
 }
 
 // ===== UTILS =====
@@ -615,7 +615,7 @@ async function saveToStorage(){
 
 async function loadFromStorage(){
   try{
-    // ã¾ãlocalStorageããå³æåæ 
+    // まずlocalStorageから即時反映
     const c=localStorage.getItem('salon_custom_' + STORE_ID); if(c)Object.assign(custom,JSON.parse(c));
     const p=localStorage.getItem('salon_pin_' + STORE_ID); if(p)pinCode=p;
     const w=localStorage.getItem('salon_webhook_' + STORE_ID); if(w)webhookUrl=w;
@@ -625,7 +625,7 @@ async function loadFromStorage(){
     const logKey='salon_log_'+today();
     const l=localStorage.getItem(logKey); if(l)visitLog=JSON.parse(l);
     applyLang();
-    // Firestoreããææ°ãã¼ã¿ãåå¾ãã¦ä¸æ¸ã
+    // Firestoreから最新データを取得して上書き
     const snap = await db.collection('salon').doc(STORE_ID).get();
     if(snap.exists){
       const d=snap.data();
@@ -666,11 +666,11 @@ function _prevDone(color,bg,m1id,m2id,badge){
   var h='<div class="prev-bar"><div class="prev-logo">'+_cv('c-salonName')+'</div><div class="prev-actions"><div class="prev-langbtn">English</div><div class="prev-gearbtn"></div></div></div>';
   h+='<div class="prev-body">';
   h+=_prevRing(color);
-  if(badge) h+='<div class="prev-badge">ç°ä¸­ æ§</div>';
+  if(badge) h+='<div class="prev-badge">田中 様</div>';
   h+='<div style="position:relative;display:inline-block"><span style="font-size:15px;font-weight:500;color:#1a1e2e">'+_cv(m1id)+'</span>'+_pmk(bg,'1')+'</div>';
   h+='<div style="position:relative;display:inline-block"><span class="prev-sub">'+_cv(m2id)+'</span>'+_pmk(bg,'2')+'</div>';
   h+='<div class="prev-bartrack"><div class="prev-barfill"></div></div>';
-  h+='<div class="prev-home">ãã¼ã ã«æ»ã</div>';
+  h+='<div class="prev-home">ホームに戻る</div>';
   h+='</div>';
   return h;
 }
@@ -680,7 +680,7 @@ function _prevSingle(color,mid){
   h+=_prevRing(color);
   h+='<div style="position:relative;display:inline-block"><span style="font-size:15px;font-weight:500;color:#1a1e2e">'+_cv(mid)+'</span>'+_pmk(color,'1')+'</div>';
   h+='<div class="prev-bartrack"><div class="prev-barfill"></div></div>';
-  h+='<div class="prev-home">ãã¼ã ã«æ»ã</div>';
+  h+='<div class="prev-home">ホームに戻る</div>';
   h+='</div>';
   return h;
 }
@@ -709,7 +709,7 @@ function updateCustPreview(){
   }
 }
 
-// ===== ã°ã­ã¼ãã«å¬éï¼HTML onclickäºæï¼ =====
+// ===== グローバル公開（HTML onclick互換） =====
 const _fns = {
   goTo, submitName, doWalkin, doVendor, doCallStaff, skipStylist,
   selectStylist, onStylistSearch, setLang, clearErr, toggleLangQuick,
@@ -723,10 +723,10 @@ const _fns = {
 };
 Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
 
-// ===== ã¨ã©ã¼ç£è¦ =====
+// ===== エラー監視 =====
 window.onerror = function(msg, src, line, col, err) {
   console.error('[Reception Error]', msg, src, line);
-  // å°æ¥çã«SlackãSentryã«éä¿¡å¯è½
+  // 将来的にSlackやSentryに送信可能
 };
 window.addEventListener('unhandledrejection', function(e) {
   console.error('[Reception Promise Error]', e.reason);
