@@ -1,5 +1,9 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "rewrites": [
+    { "source": "/muuk-hiratsuka", "destination": "/index.html" },
+    { "source": "/muuk-chigasaki", "destination": "/index.html" }
+  ]
 }
