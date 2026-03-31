@@ -493,6 +493,7 @@ function addLog(name,type,stylist){
 }
 function renderLog(){
   var el=document.getElementById('logContainer');
+  if(!el)return;
   if(!visitLog.length){el.innerHTML='<div class="log-empty">'+tx('log-empty')+'</div>';return;}
   el.innerHTML=visitLog.map(function(l){
     var badge=tx('log-'+l.type);
