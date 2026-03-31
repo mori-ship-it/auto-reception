@@ -1199,9 +1199,9 @@ function renderDrinkMenu(){
         return '<div class="staff-card" draggable="true" data-drink-id="'+d.id+'" ondragstart="onDrinkDragStart(event,'+d.id+')" ondragover="onDrinkDragOver(event)" ondrop="onDrinkDrop(event,'+d.id+')" ondragend="onDrinkDragEnd(event)" style="padding:8px 12px;">'
           +'<div style="cursor:grab;color:var(--text-muted);font-size:16px;padding:0 4px;flex-shrink:0;">⠿</div>'
           +'<div class="toggle '+(vis?'on':'off')+'" onclick="toggleDrinkVisible('+d.id+')"><div class="toggle-knob"></div></div>'
-          +'<input class="admin-field" style="margin:0;padding:3px 6px;font-size:12px;flex:2;min-width:0;'+(vis?'':'opacity:0.4;')+'" value="'+d.name.replace(/"/g,'&quot;')+'" oninput="updateDrinkField('+d.id+',\'name\',this.value)">'
-          +'<input class="admin-field" style="margin:0;padding:3px 6px;font-size:10px;flex:2;min-width:0;font-family:DM Sans,sans-serif;'+(vis?'':'opacity:0.4;')+'" value="'+(d.nameEn||'').replace(/"/g,'&quot;')+'" placeholder="EN" oninput="updateDrinkField('+d.id+',\'nameEn\',this.value)">'
-          +'<span onclick="toggleDrinkCategory('+d.id+')" style="font-family:DM Sans,sans-serif;font-size:9px;padding:2px 8px;border-radius:50px;cursor:pointer;flex-shrink:0;color:#fff;background:'+(d.category==='hot'?'#D85A30':'var(--accent)')+';letter-spacing:0.04em;">'+catLabel+'</span>'
+          +'<input class="admin-field" style="margin:0;padding:0 8px;font-size:12px;height:30px;line-height:30px;flex:2;min-width:0;'+(vis?'':'opacity:0.4;')+'" value="'+d.name.replace(/"/g,'&quot;')+'" oninput="updateDrinkField('+d.id+',\'name\',this.value)">'
+          +'<input class="admin-field" style="margin:0;padding:0 8px;font-size:10px;height:30px;line-height:30px;flex:2;min-width:0;font-family:DM Sans,sans-serif;'+(vis?'':'opacity:0.4;')+'" value="'+(d.nameEn||'').replace(/"/g,'&quot;')+'" placeholder="EN" oninput="updateDrinkField('+d.id+',\'nameEn\',this.value)">'
+          +'<span onclick="toggleDrinkCategory('+d.id+')" style="font-family:DM Sans,sans-serif;font-size:10px;padding:0 10px;height:30px;line-height:30px;border-radius:50px;cursor:pointer;flex-shrink:0;color:#fff;background:'+(d.category==='hot'?'#D85A30':'var(--accent)')+';letter-spacing:0.04em;display:inline-block;">'+catLabel+'</span>'
           +'<button class="del-btn" onclick="removeDrinkItem('+d.id+')">×</button>'
           +'</div>';
       }).join('');
