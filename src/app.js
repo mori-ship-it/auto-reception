@@ -836,7 +836,32 @@ window.switchEditTab = function(btn) {
   var panel = document.getElementById(btn.getAttribute('data-tab'));
   if(panel) panel.classList.add('active');
 };
+var _analyticsEntries = [];
+var _analyticsRange = 'day';
+var _analyticsStylist = null;
+
+window.filterByStylist = function(name) {
+  _analyticsStylist = (name === '__all__') ? null : name;
+  var filterEl = document.getElementById('stylistFilter');
+  if(filterEl){
+    filterEl.querySelectorAll('.edit-tab').forEach(function(b){
+      var bName = b.getAttribute('data-stylist');
+      b.classList.toggle('active', bName === (name || '__all__'));
+    });
+  }
+  renderAnalyticsFromCache();
+};
+
+function renderAnalyticsFromCache(){
+  var data = _analyticsStylist
+    ? _analyticsEntries.filter(function(e){ return e.stylist === _analyticsStylist; })
+    : _analyticsEntries;
+  renderAnalyticsUI(data, _analyticsRange);
+}
+
 window.setAnalyticsRange = async function(range) {
+  _analyticsRange = range;
+  _analyticsStylist = null;
   // ボタン active 切替
   ['ar-day','ar-week','ar-month'].forEach(function(id){
     var el = document.getElementById(id);
@@ -866,6 +891,25 @@ window.setAnalyticsRange = async function(range) {
 
   if(loading) loading.style.display='none';
 
+  _analyticsEntries = entries;
+  renderAnalyticsUI(entries, range);
+
+  // スタイリストフィルタ
+  var filterEl = document.getElementById('stylistFilter');
+  if(filterEl){
+    var names = {};
+    entries.forEach(function(e){if(e.stylist) names[e.stylist]=true;});
+    var sorted = Object.keys(names).sort();
+    if(sorted.length > 0){
+      filterEl.innerHTML = '<button class="edit-tab active" data-stylist="__all__" onclick="filterByStylist(\'__all__\')" style="font-size:10px;">全員</button>' +
+        sorted.map(function(n){return '<button class="edit-tab" data-stylist="'+n.replace(/'/g,"\\'")+'" onclick="filterByStylist(\''+n.replace(/'/g,"\\'")+'\')\" style="font-size:10px;">'+n+'</button>';}).join('');
+    } else {
+      filterEl.innerHTML = '';
+    }
+  }
+};
+
+function renderAnalyticsUI(entries, range){
   // 統計カード
   var total = entries.length;
   var reserved = entries.filter(function(e){return e.type==='reserved';}).length;
@@ -1015,17 +1059,4 @@ window.setAnalyticsRange = async function(range) {
     }
   }
 
-  // スタイリストフィルタ（将来用、現時点では全員表示）
-  var filterEl = document.getElementById('stylistFilter');
-  if(filterEl){
-    var names = {};
-    entries.forEach(function(e){if(e.stylist) names[e.stylist]=true;});
-    var sorted = Object.keys(names).sort();
-    if(sorted.length > 0){
-      filterEl.innerHTML = '<button class="edit-tab active" style="font-size:10px;">全員</button>' +
-        sorted.map(function(n){return '<button class="edit-tab" style="font-size:10px;">'+n+'</button>';}).join('');
-    } else {
-      filterEl.innerHTML = '';
-    }
-  }
-};
+}
