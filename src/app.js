@@ -647,6 +647,13 @@ async function loadFromStorage(){
         if(d.txCache.es) Object.assign(TX.es, d.txCache.es);
       }
     }
+    // drinkMenu が空ならデフォルトをセットして保存
+    if(!drinkMenu.length){
+      drinkMenu = defaultDrinkMenu.map(function(d){return Object.assign({},d);});
+      drinkEnabled = true;
+      nextDrinkId = 18;
+      saveToStorage();
+    }
     // ログ読み込み（新パス → 旧パスフォールバック）
     let logSnap = await db.collection('logs').doc(logDocId(today())).get();
     if(!logSnap.exists) logSnap = await db.collection('logs').doc(today()).get();
@@ -654,6 +661,26 @@ async function loadFromStorage(){
     applyLang();
   }catch(e){ console.warn('Storage load error:', e); applyLang(); }
 }
+
+const defaultDrinkMenu = [
+  {id:1,name:'ホットコーヒー',nameEn:'Hot Coffee',category:'hot',visible:true},
+  {id:2,name:'カプチーノ',nameEn:'Cappuccino',category:'hot',visible:true},
+  {id:3,name:'カフェラテ',nameEn:'Cafe Latte',category:'hot',visible:true},
+  {id:4,name:'エスプレッソ',nameEn:'Espresso',category:'hot',visible:true},
+  {id:5,name:'紅茶',nameEn:'Black Tea',category:'hot',visible:true},
+  {id:6,name:'緑茶',nameEn:'Green Tea',category:'hot',visible:true},
+  {id:7,name:'ジャスミン茶',nameEn:'Jasmine Tea',category:'hot',visible:true},
+  {id:8,name:'アイスコーヒー',nameEn:'Iced Coffee',category:'cold',visible:true},
+  {id:9,name:'アイスカプチーノ',nameEn:'Iced Cappuccino',category:'cold',visible:true},
+  {id:10,name:'アイスカフェラテ',nameEn:'Iced Cafe Latte',category:'cold',visible:true},
+  {id:11,name:'アイスエスプレッソ',nameEn:'Iced Espresso',category:'cold',visible:true},
+  {id:12,name:'アイスティー',nameEn:'Iced Tea',category:'cold',visible:true},
+  {id:13,name:'冷緑茶',nameEn:'Iced Green Tea',category:'cold',visible:true},
+  {id:14,name:'冷ジャスミン茶',nameEn:'Iced Jasmine Tea',category:'cold',visible:true},
+  {id:15,name:'お水',nameEn:'Water',category:'cold',visible:true},
+  {id:16,name:'ゆず蜂蜜ティー',nameEn:'Yuzu Honey Tea',category:'hot',visible:true},
+  {id:17,name:'ホットココア',nameEn:'Hot Cocoa',category:'hot',visible:true},
+];
 
 // ===== データページ =====
 function getDateList(days, offsetDays){
