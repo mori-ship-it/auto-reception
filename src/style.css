@@ -432,3 +432,9 @@ body {
 }
 .stat-label { font-family:'DM Sans',sans-serif; font-size:10px; color:var(--text-muted); letter-spacing:0.08em; margin-bottom:2px; }
 .stat-val { font-family:'DM Sans',sans-serif; font-size:20px; font-weight:500; }
+
+.admin-panel { display: none; }
+.admin-panel.active { display: block; }
+
+.edit-panel { display: none; }
+.edit-panel.active { display: block; }
