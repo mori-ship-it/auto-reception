@@ -1197,7 +1197,8 @@ function renderDrinkMenu(){
           +'<div class="toggle '+(vis?'on':'off')+'" onclick="toggleDrinkVisible('+d.id+')"><div class="toggle-knob"></div></div>'
           +'<div style="flex:1;min-width:0;'+(vis?'':'opacity:0.4;')+'">'
           +'<input class="admin-field" style="margin:0 0 2px;padding:3px 6px;font-size:13px;font-weight:500;" value="'+d.name.replace(/"/g,'&quot;')+'" oninput="updateDrinkField('+d.id+',\'name\',this.value)">'
-          +'<div style="display:flex;gap:4px;align-items:center;"><input class="admin-field" style="margin:0;padding:2px 6px;font-size:10px;flex:1;font-family:DM Sans,sans-serif;" value="'+(d.nameEn||'').replace(/"/g,'&quot;')+'" placeholder="EN" oninput="updateDrinkField('+d.id+',\'nameEn\',this.value)"><span style="font-size:9px;color:var(--text-muted);flex-shrink:0;">'+catLabel+'</span></div>'
+          +'<div style="display:flex;gap:4px;align-items:center;"><input class="admin-field" style="margin:0;padding:2px 6px;font-size:10px;flex:1;font-family:DM Sans,sans-serif;" value="'+(d.nameEn||'').replace(/"/g,'&quot;')+'" placeholder="EN" oninput="updateDrinkField('+d.id+',\'nameEn\',this.value)">'
+          +'<span onclick="toggleDrinkCategory('+d.id+')" style="font-family:DM Sans,sans-serif;font-size:9px;padding:2px 8px;border-radius:50px;cursor:pointer;flex-shrink:0;color:#fff;background:'+(d.category==='hot'?'#D85A30':'var(--accent)')+';letter-spacing:0.04em;">'+catLabel+'</span></div>'
           +'</div>'
           +'<button class="del-btn" onclick="removeDrinkItem('+d.id+')">×</button>'
           +'</div>';
@@ -1265,6 +1266,12 @@ window.addDrinkItem = function(){
 window.toggleDrinkVisible = function(id){
   markDirty();
   drinkMenu = drinkMenu.map(function(d){ return d.id===id ? Object.assign({},d,{visible:d.visible===false?true:false}) : d; });
+  renderDrinkMenu();
+};
+
+window.toggleDrinkCategory = function(id){
+  markDirty();
+  drinkMenu = drinkMenu.map(function(d){ return d.id===id ? Object.assign({},d,{category:d.category==='hot'?'cold':'hot'}) : d; });
   renderDrinkMenu();
 };
 
