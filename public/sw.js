@@ -1,4 +1,4 @@
-const CACHE_NAME = 'reception-v2';
+const CACHE_NAME = 'reception-v3';
 const ASSETS = ['/'];
 
 self.addEventListener('install', e => {
