@@ -1060,3 +1060,18 @@ function renderAnalyticsUI(entries, range){
   }
 
 }
+
+window.onInlineEdit = function(el){
+  var field = el.getAttribute('data-field');
+  if(field && custom[field] !== undefined){
+    custom[field] = el.textContent;
+    document.querySelectorAll('[data-field="'+field+'"]').forEach(function(other){
+      if(other !== el) other.textContent = el.textContent;
+    });
+  }
+};
+window.onInlineBlur = function(el){
+  var field = el.getAttribute('data-field');
+  if(field && custom[field] !== undefined) custom[field] = (el.textContent||'').trim();
+  applyCustom();
+};
