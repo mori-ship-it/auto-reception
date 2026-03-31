@@ -316,6 +316,12 @@ function checkPin(){
 
 // ===== HOME =====
 function openHomePanel(){
+  document.querySelectorAll('.amt').forEach(function(b){b.classList.remove('active')});
+  document.querySelectorAll('.admin-panel').forEach(function(p){p.classList.remove('active')});
+  var settingsTab = document.querySelector('[data-amt="admin-settings"]');
+  if(settingsTab) settingsTab.classList.add('active');
+  var settingsPanel = document.getElementById('admin-settings');
+  if(settingsPanel) settingsPanel.classList.add('active');
   document.getElementById('webhookInput').value=webhookUrl;
   document.getElementById('botTokenInput').value=botToken;
   document.getElementById('c-salonName').value=custom.salonName;
