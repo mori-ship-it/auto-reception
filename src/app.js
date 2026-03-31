@@ -388,7 +388,13 @@ function populatePreview(){
     if(custom[field] !== undefined) el.textContent = custom[field];
   });
 }
-function closeHome(){document.getElementById('homeScreen').classList.remove('active');}
+var _adminDirty = false;
+function markDirty(){ _adminDirty = true; }
+function closeHome(){
+  if(_adminDirty && !confirm('設定内容を保存していません。管理画面を閉じますか？')) return;
+  _adminDirty = false;
+  var hs=document.getElementById('homeScreen'); if(hs) hs.classList.remove('active');
+}
 function saveAll(){
   const g=id=>document.getElementById(id)?.value.trim()||'';
   if(g('c-salonName'))custom.salonName=g('c-salonName');
@@ -408,6 +414,7 @@ function saveAll(){
   showToast('保存中...');
   autoTranslateCustom().then(()=>{
     saveToStorage();
+    _adminDirty = false;
     showToast('保存しました');
   });
 }
@@ -648,7 +655,8 @@ async function loadFromStorage(){
       }
     }
     // Firestore に drinkMenu がなければデフォルト（初期値）を保存
-    if(!snap.exists || !snap.data().drinkMenu || !snap.data().drinkMenu.length){
+    var fsMenu = snap.exists ? snap.data().drinkMenu : null;
+    if(!fsMenu || !Array.isArray(fsMenu) || fsMenu.length === 0){
       saveToStorage();
     }
     // ログ読み込み（新パス → 旧パスフォールバック）
@@ -1139,6 +1147,7 @@ function renderAnalyticsUI(entries, range){
 }
 
 window.onInlineEdit = function(el){
+  markDirty();
   var field = el.getAttribute('data-field');
   if(field && custom[field] !== undefined){
     custom[field] = el.textContent;
@@ -1155,6 +1164,7 @@ window.onInlineBlur = function(el){
 
 // ===== ドリンクメニュー管理 =====
 window.toggleDrinkMenu = function(){
+  markDirty();
   drinkEnabled = !drinkEnabled;
   var toggle = document.getElementById('drinkToggle');
   if(toggle) toggle.className = 'toggle '+(drinkEnabled?'on':'off');
@@ -1235,6 +1245,7 @@ window.switchDrinkPreview = function(cat){
 };
 
 window.addDrinkItem = function(){
+  markDirty();
   var nameEl = document.getElementById('newDrinkName'); if(!nameEl) return;
   var name = nameEl.value.trim(); if(!name) return;
   var nameEnEl = document.getElementById('newDrinkNameEn');
@@ -1252,16 +1263,19 @@ window.addDrinkItem = function(){
 };
 
 window.toggleDrinkVisible = function(id){
+  markDirty();
   drinkMenu = drinkMenu.map(function(d){ return d.id===id ? Object.assign({},d,{visible:d.visible===false?true:false}) : d; });
   renderDrinkMenu();
 };
 
 window.updateDrinkField = function(id, field, val){
+  markDirty();
   drinkMenu = drinkMenu.map(function(d){ if(d.id===id){var u=Object.assign({},d);u[field]=val;return u;} return d; });
   renderDrinkPreview();
 };
 
 window.removeDrinkItem = function(id){
+  markDirty();
   drinkMenu = drinkMenu.filter(function(d){ return d.id !== id; });
   renderDrinkMenu();
 };
