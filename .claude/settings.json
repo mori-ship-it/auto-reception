@@ -1,0 +1,1 @@
+{"permissions":{"allow":["Bash(npm run *)","Bash(git *)","Read","Write","Edit"],"deny":["Bash(rm -rf *)","Read(./.env)","Read(./.env.*)"]}}
