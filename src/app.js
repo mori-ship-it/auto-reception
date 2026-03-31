@@ -339,8 +339,15 @@ function openHomePanel(){
   _s('c-pleaseWaitVendor',custom.pleaseWaitVendor);
   _s('c-coming',custom.coming);
   _s('c-pin','');
+  populatePreview();
   renderAdminStaff(); renderLog();
   var hs=document.getElementById('homeScreen'); if(hs) hs.classList.add('active');
+}
+function populatePreview(){
+  document.querySelectorAll('[contenteditable][data-field]').forEach(function(el){
+    var field = el.dataset.field;
+    if(custom[field] !== undefined) el.textContent = custom[field];
+  });
 }
 function closeHome(){document.getElementById('homeScreen').classList.remove('active');}
 function saveAll(){
