@@ -228,6 +228,13 @@
         <div class="toggle" id="drinkToggle" onclick="toggleDrinkMenu()"><div class="toggle-knob"></div></div>
       </div>
       <div id="drinkAdminBody" style="display:none;">
+        <div class="preview-frame" style="margin-bottom:16px;">
+          <div style="background:var(--bg);border-radius:12px;padding:20px 16px;min-height:200px;">
+            <div style="text-align:center;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--accent);letter-spacing:0.1em;margin-bottom:12px;">Drink Menu</div>
+            <div id="drinkPreviewTabs" style="display:flex;justify-content:center;gap:6px;margin-bottom:14px;"></div>
+            <div id="drinkPreviewGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+          </div>
+        </div>
         <div id="drinkMenuList" style="margin-bottom:12px;"></div>
         <div style="display:flex;gap:6px;align-items:center;">
           <input class="admin-field" id="newDrinkName" placeholder="ドリンク名" style="margin:0;flex:2;">

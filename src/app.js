@@ -1131,25 +1131,64 @@ function initDrinkAdmin(){
   if(drinkEnabled) renderDrinkMenu();
 }
 
+var _drinkPreviewCat = 'hot';
+
 function renderDrinkMenu(){
   var el = document.getElementById('drinkMenuList');
-  if(!el) return;
-  if(!drinkMenu.length){
-    el.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:8px 0;">メニューがありません</div>';
+  if(el){
+    if(!drinkMenu.length){
+      el.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:8px 0;">メニューがありません</div>';
+    } else {
+      el.innerHTML = drinkMenu.map(function(d){
+        var catLabel = d.category==='hot'?'HOT':'COLD';
+        return '<div class="staff-card" draggable="true" data-drink-id="'+d.id+'" ondragstart="onDrinkDragStart(event,'+d.id+')" ondragover="onDrinkDragOver(event)" ondrop="onDrinkDrop(event,'+d.id+')" ondragend="onDrinkDragEnd(event)" style="padding:8px 12px;">'
+          +'<div style="cursor:grab;color:var(--text-muted);font-size:16px;padding:0 4px;flex-shrink:0;">⠿</div>'
+          +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-size:13px;font-weight:500;">'+d.name+'</div>'
+          +'<div style="font-size:10px;color:var(--text-muted);font-family:DM Sans,sans-serif;">'+(d.nameEn||'')+' · '+catLabel+'</div>'
+          +'</div>'
+          +'<button class="del-btn" onclick="removeDrinkItem('+d.id+')">×</button>'
+          +'</div>';
+      }).join('');
+    }
+  }
+  renderDrinkPreview();
+}
+
+function renderDrinkPreview(){
+  var tabs = document.getElementById('drinkPreviewTabs');
+  var grid = document.getElementById('drinkPreviewGrid');
+  if(!tabs || !grid) return;
+
+  var cats = [];
+  var seen = {};
+  drinkMenu.forEach(function(d){ if(!seen[d.category]){seen[d.category]=true;cats.push(d.category);} });
+  if(!cats.length){ tabs.innerHTML=''; grid.innerHTML='<div style="text-align:center;font-size:11px;color:var(--text-muted);grid-column:1/-1;padding:20px 0;">メニュー未登録</div>'; return; }
+  if(!seen[_drinkPreviewCat]) _drinkPreviewCat = cats[0];
+
+  tabs.innerHTML = cats.map(function(c){
+    var label = c==='hot'?'HOT':c==='cold'?'COLD':c;
+    var active = c===_drinkPreviewCat;
+    return '<button onclick="switchDrinkPreview(\''+c+'\')" style="font-family:DM Sans,sans-serif;font-size:10px;padding:4px 14px;border-radius:50px;border:1px solid '+(active?'var(--accent)':'var(--glass-border)')+';background:'+(active?'var(--accent)':'var(--glass)')+';color:'+(active?'#fff':'var(--text-muted)')+';cursor:pointer;letter-spacing:0.06em;">'+label+'</button>';
+  }).join('');
+
+  var items = drinkMenu.filter(function(d){ return d.category===_drinkPreviewCat; });
+  if(!items.length){
+    grid.innerHTML = '<div style="text-align:center;font-size:11px;color:var(--text-muted);grid-column:1/-1;padding:16px 0;">このカテゴリにメニューはありません</div>';
     return;
   }
-  el.innerHTML = drinkMenu.map(function(d){
-    var catLabel = d.category==='hot'?'HOT':'COLD';
-    return '<div class="staff-card" draggable="true" data-drink-id="'+d.id+'" ondragstart="onDrinkDragStart(event,'+d.id+')" ondragover="onDrinkDragOver(event)" ondrop="onDrinkDrop(event,'+d.id+')" ondragend="onDrinkDragEnd(event)" style="padding:8px 12px;">'
-      +'<div style="cursor:grab;color:var(--text-muted);font-size:16px;padding:0 4px;flex-shrink:0;">⠿</div>'
-      +'<div style="flex:1;min-width:0;">'
-      +'<div style="font-size:13px;font-weight:500;">'+d.name+'</div>'
-      +'<div style="font-size:10px;color:var(--text-muted);font-family:DM Sans,sans-serif;">'+(d.nameEn||'')+' · '+catLabel+'</div>'
-      +'</div>'
-      +'<button class="del-btn" onclick="removeDrinkItem('+d.id+')">×</button>'
+  grid.innerHTML = items.map(function(d){
+    return '<div style="background:var(--surface);border:1px solid var(--glass-border);border-radius:10px;padding:14px 8px;text-align:center;">'
+      +'<div style="font-size:12px;font-weight:500;">'+d.name+'</div>'
+      +(d.nameEn?'<div style="font-family:DM Sans,sans-serif;font-size:9px;color:var(--text-muted);margin-top:2px;letter-spacing:0.04em;">'+d.nameEn+'</div>':'')
       +'</div>';
   }).join('');
 }
+
+window.switchDrinkPreview = function(cat){
+  _drinkPreviewCat = cat;
+  renderDrinkPreview();
+};
 
 window.addDrinkItem = function(){
   var nameEl = document.getElementById('newDrinkName'); if(!nameEl) return;
