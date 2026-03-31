@@ -184,12 +184,12 @@ function applyLang(){
     const el = document.getElementById('t-'+k);
     if(el) el.innerHTML = tx(k);
   });
-  document.getElementById('nameInput').placeholder = tx('name-ph');
-  document.getElementById('errMsg').textContent = tx('err');
-  document.getElementById('stylistSearch').placeholder = tx('search-ph');
-  document.getElementById('langBtn').value = lang;
+  const ni=document.getElementById('nameInput'); if(ni) ni.placeholder = tx('name-ph');
+  const em=document.getElementById('errMsg'); if(em) em.textContent = tx('err');
+  const ss=document.getElementById('stylistSearch'); if(ss) ss.placeholder = tx('search-ph');
+  const lb=document.getElementById('langBtn'); if(lb) lb.value = lang;
   applyCustom(); renderLog();
-  onStylistSearch(document.getElementById('stylistSearch').value);
+  if(ss) onStylistSearch(ss.value);
 }
 
 function applyCustom(){
@@ -358,7 +358,7 @@ function saveAll(){
   const wh=g('webhookInput'); if(wh)webhookUrl=wh;
   const bt=g('botTokenInput'); if(bt)botToken=bt;
   applyCustom();
-  document.getElementById('homeScreen').classList.remove('active');
+  var hs=document.getElementById('homeScreen'); if(hs) hs.classList.remove('active');
   showToast('保存中...');
   autoTranslateCustom().then(()=>{
     saveToStorage();
@@ -454,14 +454,15 @@ function updateStaff(id,key,val){staffList=staffList.map(s=>s.id===id?{...s,[key
 function updateSlackId(id,val){updateStaff(id,'slackId',val);}
 function removeStaff(id){staffList=staffList.filter(s=>s.id!==id);renderAdminStaff();}
 function addStaff(){
-  const name=document.getElementById('newName').value.trim();
-  const nameEn=document.getElementById('newNameEn').value.trim();
-  const role=document.getElementById('newRole').value;
+  const nn=document.getElementById('newName'); if(!nn) return;
+  const name=nn.value.trim();
+  const ne=document.getElementById('newNameEn');
+  const nameEn=ne?ne.value.trim():'';
+  const nr=document.getElementById('newRole');
+  const role=nr?nr.value:'スタイリスト';
   if(!name)return;
   staffList.push({id:nextStaffId++,name,nameEn,role,on:true,slackId:'',photo:''});
-  document.getElementById('newName').value='';
-  document.getElementById('newNameEn').value='';
-  document.getElementById('newRole').value='スタイリスト';
+  nn.value=''; if(ne) ne.value=''; if(nr) nr.value='スタイリスト';
   renderAdminStaff(); showToast(`${name} を追加しました`);
 }
 function uploadPhoto(id,input){
