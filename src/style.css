@@ -233,13 +233,13 @@ body {
 
 /* ══ PREVIEW FRAME ══ */
 .preview-frame {
-  border-radius:22px; overflow:hidden; border:2px solid #c8ccd4;
-  background:#2a2a2e; position:relative; padding:10px;
-  box-shadow:0 4px 20px rgba(0,0,0,.08), inset 0 1px 0 rgba(255,255,255,.06);
+  border-radius:22px; overflow:hidden; border:2px solid #d8dbe2;
+  background:#e8eaee; position:relative; padding:10px;
+  box-shadow:0 4px 20px rgba(0,0,0,.06);
 }
 .preview-frame::before {
   content:''; display:block; width:6px; height:6px; border-radius:50%;
-  background:#555; margin:0 auto 8px; opacity:.6;
+  background:#c0c4cc; margin:0 auto 8px;
 }
 .preview-frame > * { border-radius:14px; overflow:hidden; }
 .preview-panel { display:none; flex-direction:column; width:100%; min-height:340px; }
