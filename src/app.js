@@ -637,7 +637,7 @@ async function loadFromStorage(){
       if(d.botToken)botToken=d.botToken;
       if(d.staffList)staffList=d.staffList;
       if(d.nextStaffId)nextStaffId=d.nextStaffId;
-      if(d.drinkMenu)drinkMenu=d.drinkMenu;
+      if(d.drinkMenu&&d.drinkMenu.length)drinkMenu=d.drinkMenu;
       if(d.drinkEnabled!==undefined)drinkEnabled=d.drinkEnabled;
       if(drinkMenu.length){nextDrinkId=Math.max.apply(null,drinkMenu.map(function(x){return x.id;}))+1;}
       if(d.txCache){
@@ -647,11 +647,8 @@ async function loadFromStorage(){
         if(d.txCache.es) Object.assign(TX.es, d.txCache.es);
       }
     }
-    // drinkMenu が空ならデフォルトをセットして保存
-    if(!drinkMenu.length){
-      drinkMenu = defaultDrinkMenu.map(function(d){return Object.assign({},d);});
-      drinkEnabled = true;
-      nextDrinkId = 18;
+    // Firestore に drinkMenu がなければデフォルト（初期値）を保存
+    if(!snap.exists || !snap.data().drinkMenu || !snap.data().drinkMenu.length){
       saveToStorage();
     }
     // ログ読み込み（新パス → 旧パスフォールバック）
