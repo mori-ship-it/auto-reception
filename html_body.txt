@@ -133,7 +133,7 @@
 <div class="home-screen" id="homeScreen">
   <div class="home-hd">
     <div class="home-hd-title">管理画面</div>
-    <button onclick="saveAll()" style="font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.06em;padding:5px 12px;border-radius:50px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;">保存</button>
+    <button onclick="saveAll()" style="font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.06em;padding:6px 14px;border-radius:50px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;height:30px;line-height:1;">設定を保存する</button>
     <button class="icon-btn" style="opacity:1;" onclick="closeHome()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>

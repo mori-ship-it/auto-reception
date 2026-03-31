@@ -1215,7 +1215,8 @@ function renderDrinkPreview(){
   tabs.innerHTML = cats.map(function(c){
     var label = c==='hot'?'HOT':c==='cold'?'COLD':c;
     var active = c===_drinkPreviewCat;
-    return '<button onclick="switchDrinkPreview(\''+c+'\')" style="font-family:DM Sans,sans-serif;font-size:10px;padding:4px 14px;border-radius:50px;border:1px solid '+(active?'var(--accent)':'var(--glass-border)')+';background:'+(active?'var(--accent)':'var(--glass)')+';color:'+(active?'#fff':'var(--text-muted)')+';cursor:pointer;letter-spacing:0.06em;">'+label+'</button>';
+    var activeColor = c==='hot'?'#D85A30':'var(--accent)';
+    return '<button onclick="switchDrinkPreview(\''+c+'\')" style="font-family:DM Sans,sans-serif;font-size:10px;padding:4px 14px;border-radius:50px;border:1px solid '+(active?activeColor:'var(--glass-border)')+';background:'+(active?activeColor:'var(--glass)')+';color:'+(active?'#fff':'var(--text-muted)')+';cursor:pointer;letter-spacing:0.06em;">'+label+'</button>';
   }).join('');
 
   var items = visibleMenu.filter(function(d){ return d.category===_drinkPreviewCat; });

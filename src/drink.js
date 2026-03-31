@@ -64,7 +64,7 @@ function renderTabs(){
   if(!seen[currentCategory]) currentCategory = categories[0];
   el.innerHTML = categories.map(function(cat){
     var label = cat==='hot'?'HOT':cat==='cold'?'COLD':cat;
-    return '<button class="tab'+(cat===currentCategory?' active':'')+'" data-cat="'+cat+'">'+label+'</button>';
+    return '<button class="tab '+cat+(cat===currentCategory?' active':'')+'" data-cat="'+cat+'">'+label+'</button>';
   }).join('');
   el.querySelectorAll('.tab').forEach(function(btn){
     btn.addEventListener('click', function(){
