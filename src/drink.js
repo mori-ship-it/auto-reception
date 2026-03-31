@@ -91,9 +91,26 @@ function renderMenu(){
     card.addEventListener('click', function(){
       var id = parseInt(card.dataset.id);
       var item = drinkMenu.find(function(d){ return d.id===id; });
-      if(item) orderDrink(item);
+      if(item) showConfirm(item);
     });
   });
+}
+
+// ===== Confirm =====
+var _pendingItem = null;
+
+function showConfirm(item){
+  _pendingItem = item;
+  var name = document.getElementById('confirmName');
+  if(name) name.textContent = '【'+item.name+'】';
+  var bg = document.getElementById('confirmBg');
+  if(bg) bg.classList.add('active');
+}
+
+function hideConfirm(){
+  _pendingItem = null;
+  var bg = document.getElementById('confirmBg');
+  if(bg) bg.classList.remove('active');
 }
 
 // ===== Order =====
@@ -162,3 +179,9 @@ initSeat();
 loadData();
 var callBtn = document.getElementById('callStaffBtn');
 if(callBtn) callBtn.addEventListener('click', callStaff);
+var confirmYes = document.getElementById('confirmYes');
+if(confirmYes) confirmYes.addEventListener('click', function(){ if(_pendingItem){ var item=_pendingItem; hideConfirm(); orderDrink(item); } });
+var confirmNo = document.getElementById('confirmNo');
+if(confirmNo) confirmNo.addEventListener('click', hideConfirm);
+var confirmBg = document.getElementById('confirmBg');
+if(confirmBg) confirmBg.addEventListener('click', function(e){ if(e.target===confirmBg) hideConfirm(); });

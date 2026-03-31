@@ -93,6 +93,27 @@ body{
 }
 .call-btn:active{transform:translateX(-50%) scale(0.96);}
 .overlay .icon.call{background:rgba(90,106,150,.12);color:var(--accent);}
+.confirm-bg{
+  position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.35);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.2s;
+}
+.confirm-bg.active{opacity:1;pointer-events:auto;}
+.confirm-card{
+  background:#fff;border-radius:16px;padding:28px 24px 20px;
+  width:min(300px,85vw);text-align:center;
+  box-shadow:0 8px 32px rgba(0,0,0,.12);
+}
+.confirm-card .confirm-name{font-size:17px;font-weight:500;margin-bottom:4px;}
+.confirm-card .confirm-msg{font-size:13px;color:var(--text-muted);margin-bottom:20px;}
+.confirm-btns{display:flex;gap:10px;}
+.confirm-btns button{
+  flex:1;padding:10px 0;border-radius:10px;font-size:13px;font-weight:500;
+  cursor:pointer;border:none;letter-spacing:0.04em;
+  font-family:'Shippori Mincho','Noto Sans JP',serif;
+}
+.confirm-btns .btn-yes{background:var(--accent);color:#fff;}
+.confirm-btns .btn-no{background:var(--bg);color:var(--text-muted);border:1px solid var(--glass-border);}
 </style>
 </head>
 <body>
@@ -119,6 +140,16 @@ body{
   <div class="icon wait"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
   <div class="msg">しばらくお待ちください</div>
   <div class="sub" id="limitSub"></div>
+</div>
+<div class="confirm-bg" id="confirmBg">
+  <div class="confirm-card">
+    <div class="confirm-name" id="confirmName"></div>
+    <div class="confirm-msg">を注文しますか？</div>
+    <div class="confirm-btns">
+      <button class="btn-no" id="confirmNo">いいえ</button>
+      <button class="btn-yes" id="confirmYes">はい</button>
+    </div>
+  </div>
 </div>
 <button class="call-btn" id="callStaffBtn">スタッフを呼ぶ</button>
 <script type="module" src="/src/drink.js"></script>
