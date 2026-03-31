@@ -327,20 +327,20 @@ function openHomePanel(){
   if(settingsTab) settingsTab.classList.add('active');
   var settingsPanel = document.getElementById('admin-settings');
   if(settingsPanel) settingsPanel.classList.add('active');
-  document.getElementById('webhookInput').value=webhookUrl;
-  document.getElementById('botTokenInput').value=botToken;
-  document.getElementById('c-salonName').value=custom.salonName;
-  document.getElementById('c-welcome').value=custom.welcome;
-  document.getElementById('c-welcomeSub').value=custom.welcomeSub;
-  document.getElementById('c-checkinDone').value=custom.checkinDone;
-  document.getElementById('c-pleaseWait').value=custom.pleaseWait;
-  document.getElementById('c-pleaseWaitWalkin').value=custom.pleaseWaitWalkin;
-  document.getElementById('c-pleaseWaitVendor').value=custom.pleaseWaitVendor;
-  document.getElementById('c-coming').value=custom.coming;
-  document.getElementById('c-pin').value='';
+  var _s = function(id,val){ var e=document.getElementById(id); if(e) e.value=val; };
+  _s('webhookInput',webhookUrl);
+  _s('botTokenInput',botToken);
+  _s('c-salonName',custom.salonName);
+  _s('c-welcome',custom.welcome);
+  _s('c-welcomeSub',custom.welcomeSub);
+  _s('c-checkinDone',custom.checkinDone);
+  _s('c-pleaseWait',custom.pleaseWait);
+  _s('c-pleaseWaitWalkin',custom.pleaseWaitWalkin);
+  _s('c-pleaseWaitVendor',custom.pleaseWaitVendor);
+  _s('c-coming',custom.coming);
+  _s('c-pin','');
   renderAdminStaff(); renderLog();
-  document.getElementById('homeScreen').classList.add('active');
-  switchDataPeriod('today');
+  var hs=document.getElementById('homeScreen'); if(hs) hs.classList.add('active');
 }
 function closeHome(){document.getElementById('homeScreen').classList.remove('active');}
 function saveAll(){
@@ -401,6 +401,7 @@ let dragSrcId = null;
 
 function renderAdminStaff(){
   const el=document.getElementById('adminStaffList');
+  if(!el) return;
   el.innerHTML=staffList.map(s=>`
     <div class="staff-card" draggable="true" data-id="${s.id}"
       ondragstart="onDragStart(event,${s.id})"
@@ -478,6 +479,7 @@ function addLog(name,type,stylist){
 }
 function renderLog(){
   const el=document.getElementById('logContainer');
+  if(!el) return;
   if(!visitLog.length){el.innerHTML=`<div class="log-empty">${tx('log-empty')}</div>`;return;}
   el.innerHTML=visitLog.map(l=>{
     const badge=tx('log-'+l.type);
@@ -520,6 +522,7 @@ function dateLabel(){const d=new Date();return `${d.getMonth()+1}/${d.getDate()}
 function nowFull(){const d=new Date();return `${dateLabel()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;}
 function showToast(msg){
   const el=document.getElementById('toast');
+  if(!el) return;
   el.textContent=msg; el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'),2500);
 }
@@ -618,10 +621,12 @@ async function loadLogEntries(dateStr){
 function switchDataPeriod(period, btnEl){
   currentDataPeriod = period;
   const row = document.getElementById('dataPeriodRow');
+  if(!row) return;
   row.querySelectorAll('.data-pill').forEach(b=>b.classList.remove('active'));
   if(btnEl) btnEl.classList.add('active');
-  else row.querySelector('.data-pill').classList.add('active');
-  document.getElementById('dataContent').innerHTML='<div class="log-empty">読み込み中...</div>';
+  else{ const f=row.querySelector('.data-pill'); if(f) f.classList.add('active'); }
+  const dc=document.getElementById('dataContent');
+  if(dc) dc.innerHTML='<div class="log-empty">読み込み中...</div>';
   loadDataForPeriod(period);
 }
 
@@ -654,6 +659,7 @@ function parseHour(entry){
 
 function renderDataContent(entries, period, prevCount, days){
   const el = document.getElementById('dataContent');
+  if(!el) return;
   const total = entries.length;
 
   // 種別集計
