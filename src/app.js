@@ -1170,6 +1170,8 @@ window.toggleDrinkMenu = function(){
   if(toggle) toggle.className = 'toggle '+(drinkEnabled?'on':'off');
   var body = document.getElementById('drinkAdminBody');
   if(body) body.style.display = drinkEnabled ? '' : 'none';
+  var offMsg = document.getElementById('drinkOffMsg');
+  if(offMsg) offMsg.style.display = drinkEnabled ? 'none' : '';
   if(drinkEnabled) renderDrinkMenu();
 };
 
@@ -1178,6 +1180,8 @@ function initDrinkAdmin(){
   if(toggle) toggle.className = 'toggle '+(drinkEnabled?'on':'off');
   var body = document.getElementById('drinkAdminBody');
   if(body) body.style.display = drinkEnabled ? '' : 'none';
+  var offMsg = document.getElementById('drinkOffMsg');
+  if(offMsg) offMsg.style.display = drinkEnabled ? 'none' : '';
   if(drinkEnabled) renderDrinkMenu();
 }
 
