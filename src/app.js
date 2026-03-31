@@ -61,8 +61,12 @@ const TX = {
     'err':'お名前を入力してから次へを押してください',
     'checkin-done':'受付が完了しました',
     'please-wait':'お席にお座りになってお待ちください',
+    'please-wait2':'お席にお座りになってお待ちください',
     'please-wait-walkin':'お席にお座りになってお待ちください',
+    'please-wait3':'お席にお座りになってお待ちください',
+    'please-wait4':'お席にお座りになってお待ちください',
     'please-wait-vendor':'そのままお待ちください',
+    'please-wait5':'そのままお待ちください',
     'coming':'スタッフが参ります','coming2':'スタッフが参ります',
     'coming3':'スタッフが参ります','coming-vendor':'スタッフが参ります',
     'wait-here':'そのままお待ちください','wait-here2':'そのままお待ちください',
@@ -86,8 +90,12 @@ const TX = {
     'err':'Please enter your name before continuing',
     'checkin-done':'Check-in complete',
     'please-wait':'Please have a seat and wait',
+    'please-wait2':'Please have a seat and wait',
     'please-wait-walkin':'Please have a seat and wait',
+    'please-wait3':'Please have a seat and wait',
+    'please-wait4':'Please have a seat and wait',
     'please-wait-vendor':'Please wait here',
+    'please-wait5':'Please wait here',
     'coming':'Staff is on the way','coming2':'Staff is on the way',
     'coming3':'Staff is on the way','coming-vendor':'Staff is on the way',
     'wait-here':'Please wait here','wait-here2':'Please wait here',
@@ -111,8 +119,12 @@ const TX = {
     'err':'请输入姓名后再继续',
     'checkin-done':'办理完成',
     'please-wait':'请就座等候',
+    'please-wait2':'请就座等候',
     'please-wait-walkin':'请就座等候',
+    'please-wait3':'请就座等候',
+    'please-wait4':'请就座等候',
     'please-wait-vendor':'请在此等候',
+    'please-wait5':'请在此等候',
     'coming':'工作人员马上到','coming2':'工作人员马上到',
     'coming3':'工作人员马上到','coming-vendor':'工作人员马上到',
     'wait-here':'请在此等候','wait-here2':'请在此等候',
@@ -136,8 +148,12 @@ const TX = {
     'err':'성함을 입력한 후 다음을 눌러주세요',
     'checkin-done':'체크인 완료',
     'please-wait':'자리에 앉아서 기다려 주세요',
+    'please-wait2':'자리에 앉아서 기다려 주세요',
     'please-wait-walkin':'자리에 앉아서 기다려 주세요',
+    'please-wait3':'자리에 앉아서 기다려 주세요',
+    'please-wait4':'자리에 앉아서 기다려 주세요',
     'please-wait-vendor':'그 자리에서 기다려 주세요',
+    'please-wait5':'그 자리에서 기다려 주세요',
     'coming':'직원이 곧 갑니다','coming2':'직원이 곧 갑니다',
     'coming3':'직원이 곧 갑니다','coming-vendor':'직원이 곧 갑니다',
     'wait-here':'그 자리에서 기다려 주세요','wait-here2':'그 자리에서 기다려 주세요',
@@ -161,8 +177,12 @@ const TX = {
     'err':'Por favor ingrese su nombre antes de continuar',
     'checkin-done':'Registro completado',
     'please-wait':'Por favor tome asiento y espere',
+    'please-wait2':'Por favor tome asiento y espere',
     'please-wait-walkin':'Por favor tome asiento y espere',
+    'please-wait3':'Por favor tome asiento y espere',
+    'please-wait4':'Por favor tome asiento y espere',
     'please-wait-vendor':'Por favor espere aquí',
+    'please-wait5':'Por favor espere aquí',
     'coming':'El personal viene en camino','coming2':'El personal viene en camino',
     'coming3':'El personal viene en camino','coming-vendor':'El personal viene en camino',
     'wait-here':'Por favor espere aquí','wait-here2':'Por favor espere aquí',
@@ -392,6 +412,16 @@ async function autoTranslateCustom(){
         const data = await res.json();
         const translated = data[0].map(x=>x[0]).join('');
         TX[tl][keys[i]] = translated;
+        if(keys[i]==='please-wait'){
+          TX[tl]['please-wait2']=translated;
+        }
+        if(keys[i]==='please-wait-walkin'){
+          TX[tl]['please-wait3']=translated;
+          TX[tl]['please-wait4']=translated;
+        }
+        if(keys[i]==='please-wait-vendor'){
+          TX[tl]['please-wait5']=translated;
+        }
         if(keys[i]==='coming'){
           TX[tl]['coming2']=translated;
           TX[tl]['coming3']=translated;
