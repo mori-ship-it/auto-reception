@@ -83,6 +83,16 @@ body{
 .overlay .msg{font-size:20px;font-weight:500;margin-bottom:8px;}
 .overlay .sub{font-size:13px;color:var(--text-muted);}
 .empty{text-align:center;padding:40px 16px;color:var(--text-muted);font-size:13px;}
+.call-btn{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:10;
+  font-family:'Shippori Mincho','Noto Sans JP',serif;font-size:13px;font-weight:500;
+  padding:10px 28px;border-radius:50px;border:1px solid var(--glass-border);
+  background:var(--surface);color:var(--accent);cursor:pointer;
+  backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  box-shadow:0 4px 16px rgba(0,0,0,.08);transition:transform 0.15s;letter-spacing:0.06em;
+}
+.call-btn:active{transform:translateX(-50%) scale(0.96);}
+.overlay .icon.call{background:rgba(90,106,150,.12);color:var(--accent);}
 </style>
 </head>
 <body>
@@ -95,11 +105,22 @@ body{
   <div class="msg">ご注文を承りました</div>
   <div class="sub">スタッフがお届けします</div>
 </div>
+<div class="overlay" id="callOverlay">
+  <div class="icon call"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+  <div class="msg">スタッフが参ります</div>
+  <div class="sub">そのままお待ちください</div>
+</div>
+<div class="overlay" id="callLimitOverlay">
+  <div class="icon wait"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+  <div class="msg">しばらくお待ちください</div>
+  <div class="sub" id="callLimitSub"></div>
+</div>
 <div class="overlay" id="limitOverlay">
   <div class="icon wait"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
   <div class="msg">しばらくお待ちください</div>
   <div class="sub" id="limitSub"></div>
 </div>
+<button class="call-btn" id="callStaffBtn">スタッフを呼ぶ</button>
 <script type="module" src="/src/drink.js"></script>
 </body>
 </html>

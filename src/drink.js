@@ -134,6 +134,31 @@ function showOverlay(id, duration){
   setTimeout(function(){ el.classList.remove('active'); }, duration);
 }
 
+// ===== Call Staff =====
+async function callStaff(){
+  var lastCall = parseInt(localStorage.getItem(`${STORE_ID}_call_last`)||'0');
+  var now = Date.now();
+  if(now - lastCall < LIMIT_MS){
+    var remaining = Math.ceil((LIMIT_MS - (now - lastCall)) / 60000);
+    var sub = document.getElementById('callLimitSub');
+    if(sub) sub.textContent = 'あと約'+remaining+'分お待ちください';
+    showOverlay('callLimitOverlay', 3000);
+    return;
+  }
+  localStorage.setItem(`${STORE_ID}_call_last`, String(now));
+  var seatLabel = seat ? '席'+seat : '不明席';
+  var storeName = salonName || STORE_ID;
+  var msg = '\uD83D\uDD14 '+seatLabel+' - スタッフ呼び出し（'+storeName+'）';
+  if(webhookUrl){
+    try{
+      await fetch(webhookUrl, {method:'POST', body:JSON.stringify({text:msg})});
+    }catch(e){ console.warn('Slack error:', e); }
+  }
+  showOverlay('callOverlay', 5000);
+}
+
 // ===== Init =====
 initSeat();
 loadData();
+var callBtn = document.getElementById('callStaffBtn');
+if(callBtn) callBtn.addEventListener('click', callStaff);
