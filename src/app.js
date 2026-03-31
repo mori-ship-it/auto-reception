@@ -805,7 +805,7 @@ window.switchEditTab = function(btn) {
   if(!p) return;
   p.querySelectorAll('.edit-tab').forEach(function(t){t.classList.remove('active')});
   btn.classList.add('active');
-  p.querySelectorAll('.edit-panel').forEach(function(el){el.classList.remove('active')});
+  p.querySelectorAll('.preview-panel').forEach(function(el){el.classList.remove('active')});
   var panel = document.getElementById(btn.getAttribute('data-tab'));
   if(panel) panel.classList.add('active');
 };
