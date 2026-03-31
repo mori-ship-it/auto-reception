@@ -133,6 +133,7 @@
 <div class="home-screen" id="homeScreen">
   <div class="home-hd">
     <div class="home-hd-title">管理画面</div>
+    <button onclick="saveAll()" style="font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.06em;padding:5px 12px;border-radius:50px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;">保存</button>
     <button class="icon-btn" style="opacity:1;" onclick="closeHome()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
@@ -184,7 +185,6 @@
     <div class="admin-section"><span class="admin-label">PINコード</span><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">4桁の数字を入力</div><input class="admin-field" id="c-pin" placeholder="新しいPINコードを入力" maxlength="4" type="tel" style="letter-spacing:0.3em;"></div>
     <div class="admin-section"><span class="admin-label">Slack 設定</span><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">Webhook URL</div><input class="admin-field" id="webhookInput" placeholder="https://hooks.slack.com/services/..."><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">Bot Token</div><input class="admin-field" id="botTokenInput" placeholder="xoxb-..."></div>
     <div class="admin-section"><span class="admin-label">スタッフ管理</span><div id="adminStaffList" style="margin-bottom:12px;"></div><div class="admin-row"><input class="admin-field" id="newName" placeholder="名前（日本語）" style="margin:0;flex:2;"><input class="admin-field" id="newNameEn" placeholder="Name (EN)" style="margin:0;flex:2;"><select class="admin-field" id="newRole" style="margin:0;flex:1;"><option value="スタイリスト">スタイリスト</option><option value="アシスタント">アシスタント</option></select><button class="admin-btn" onclick="addStaff()">追加</button></div></div>
-    <div style="padding:16px 0 40px;"><button class="btn btn-fill" style="max-width:100%;" onclick="saveAll()">すべて保存して閉じる</button></div>
   </div>
 
   <!-- ══ データ ══ -->
