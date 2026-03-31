@@ -558,7 +558,7 @@ async function saveToStorage(){
       staffList:staffList, nextStaffId:nextStaffId,
       txCache: {en: TX.en, zh: TX.zh, ko: TX.ko, es: TX.es},
     });
-    await db.collection('logs').doc(today()).set({ entries: visitLog });
+    await db.collection('logs').doc(STORE_ID+'_'+today()).set({ entries: visitLog }, {merge: true});
   }catch(e){ console.warn('Storage error:', e); }
 }
 
@@ -589,10 +589,147 @@ async function loadFromStorage(){
         if(d.txCache.es) Object.assign(TX.es, d.txCache.es);
       }
     }
-    var logSnap = await db.collection('logs').doc(today()).get();
+    var logSnap = await db.collection('logs').doc(STORE_ID+'_'+today()).get();
+    if(!logSnap.exists) logSnap = await db.collection('logs').doc(today()).get();
     if(logSnap.exists&&logSnap.data().entries) visitLog=logSnap.data().entries;
     applyLang();
   }catch(e){ console.warn('Storage load error:', e); applyLang(); }
+}
+
+// ===== データ分析 =====
+var currentDataPeriod = 'today';
+
+function logDocId(dateStr){ return STORE_ID+'_'+dateStr; }
+
+function getDateList(days, offsetDays){
+  var list = [];
+  var start = offsetDays || 0;
+  for(var i=start; i<start+days; i++){
+    var d = new Date();
+    d.setDate(d.getDate()-i);
+    list.push(d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate());
+  }
+  return list;
+}
+
+async function loadLogEntries(dateStr){
+  if(!db) return [];
+  try{
+    var snap = await db.collection('logs').doc(logDocId(dateStr)).get();
+    if(!snap.exists) snap = await db.collection('logs').doc(dateStr).get();
+    if(snap.exists && snap.data().entries) return snap.data().entries;
+  }catch(e){}
+  return [];
+}
+
+function switchDataPeriod(period, btnEl){
+  currentDataPeriod = period;
+  var row = document.getElementById('dataPeriodRow');
+  if(!row) return;
+  row.querySelectorAll('.data-pill').forEach(function(b){b.classList.remove('active');});
+  if(btnEl) btnEl.classList.add('active');
+  else{ var first=row.querySelector('.data-pill'); if(first) first.classList.add('active'); }
+  var dc = document.getElementById('dataContent');
+  if(dc) dc.innerHTML='<div class="log-empty">読み込み中...</div>';
+  loadDataForPeriod(period);
+}
+
+async function loadDataForPeriod(period){
+  var days = period==='today'?1 : period==='week'?7 : 30;
+  var entries = [];
+  var prevCount = 0;
+
+  if(period==='today'){
+    entries = visitLog.slice();
+    var yesterday = getDateList(1,1)[0];
+    var yEntries = await loadLogEntries(yesterday);
+    prevCount = yEntries.length;
+  } else {
+    var dates = getDateList(days);
+    var results = await Promise.all(dates.map(function(d){return loadLogEntries(d);}));
+    results.forEach(function(r){ entries = entries.concat(r); });
+  }
+
+  renderDataContent(entries, period, prevCount, days);
+}
+
+function parseHour(entry){
+  if(!entry.time) return -1;
+  var parts = entry.time.split(' ');
+  var timePart = parts.length>1 ? parts[1] : parts[0];
+  var h = parseInt(timePart.split(':')[0]);
+  return isNaN(h) ? -1 : h;
+}
+
+function renderDataContent(entries, period, prevCount, days){
+  var el = document.getElementById('dataContent');
+  if(!el) return;
+  var total = entries.length;
+  var types = {reserved:0, walkin:0, vendor:0, call:0};
+  entries.forEach(function(e){ if(types[e.type]!==undefined) types[e.type]++; });
+
+  var hours = {};
+  for(var h=9;h<=20;h++) hours[h]=0;
+  entries.forEach(function(e){
+    var hr = parseHour(e);
+    if(hr>=9&&hr<=20) hours[hr]++;
+  });
+  var maxHourCount = Math.max.apply(null, Object.keys(hours).map(function(k){return hours[k];}));
+  if(maxHourCount<1) maxHourCount=1;
+
+  var peakHour = -1, peakCount = 0;
+  Object.keys(hours).forEach(function(hk){
+    if(hours[hk]>peakCount){peakCount=hours[hk];peakHour=parseInt(hk);}
+  });
+
+  var stylistMap = {};
+  entries.forEach(function(e){
+    if(e.type==='reserved'){
+      var key = e.stylist || '指名なし';
+      stylistMap[key] = (stylistMap[key]||0)+1;
+    }
+  });
+  var stylistRanking = Object.keys(stylistMap).map(function(k){return [k,stylistMap[k]];}).sort(function(a,b){return b[1]-a[1];});
+  var maxStylistCount = stylistRanking.length ? stylistRanking[0][1] : 1;
+
+  var compareLabel, compareValue, compareColor;
+  if(period==='today'){
+    var diff = total - prevCount;
+    compareLabel = '前日比';
+    compareValue = (diff>=0?'+':'')+diff;
+    compareColor = diff>=0 ? 'var(--success)' : 'var(--danger)';
+  } else {
+    var avg = days>0 ? (total/days).toFixed(1) : '0';
+    compareLabel = '1日平均';
+    compareValue = avg;
+    compareColor = 'var(--text)';
+  }
+
+  var html = '';
+  html += '<div class="data-summary"><div class="data-card"><div class="data-card-label">'+(period==='today'?'本日の来店数':days+'日間の来店数')+'</div><div class="data-card-value">'+total+'</div></div><div class="data-card"><div class="data-card-label">'+compareLabel+'</div><div class="data-card-value" style="color:'+compareColor+'">'+compareValue+'</div></div></div>';
+  html += '<div class="data-sub-label">種別内訳</div><div class="data-types"><div class="data-type-card" style="background:rgba(90,106,150,.08);"><div class="data-type-num" style="color:#3a4a70;">'+types.reserved+'</div><div class="data-type-name" style="color:#5a6a96;">予約</div></div><div class="data-type-card" style="background:rgba(184,144,64,.08);"><div class="data-type-num" style="color:#8a6820;">'+types.walkin+'</div><div class="data-type-name" style="color:#b89040;">飛び込み</div></div><div class="data-type-card" style="background:rgba(80,136,160,.08);"><div class="data-type-num" style="color:#3a6878;">'+types.vendor+'</div><div class="data-type-name" style="color:#5088a0;">業者</div></div><div class="data-type-card" style="background:rgba(160,96,96,.08);"><div class="data-type-num" style="color:#8a4040;">'+types.call+'</div><div class="data-type-name" style="color:#c45050;">呼び出し</div></div></div>';
+  if(peakHour>=0 && peakCount>0){
+    html += '<div class="data-peak"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span>ピーク：'+peakHour+'時台（'+peakCount+'件）</span></div>';
+  }
+  html += '<div class="data-sub-label">時間帯別</div><div class="data-hours">';
+  for(var hh=9;hh<=20;hh++){
+    var pct = maxHourCount>0 ? (hours[hh]/maxHourCount*100) : 0;
+    var isPeak = (hh===peakHour && peakCount>0);
+    html += '<div class="data-hour-col"><div class="data-hour-bar-wrap"><div class="data-hour-bar'+(isPeak?' peak':'')+'" style="height:'+Math.max(pct,2)+'%"></div></div><div class="data-hour-label">'+hh+'</div></div>';
+  }
+  html += '</div>';
+  if(stylistRanking.length){
+    html += '<div class="data-sub-label">スタイリスト別</div><div class="data-stylists">';
+    stylistRanking.forEach(function(item){
+      var name=item[0], count=item[1];
+      var spct = (count/maxStylistCount*100);
+      var isNone = name==='指名なし';
+      html += '<div class="data-stylist-row"><div class="data-stylist-name'+(isNone?' muted':'')+'">'+name+'</div><div class="data-stylist-bar-wrap"><div class="data-stylist-bar'+(isNone?' none':'')+'" style="width:'+spct+'%"></div></div><div class="data-stylist-count">'+count+'</div></div>';
+    });
+    html += '</div>';
+  }
+  if(total===0){ html = '<div class="log-empty">この期間のデータはありません</div>'; }
+  el.innerHTML = html;
 }
 
 // ===== グローバル公開 =====
@@ -609,7 +746,8 @@ var _fns = {
   saveCustom:saveCustom, saveWebhook:saveWebhook,
   saveBotToken:saveBotToken, savePin:savePin, toggleLang:toggleLang,
   onDragStart:onDragStart, onDragOver:onDragOver, onDrop:onDrop, onDragEnd:onDragEnd,
-  switchEditTab:switchEditTab, onInlineEdit:onInlineEdit, onInlineBlur:onInlineBlur
+  switchEditTab:switchEditTab, onInlineEdit:onInlineEdit, onInlineBlur:onInlineBlur,
+  switchDataPeriod:switchDataPeriod
 };
 Object.keys(_fns).forEach(function(k){ window[k] = _fns[k]; });
 
