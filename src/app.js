@@ -47,9 +47,25 @@ let custom = {
 
 let staffList = [];
 let nextStaffId = 1;
-let drinkMenu = [];
-let drinkEnabled = false;
-let nextDrinkId = 1;
+let drinkMenu = [
+  {id:1,name:'ホットコーヒー',nameEn:'Hot Coffee',category:'hot',visible:true},
+  {id:2,name:'カプチーノ',nameEn:'Cappuccino',category:'hot',visible:true},
+  {id:3,name:'カフェラテ',nameEn:'Cafe Latte',category:'hot',visible:true},
+  {id:4,name:'エスプレッソ',nameEn:'Espresso',category:'hot',visible:true},
+  {id:5,name:'紅茶',nameEn:'Black Tea',category:'hot',visible:true},
+  {id:6,name:'緑茶',nameEn:'Green Tea',category:'hot',visible:true},
+  {id:7,name:'ジャスミン茶',nameEn:'Jasmine Tea',category:'hot',visible:true},
+  {id:8,name:'アイスコーヒー',nameEn:'Iced Coffee',category:'cold',visible:true},
+  {id:9,name:'アイスカプチーノ',nameEn:'Iced Cappuccino',category:'cold',visible:true},
+  {id:10,name:'アイスカフェラテ',nameEn:'Iced Cafe Latte',category:'cold',visible:true},
+  {id:11,name:'アイスエスプレッソ',nameEn:'Iced Espresso',category:'cold',visible:true},
+  {id:12,name:'アイスティー',nameEn:'Iced Tea',category:'cold',visible:true},
+  {id:13,name:'冷緑茶',nameEn:'Iced Green Tea',category:'cold',visible:true},
+  {id:14,name:'冷ジャスミン茶',nameEn:'Iced Jasmine Tea',category:'cold',visible:true},
+  {id:15,name:'お水',nameEn:'Water',category:'cold',visible:true},
+];
+let drinkEnabled = true;
+let nextDrinkId = 16;
 
 // ===== i18n =====
 const TX = {
@@ -1141,9 +1157,11 @@ function renderDrinkMenu(){
     } else {
       el.innerHTML = drinkMenu.map(function(d){
         var catLabel = d.category==='hot'?'HOT':'COLD';
+        var vis = d.visible!==false;
         return '<div class="staff-card" draggable="true" data-drink-id="'+d.id+'" ondragstart="onDrinkDragStart(event,'+d.id+')" ondragover="onDrinkDragOver(event)" ondrop="onDrinkDrop(event,'+d.id+')" ondragend="onDrinkDragEnd(event)" style="padding:8px 12px;">'
           +'<div style="cursor:grab;color:var(--text-muted);font-size:16px;padding:0 4px;flex-shrink:0;">⠿</div>'
-          +'<div style="flex:1;min-width:0;">'
+          +'<div class="toggle '+(vis?'on':'off')+'" onclick="toggleDrinkVisible('+d.id+')"><div class="toggle-knob"></div></div>'
+          +'<div style="flex:1;min-width:0;'+(vis?'':'opacity:0.4;')+'">'
           +'<div style="font-size:13px;font-weight:500;">'+d.name+'</div>'
           +'<div style="font-size:10px;color:var(--text-muted);font-family:DM Sans,sans-serif;">'+(d.nameEn||'')+' · '+catLabel+'</div>'
           +'</div>'
@@ -1160,9 +1178,10 @@ function renderDrinkPreview(){
   var grid = document.getElementById('drinkPreviewGrid');
   if(!tabs || !grid) return;
 
+  var visibleMenu = drinkMenu.filter(function(d){ return d.visible!==false; });
   var cats = [];
   var seen = {};
-  drinkMenu.forEach(function(d){ if(!seen[d.category]){seen[d.category]=true;cats.push(d.category);} });
+  visibleMenu.forEach(function(d){ if(!seen[d.category]){seen[d.category]=true;cats.push(d.category);} });
   if(!cats.length){ tabs.innerHTML=''; grid.innerHTML='<div style="text-align:center;font-size:11px;color:var(--text-muted);grid-column:1/-1;padding:20px 0;">メニュー未登録</div>'; return; }
   if(!seen[_drinkPreviewCat]) _drinkPreviewCat = cats[0];
 
@@ -1172,7 +1191,7 @@ function renderDrinkPreview(){
     return '<button onclick="switchDrinkPreview(\''+c+'\')" style="font-family:DM Sans,sans-serif;font-size:10px;padding:4px 14px;border-radius:50px;border:1px solid '+(active?'var(--accent)':'var(--glass-border)')+';background:'+(active?'var(--accent)':'var(--glass)')+';color:'+(active?'#fff':'var(--text-muted)')+';cursor:pointer;letter-spacing:0.06em;">'+label+'</button>';
   }).join('');
 
-  var items = drinkMenu.filter(function(d){ return d.category===_drinkPreviewCat; });
+  var items = visibleMenu.filter(function(d){ return d.category===_drinkPreviewCat; });
   if(!items.length){
     grid.innerHTML = '<div style="text-align:center;font-size:11px;color:var(--text-muted);grid-column:1/-1;padding:16px 0;">このカテゴリにメニューはありません</div>';
     return;
@@ -1199,11 +1218,17 @@ window.addDrinkItem = function(){
     id: nextDrinkId++,
     name: name,
     nameEn: nameEnEl ? nameEnEl.value.trim() : '',
-    category: catEl ? catEl.value : 'hot'
+    category: catEl ? catEl.value : 'hot',
+    visible: true
   });
   nameEl.value = ''; if(nameEnEl) nameEnEl.value = '';
   renderDrinkMenu();
   showToast(name+' を追加しました');
+};
+
+window.toggleDrinkVisible = function(id){
+  drinkMenu = drinkMenu.map(function(d){ return d.id===id ? Object.assign({},d,{visible:d.visible===false?true:false}) : d; });
+  renderDrinkMenu();
 };
 
 window.removeDrinkItem = function(id){

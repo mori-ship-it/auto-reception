@@ -57,7 +57,7 @@ function renderTabs(){
   if(!el) return;
   const categories = [];
   const seen = {};
-  drinkMenu.forEach(function(d){
+  drinkMenu.filter(function(d){ return d.visible!==false; }).forEach(function(d){
     if(!seen[d.category]){ seen[d.category]=true; categories.push(d.category); }
   });
   if(!categories.length){ el.innerHTML=''; return; }
@@ -79,7 +79,7 @@ function renderTabs(){
 function renderMenu(){
   const el = document.getElementById('menuGrid');
   if(!el) return;
-  const items = drinkMenu.filter(function(d){ return d.category === currentCategory; });
+  const items = drinkMenu.filter(function(d){ return d.category === currentCategory && d.visible !== false; });
   if(!items.length){
     el.innerHTML = '<div class="empty">メニューがありません</div>';
     return;
