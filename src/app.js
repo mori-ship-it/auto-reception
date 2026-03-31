@@ -1,7 +1,7 @@
 // ===== FIREBASE CONFIG =====
 // ===== FIREBASE INIT (遅延) =====
 let db;
-const STORE_ID = import.meta.env.VITE_STORE_ID || 'muuk-hiratsuka';
+const STORE_ID = 'muuk-hiratsuka';
 document.addEventListener('DOMContentLoaded', () => {
   const firebaseConfig = {
     apiKey: "AIzaSyDopvxzyHEcm8KChamvVVaN9YVxHCamGx0",
@@ -28,6 +28,7 @@ let selectedStylist = null;
 let visitLog = [];
 let cdTimer = null;
 let current = 's1';
+let currentDataPeriod = 'today';
 
 let custom = {
   salonName:'SALON', welcome:'いらっしゃいませ',
@@ -39,13 +40,8 @@ let custom = {
   coming:'スタッフが参ります', waitHere:'そのままお待ちください',
 };
 
-let staffList = [
-  {id:1,name:'田中 美咲',nameEn:'Misaki Tanaka',role:'スタイリスト',on:true,slackId:'',photo:''},
-  {id:2,name:'鈴木 健太',nameEn:'Kenta Suzuki',role:'スタイリスト',on:true,slackId:'',photo:''},
-  {id:3,name:'山本 さくら',nameEn:'Sakura Yamamoto',role:'スタイリスト',on:false,slackId:'',photo:''},
-  {id:4,name:'佐藤 りな',nameEn:'Rina Sato',role:'アシスタント',on:true,slackId:'',photo:''},
-];
-let nextStaffId = 5;
+let staffList = [];
+let nextStaffId = 1;
 
 // ===== i18n =====
 const TX = {
@@ -333,6 +329,7 @@ function openHomePanel(){
   document.getElementById('c-pin').value='';
   renderAdminStaff(); renderLog();
   document.getElementById('homeScreen').classList.add('active');
+  switchDataPeriod('today');
 }
 function closeHome(){document.getElementById('homeScreen').classList.remove('active');}
 function saveAll(){
@@ -516,37 +513,47 @@ function showToast(msg){
   setTimeout(()=>el.classList.remove('show'),2500);
 }
 
+// ===== Firestoreログキー（STORE_ID付き） =====
+function logDocId(dateStr){ return `${STORE_ID}_${dateStr}`; }
+
 async function saveToStorage(){
   try{
-    localStorage.setItem('salon_custom', JSON.stringify(custom));
-    localStorage.setItem('salon_pin', pinCode);
-    localStorage.setItem('salon_webhook', webhookUrl);
-    localStorage.setItem('salon_bottoken', botToken);
-    localStorage.setItem('salon_staff', JSON.stringify(staffList));
-    localStorage.setItem('salon_nextid', nextStaffId);
-    const logKey = 'salon_log_' + today();
+    localStorage.setItem(`${STORE_ID}_custom`, JSON.stringify(custom));
+    localStorage.setItem(`${STORE_ID}_pin`, pinCode);
+    localStorage.setItem(`${STORE_ID}_webhook`, webhookUrl);
+    localStorage.setItem(`${STORE_ID}_bottoken`, botToken);
+    localStorage.setItem(`${STORE_ID}_staff`, JSON.stringify(staffList));
+    localStorage.setItem(`${STORE_ID}_nextid`, nextStaffId);
+    const logKey = `${STORE_ID}_log_${today()}`;
     localStorage.setItem(logKey, JSON.stringify(visitLog));
     if(!db) return;
     await db.collection('salon').doc(STORE_ID).set({
       custom, pinCode, webhookUrl, botToken,
       staffList, nextStaffId,
       txCache: {en: TX.en, zh: TX.zh, ko: TX.ko, es: TX.es},
-    });
-    await db.collection('logs').doc(today()).set({ entries: visitLog });
+    }, {merge: true});
+    await db.collection('logs').doc(logDocId(today())).set({ entries: visitLog }, {merge: true});
   }catch(e){ console.warn('Storage error:', e); }
 }
 
 async function loadFromStorage(){
   try{
-    // まずlocalStorageから即時反映
-    const c=localStorage.getItem('salon_custom'); if(c)Object.assign(custom,JSON.parse(c));
-    const p=localStorage.getItem('salon_pin'); if(p)pinCode=p;
-    const w=localStorage.getItem('salon_webhook'); if(w)webhookUrl=w;
-    const b=localStorage.getItem('salon_bottoken'); if(b)botToken=b;
-    const s=localStorage.getItem('salon_staff'); if(s)staffList=JSON.parse(s);
-    const ni=localStorage.getItem('salon_nextid'); if(ni)nextStaffId=parseInt(ni);
-    const logKey='salon_log_'+today();
-    const l=localStorage.getItem(logKey); if(l)visitLog=JSON.parse(l);
+    // まずlocalStorageから即時反映（新キー → 旧キーフォールバック）
+    const c=localStorage.getItem(`${STORE_ID}_custom`)||localStorage.getItem('salon_custom');
+    if(c)Object.assign(custom,JSON.parse(c));
+    const p=localStorage.getItem(`${STORE_ID}_pin`)||localStorage.getItem('salon_pin');
+    if(p)pinCode=p;
+    const w=localStorage.getItem(`${STORE_ID}_webhook`)||localStorage.getItem('salon_webhook');
+    if(w)webhookUrl=w;
+    const b=localStorage.getItem(`${STORE_ID}_bottoken`)||localStorage.getItem('salon_bottoken');
+    if(b)botToken=b;
+    const s=localStorage.getItem(`${STORE_ID}_staff`)||localStorage.getItem('salon_staff');
+    if(s)staffList=JSON.parse(s);
+    const ni=localStorage.getItem(`${STORE_ID}_nextid`)||localStorage.getItem('salon_nextid');
+    if(ni)nextStaffId=parseInt(ni);
+    const logKey=`${STORE_ID}_log_${today()}`;
+    const l=localStorage.getItem(logKey)||localStorage.getItem('salon_log_'+today());
+    if(l)visitLog=JSON.parse(l);
     applyLang();
     // Firestoreから最新データを取得して上書き
     const snap = await db.collection('salon').doc(STORE_ID).get();
@@ -565,11 +572,205 @@ async function loadFromStorage(){
         if(d.txCache.es) Object.assign(TX.es, d.txCache.es);
       }
     }
-    const logSnap = await db.collection('logs').doc(today()).get();
+    // ログ読み込み（新パス → 旧パスフォールバック）
+    let logSnap = await db.collection('logs').doc(logDocId(today())).get();
+    if(!logSnap.exists) logSnap = await db.collection('logs').doc(today()).get();
     if(logSnap.exists&&logSnap.data().entries) visitLog=logSnap.data().entries;
     applyLang();
   }catch(e){ console.warn('Storage load error:', e); applyLang(); }
 }
+
+// ===== データページ =====
+function getDateList(days, offsetDays){
+  const list = [];
+  const start = offsetDays || 0;
+  for(let i=start; i<start+days; i++){
+    const d = new Date();
+    d.setDate(d.getDate()-i);
+    list.push(`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`);
+  }
+  return list;
+}
+
+async function loadLogEntries(dateStr){
+  if(!db) return [];
+  try{
+    let snap = await db.collection('logs').doc(logDocId(dateStr)).get();
+    if(!snap.exists) snap = await db.collection('logs').doc(dateStr).get();
+    if(snap.exists && snap.data().entries) return snap.data().entries;
+  }catch(e){}
+  return [];
+}
+
+function switchDataPeriod(period, btnEl){
+  currentDataPeriod = period;
+  const row = document.getElementById('dataPeriodRow');
+  row.querySelectorAll('.data-pill').forEach(b=>b.classList.remove('active'));
+  if(btnEl) btnEl.classList.add('active');
+  else row.querySelector('.data-pill').classList.add('active');
+  document.getElementById('dataContent').innerHTML='<div class="log-empty">読み込み中...</div>';
+  loadDataForPeriod(period);
+}
+
+async function loadDataForPeriod(period){
+  const days = period==='today'?1 : period==='week'?7 : 30;
+  let entries = [];
+  let prevCount = 0;
+
+  if(period==='today'){
+    entries = [...visitLog];
+    const yesterday = getDateList(1,1)[0];
+    const yEntries = await loadLogEntries(yesterday);
+    prevCount = yEntries.length;
+  } else {
+    const dates = getDateList(days);
+    const results = await Promise.all(dates.map(d=>loadLogEntries(d)));
+    results.forEach(r => entries.push(...r));
+  }
+
+  renderDataContent(entries, period, prevCount, days);
+}
+
+function parseHour(entry){
+  if(!entry.time) return -1;
+  const parts = entry.time.split(' ');
+  const timePart = parts.length>1 ? parts[1] : parts[0];
+  const h = parseInt(timePart.split(':')[0]);
+  return isNaN(h) ? -1 : h;
+}
+
+function renderDataContent(entries, period, prevCount, days){
+  const el = document.getElementById('dataContent');
+  const total = entries.length;
+
+  // 種別集計
+  const types = {reserved:0, walkin:0, vendor:0, call:0};
+  entries.forEach(e=>{ if(types[e.type]!==undefined) types[e.type]++; });
+
+  // 時間帯集計（9〜20時）
+  const hours = {};
+  for(let h=9;h<=20;h++) hours[h]=0;
+  entries.forEach(e=>{
+    const h = parseHour(e);
+    if(h>=9&&h<=20) hours[h]++;
+  });
+  const maxHourCount = Math.max(...Object.values(hours),1);
+
+  // ピーク時間帯
+  let peakHour = -1;
+  let peakCount = 0;
+  Object.entries(hours).forEach(([h,c])=>{
+    if(c>peakCount){peakCount=c;peakHour=parseInt(h);}
+  });
+
+  // スタイリスト集計
+  const stylistMap = {};
+  entries.forEach(e=>{
+    if(e.type==='reserved'){
+      const key = e.stylist || '指名なし';
+      stylistMap[key] = (stylistMap[key]||0)+1;
+    }
+  });
+  const stylistRanking = Object.entries(stylistMap).sort((a,b)=>b[1]-a[1]);
+  const maxStylistCount = stylistRanking.length ? stylistRanking[0][1] : 1;
+
+  // 比較カード
+  let compareLabel, compareValue, compareColor;
+  if(period==='today'){
+    const diff = total - prevCount;
+    compareLabel = '前日比';
+    compareValue = (diff>=0?'+':'')+diff;
+    compareColor = diff>=0 ? 'var(--success)' : 'var(--danger)';
+  } else {
+    const avg = days>0 ? (total/days).toFixed(1) : '0';
+    compareLabel = '1日平均';
+    compareValue = avg;
+    compareColor = 'var(--text)';
+  }
+
+  // HTML組み立て
+  let html = '';
+
+  // サマリーカード
+  html += `<div class="data-summary">
+    <div class="data-card">
+      <div class="data-card-label">${period==='today'?'本日の来店数':days+'日間の来店数'}</div>
+      <div class="data-card-value">${total}</div>
+    </div>
+    <div class="data-card">
+      <div class="data-card-label">${compareLabel}</div>
+      <div class="data-card-value" style="color:${compareColor}">${compareValue}</div>
+    </div>
+  </div>`;
+
+  // 種別内訳
+  html += `<div class="data-sub-label">種別内訳</div>
+  <div class="data-types">
+    <div class="data-type-card" style="background:rgba(90,106,150,.08);">
+      <div class="data-type-num" style="color:#3a4a70;">${types.reserved}</div>
+      <div class="data-type-name" style="color:#5a6a96;">予約</div>
+    </div>
+    <div class="data-type-card" style="background:rgba(184,144,64,.08);">
+      <div class="data-type-num" style="color:#8a6820;">${types.walkin}</div>
+      <div class="data-type-name" style="color:#b89040;">飛び込み</div>
+    </div>
+    <div class="data-type-card" style="background:rgba(80,136,160,.08);">
+      <div class="data-type-num" style="color:#3a6878;">${types.vendor}</div>
+      <div class="data-type-name" style="color:#5088a0;">業者</div>
+    </div>
+    <div class="data-type-card" style="background:rgba(160,96,96,.08);">
+      <div class="data-type-num" style="color:#8a4040;">${types.call}</div>
+      <div class="data-type-name" style="color:#c45050;">呼び出し</div>
+    </div>
+  </div>`;
+
+  // ピーク時間帯ハイライト
+  if(peakHour>=0 && peakCount>0){
+    html += `<div class="data-peak">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      <span>ピーク：${peakHour}時台（${peakCount}件）</span>
+    </div>`;
+  }
+
+  // 時間帯別バーチャート
+  html += `<div class="data-sub-label">時間帯別</div>
+  <div class="data-hours">`;
+  for(let h=9;h<=20;h++){
+    const pct = maxHourCount>0 ? (hours[h]/maxHourCount*100) : 0;
+    const isPeak = (h===peakHour && peakCount>0);
+    html += `<div class="data-hour-col">
+      <div class="data-hour-bar-wrap">
+        <div class="data-hour-bar${isPeak?' peak':''}" style="height:${Math.max(pct,2)}%"></div>
+      </div>
+      <div class="data-hour-label">${h}</div>
+    </div>`;
+  }
+  html += '</div>';
+
+  // スタイリスト別
+  if(stylistRanking.length){
+    html += '<div class="data-sub-label">スタイリスト別</div><div class="data-stylists">';
+    stylistRanking.forEach(([name,count])=>{
+      const pct = (count/maxStylistCount*100);
+      const isNone = name==='指名なし';
+      html += `<div class="data-stylist-row">
+        <div class="data-stylist-name${isNone?' muted':''}">${name}</div>
+        <div class="data-stylist-bar-wrap">
+          <div class="data-stylist-bar${isNone?' none':''}" style="width:${pct}%"></div>
+        </div>
+        <div class="data-stylist-count">${count}</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  if(total===0){
+    html = '<div class="log-empty">この期間のデータはありません</div>';
+  }
+
+  el.innerHTML = html;
+}
+
 // ===== グローバル公開（HTML onclick互換） =====
 const _fns = {
   goTo, submitName, doWalkin, doVendor, doCallStaff, skipStylist,
@@ -578,14 +779,14 @@ const _fns = {
   toggleStaff, updateStaff, updateSlackId, uploadPhoto,
   pinInput, pinDelete, showToast, saveCustom, saveWebhook,
   saveBotToken, savePin, toggleLang,
-  onDragStart, onDragOver, onDrop, onDragEnd
+  onDragStart, onDragOver, onDrop, onDragEnd,
+  switchDataPeriod
 };
 Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
 
 // ===== エラー監視 =====
 window.onerror = function(msg, src, line, col, err) {
   console.error('[Reception Error]', msg, src, line);
-  // 将来的にSlackやSentryに送信可能
 };
 window.addEventListener('unhandledrejection', function(e) {
   console.error('[Reception Promise Error]', e.reason);
