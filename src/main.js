@@ -1,4 +1,4 @@
-// ===== Firebase SDK (npm - バージョン固定・CDN不要) =====
+// ===== Firebase SDK (npm — バージョン固定・CDN不要) =====
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 
@@ -13,4 +13,4 @@ import htmlContent from '../html_body.txt?raw';
 document.getElementById('app').innerHTML = htmlContent;
 
 // ===== アプリロジック =====
-import '../app.js';
+import './app.js';
