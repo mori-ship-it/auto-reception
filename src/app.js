@@ -47,6 +47,9 @@ let custom = {
 
 let staffList = [];
 let nextStaffId = 1;
+let drinkMenu = [];
+let drinkEnabled = false;
+let nextDrinkId = 1;
 
 // ===== i18n =====
 const TX = {
@@ -360,7 +363,7 @@ function openHomePanel(){
   _s('c-coming',custom.coming);
   _s('c-pin','');
   populatePreview();
-  renderAdminStaff(); renderLog();
+  renderAdminStaff(); renderLog(); initDrinkAdmin();
   var hs=document.getElementById('homeScreen'); if(hs) hs.classList.add('active');
 }
 function populatePreview(){
@@ -582,6 +585,7 @@ async function saveToStorage(){
     await db.collection('salon').doc(STORE_ID).set({
       custom, pinCode, webhookUrl, botToken,
       staffList, nextStaffId,
+      drinkMenu, drinkEnabled,
       txCache: {en: TX.en, zh: TX.zh, ko: TX.ko, es: TX.es},
     }, {merge: true});
     await db.collection('logs').doc(logDocId(today())).set({ entries: visitLog }, {merge: true});
@@ -617,6 +621,9 @@ async function loadFromStorage(){
       if(d.botToken)botToken=d.botToken;
       if(d.staffList)staffList=d.staffList;
       if(d.nextStaffId)nextStaffId=d.nextStaffId;
+      if(d.drinkMenu)drinkMenu=d.drinkMenu;
+      if(d.drinkEnabled!==undefined)drinkEnabled=d.drinkEnabled;
+      if(drinkMenu.length){nextDrinkId=Math.max.apply(null,drinkMenu.map(function(x){return x.id;}))+1;}
       if(d.txCache){
         if(d.txCache.en) Object.assign(TX.en, d.txCache.en);
         if(d.txCache.zh) Object.assign(TX.zh, d.txCache.zh);
@@ -1105,3 +1112,76 @@ window.onInlineBlur = function(el){
   if(field && custom[field] !== undefined) custom[field] = (el.textContent||'').trim();
   applyCustom();
 };
+
+// ===== ドリンクメニュー管理 =====
+window.toggleDrinkMenu = function(){
+  drinkEnabled = !drinkEnabled;
+  var toggle = document.getElementById('drinkToggle');
+  if(toggle) toggle.className = 'toggle '+(drinkEnabled?'on':'off');
+  var body = document.getElementById('drinkAdminBody');
+  if(body) body.style.display = drinkEnabled ? '' : 'none';
+  if(drinkEnabled) renderDrinkMenu();
+};
+
+function initDrinkAdmin(){
+  var toggle = document.getElementById('drinkToggle');
+  if(toggle) toggle.className = 'toggle '+(drinkEnabled?'on':'off');
+  var body = document.getElementById('drinkAdminBody');
+  if(body) body.style.display = drinkEnabled ? '' : 'none';
+  if(drinkEnabled) renderDrinkMenu();
+}
+
+function renderDrinkMenu(){
+  var el = document.getElementById('drinkMenuList');
+  if(!el) return;
+  if(!drinkMenu.length){
+    el.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:8px 0;">メニューがありません</div>';
+    return;
+  }
+  el.innerHTML = drinkMenu.map(function(d){
+    var catLabel = d.category==='hot'?'HOT':'COLD';
+    return '<div class="staff-card" draggable="true" data-drink-id="'+d.id+'" ondragstart="onDrinkDragStart(event,'+d.id+')" ondragover="onDrinkDragOver(event)" ondrop="onDrinkDrop(event,'+d.id+')" ondragend="onDrinkDragEnd(event)" style="padding:8px 12px;">'
+      +'<div style="cursor:grab;color:var(--text-muted);font-size:16px;padding:0 4px;flex-shrink:0;">⠿</div>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-size:13px;font-weight:500;">'+d.name+'</div>'
+      +'<div style="font-size:10px;color:var(--text-muted);font-family:DM Sans,sans-serif;">'+(d.nameEn||'')+' · '+catLabel+'</div>'
+      +'</div>'
+      +'<button class="del-btn" onclick="removeDrinkItem('+d.id+')">×</button>'
+      +'</div>';
+  }).join('');
+}
+
+window.addDrinkItem = function(){
+  var nameEl = document.getElementById('newDrinkName'); if(!nameEl) return;
+  var name = nameEl.value.trim(); if(!name) return;
+  var nameEnEl = document.getElementById('newDrinkNameEn');
+  var catEl = document.getElementById('newDrinkCat');
+  drinkMenu.push({
+    id: nextDrinkId++,
+    name: name,
+    nameEn: nameEnEl ? nameEnEl.value.trim() : '',
+    category: catEl ? catEl.value : 'hot'
+  });
+  nameEl.value = ''; if(nameEnEl) nameEnEl.value = '';
+  renderDrinkMenu();
+  showToast(name+' を追加しました');
+};
+
+window.removeDrinkItem = function(id){
+  drinkMenu = drinkMenu.filter(function(d){ return d.id !== id; });
+  renderDrinkMenu();
+};
+
+var _drinkDragId = null;
+window.onDrinkDragStart = function(e, id){ _drinkDragId = id; e.currentTarget.style.opacity='0.4'; };
+window.onDrinkDragOver = function(e){ e.preventDefault(); };
+window.onDrinkDrop = function(e, targetId){
+  e.preventDefault();
+  if(_drinkDragId===targetId) return;
+  var fromIdx = drinkMenu.findIndex(function(d){return d.id===_drinkDragId;});
+  var toIdx = drinkMenu.findIndex(function(d){return d.id===targetId;});
+  var item = drinkMenu.splice(fromIdx,1)[0];
+  drinkMenu.splice(toIdx,0,item);
+  renderDrinkMenu();
+};
+window.onDrinkDragEnd = function(e){ e.currentTarget.style.opacity='1'; };

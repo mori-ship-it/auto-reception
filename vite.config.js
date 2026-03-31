@@ -7,6 +7,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         register: resolve(__dirname, 'register.html'),
+        drink: resolve(__dirname, 'drink.html'),
       }
     }
   }

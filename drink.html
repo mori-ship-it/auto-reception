@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#5a6a96">
+<title>ドリンク注文</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=DM+Sans:wght@300;400;500&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f0f2f6;
+  --surface: rgba(255,255,255,.65);
+  --glass: rgba(255,255,255,.55);
+  --glass-border: rgba(104,120,160,.12);
+  --glass-blur: blur(18px);
+  --accent: #5a6a96;
+  --text: #3a3a4a;
+  --text-muted: #8a8a9a;
+  --success: #6bcf8e;
+  --danger: #e07a7a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Shippori Mincho','Noto Sans JP',serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}
+.seat-badge{
+  position:fixed;top:12px;right:16px;z-index:10;
+  font-family:'DM Sans',sans-serif;font-size:11px;
+  color:var(--text-muted);letter-spacing:0.08em;
+}
+.header{
+  text-align:center;padding:32px 16px 8px;
+}
+.header h1{
+  font-size:18px;font-weight:500;letter-spacing:0.1em;color:var(--accent);
+}
+.tabs{
+  display:flex;justify-content:center;gap:8px;padding:12px 16px 16px;
+}
+.tab{
+  font-family:'DM Sans',sans-serif;font-size:12px;
+  padding:6px 20px;border-radius:50px;border:1px solid var(--glass-border);
+  background:var(--glass);color:var(--text-muted);cursor:pointer;
+  backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  transition:all 0.2s;letter-spacing:0.06em;
+}
+.tab.active{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+}
+.menu{
+  flex:1;padding:0 20px 40px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;
+  align-content:start;
+}
+.drink-card{
+  background:var(--surface);border:1px solid var(--glass-border);
+  border-radius:14px;padding:20px 12px;text-align:center;
+  backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;
+  box-shadow:0 2px 12px rgba(0,0,0,.04);
+}
+.drink-card:active{transform:scale(0.96);}
+.drink-name{font-size:15px;font-weight:500;margin-bottom:4px;}
+.drink-name-en{font-family:'DM Sans',sans-serif;font-size:10px;color:var(--text-muted);letter-spacing:0.06em;}
+.overlay{
+  position:fixed;inset:0;z-index:20;
+  background:rgba(240,242,246,.95);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
+.overlay.active{opacity:1;pointer-events:auto;}
+.overlay .icon{
+  width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+}
+.overlay .icon.ok{background:rgba(107,207,142,.15);color:var(--success);}
+.overlay .icon.wait{background:rgba(224,122,122,.15);color:var(--danger);}
+.overlay .msg{font-size:20px;font-weight:500;margin-bottom:8px;}
+.overlay .sub{font-size:13px;color:var(--text-muted);}
+.empty{text-align:center;padding:40px 16px;color:var(--text-muted);font-size:13px;}
+</style>
+</head>
+<body>
+<div class="seat-badge" id="seatBadge"></div>
+<div class="header"><h1>Drink Menu</h1></div>
+<div class="tabs" id="tabs"></div>
+<div class="menu" id="menuGrid"></div>
+<div class="overlay" id="doneOverlay">
+  <div class="icon ok"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+  <div class="msg">ご注文を承りました</div>
+  <div class="sub">スタッフがお届けします</div>
+</div>
+<div class="overlay" id="limitOverlay">
+  <div class="icon wait"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+  <div class="msg">しばらくお待ちください</div>
+  <div class="sub" id="limitSub"></div>
+</div>
+<script type="module" src="/src/drink.js"></script>
+</body>
+</html>

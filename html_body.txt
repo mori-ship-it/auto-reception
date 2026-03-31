@@ -140,6 +140,7 @@
   <div class="admin-main-tabs">
     <button class="amt active" data-amt="admin-settings" onclick="switchAdminTab(this)">設定</button>
     <button class="amt" data-amt="admin-analytics" onclick="switchAdminTab(this)">データ</button>
+    <button class="amt" data-amt="admin-drink" onclick="switchAdminTab(this)">ドリンク</button>
   </div>
 
   <!-- ══ 設定 ══ -->
@@ -217,6 +218,28 @@
     </div>
     <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">来店一覧</div>
     <div id="analyticsVisitList"></div>
+  </div>
+
+  <!-- ══ ドリンク ══ -->
+  <div class="home-body admin-panel" id="admin-drink">
+    <div class="admin-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <span class="admin-label" style="margin:0;">ドリンクメニュー</span>
+        <div class="toggle" id="drinkToggle" onclick="toggleDrinkMenu()"><div class="toggle-knob"></div></div>
+      </div>
+      <div id="drinkAdminBody" style="display:none;">
+        <div id="drinkMenuList" style="margin-bottom:12px;"></div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input class="admin-field" id="newDrinkName" placeholder="ドリンク名" style="margin:0;flex:2;">
+          <input class="admin-field" id="newDrinkNameEn" placeholder="Name (EN)" style="margin:0;flex:2;">
+          <select class="admin-field" id="newDrinkCat" style="margin:0;flex:1;">
+            <option value="hot">HOT</option>
+            <option value="cold">COLD</option>
+          </select>
+          <button class="admin-btn" onclick="addDrinkItem()">追加</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
