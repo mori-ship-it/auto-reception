@@ -57,19 +57,19 @@ body{
 }
 .menu{
   flex:1;padding:0 20px 40px;
-  display:grid;grid-template-columns:repeat(auto-fill,140px);gap:12px;
-  justify-content:center;align-content:start;
+  display:flex;flex-wrap:wrap;justify-content:center;gap:12px;
+  align-content:start;
 }
 .drink-card{
   background:var(--surface);border:1px solid var(--glass-border);
-  border-radius:14px;padding:20px 10px;text-align:center;width:140px;
+  border-radius:14px;padding:16px 24px;text-align:center;width:auto;
   backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
   cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;
   box-shadow:0 2px 12px rgba(0,0,0,.04);
 }
 .drink-card:active{transform:scale(0.96);}
-.drink-name{font-size:14px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.drink-name-en{font-family:'DM Sans',sans-serif;font-size:10px;color:var(--text-muted);letter-spacing:0.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.drink-name{font-size:14px;font-weight:500;margin-bottom:4px;white-space:nowrap;}
+.drink-name-en{font-family:'DM Sans',sans-serif;font-size:10px;color:var(--text-muted);letter-spacing:0.06em;white-space:nowrap;}
 .overlay{
   position:fixed;inset:0;z-index:20;
   background:rgba(240,242,246,.95);

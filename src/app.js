@@ -1235,9 +1235,9 @@ function renderDrinkPreview(){
     return;
   }
   grid.innerHTML = items.map(function(d){
-    return '<div style="background:var(--surface);border:1px solid var(--glass-border);border-radius:10px;padding:14px 8px;text-align:center;">'
-      +'<div style="font-size:12px;font-weight:500;">'+d.name+'</div>'
-      +(d.nameEn?'<div style="font-family:DM Sans,sans-serif;font-size:9px;color:var(--text-muted);margin-top:2px;letter-spacing:0.04em;">'+d.nameEn+'</div>':'')
+    return '<div style="background:var(--surface);border:1px solid var(--glass-border);border-radius:10px;padding:12px 16px;text-align:center;">'
+      +'<div style="font-size:12px;font-weight:500;white-space:nowrap;">'+d.name+'</div>'
+      +(d.nameEn?'<div style="font-family:DM Sans,sans-serif;font-size:9px;color:var(--text-muted);margin-top:2px;letter-spacing:0.04em;white-space:nowrap;">'+d.nameEn+'</div>':'')
       +'</div>';
   }).join('');
 }

@@ -234,7 +234,7 @@
         <div class="preview-frame" style="margin-bottom:16px;">
           <div style="background:var(--bg);border-radius:12px;padding:20px 16px;min-height:160px;">
             <div id="drinkPreviewTabs" style="display:flex;justify-content:center;gap:6px;margin-bottom:14px;"></div>
-            <div id="drinkPreviewGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+            <div id="drinkPreviewGrid" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;"></div>
           </div>
         </div>
         <div id="drinkMenuList" style="margin-bottom:12px;"></div>
