@@ -45,6 +45,12 @@ async function loadData(){
       if(d.webhookUrl) webhookUrl = d.webhookUrl;
       if(d.custom && d.custom.salonName) salonName = d.custom.salonName;
       if(d.drinkMenu) drinkMenu = d.drinkMenu;
+      if(d.drinkEnabled===false){
+        document.getElementById('tabs').innerHTML='';
+        document.getElementById('menuGrid').innerHTML='<div class="empty">現在ドリンクサービスは休止中です</div>';
+        var cb=document.getElementById('callStaffBtn'); if(cb) cb.style.display='none';
+        return;
+      }
     }
   }catch(e){ console.warn('Drink load error:', e); }
   renderTabs();

@@ -141,8 +141,8 @@
     </div>
   </div>
   <div class="admin-main-tabs">
-    <button class="amt active" data-amt="admin-settings" onclick="switchAdminTab(this)">設定</button>
-    <button class="amt" data-amt="admin-analytics" onclick="switchAdminTab(this)">データ</button>
+    <button class="amt active" data-amt="admin-settings" onclick="switchAdminTab(this)">通知設定</button>
+    <button class="amt" data-amt="admin-analytics" onclick="switchAdminTab(this)">来店データ</button>
     <button class="amt" data-amt="admin-drink" onclick="switchAdminTab(this)">ドリンク</button>
   </div>
 
@@ -225,14 +225,13 @@
   <!-- ══ ドリンク ══ -->
   <div class="home-body admin-panel" id="admin-drink">
     <div class="admin-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <span class="admin-label" style="margin:0;">ドリンクメニュー</span>
-        <div class="toggle" id="drinkToggle" onclick="toggleDrinkMenu()"><div class="toggle-knob"></div></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;">
+        <div style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--accent);letter-spacing:0.1em;">Drink Menu</div>
+        <div class="toggle" id="drinkToggle" onclick="toggleDrinkMenu()" style="flex-shrink:0;"><div class="toggle-knob"></div></div>
       </div>
       <div id="drinkAdminBody" style="display:none;">
         <div class="preview-frame" style="margin-bottom:16px;">
-          <div style="background:var(--bg);border-radius:12px;padding:20px 16px;min-height:200px;">
-            <div style="text-align:center;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--accent);letter-spacing:0.1em;margin-bottom:12px;">Drink Menu</div>
+          <div style="background:var(--bg);border-radius:12px;padding:20px 16px;min-height:160px;">
             <div id="drinkPreviewTabs" style="display:flex;justify-content:center;gap:6px;margin-bottom:14px;"></div>
             <div id="drinkPreviewGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
           </div>

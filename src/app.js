@@ -1186,8 +1186,8 @@ function renderDrinkMenu(){
           +'<div style="cursor:grab;color:var(--text-muted);font-size:16px;padding:0 4px;flex-shrink:0;">⠿</div>'
           +'<div class="toggle '+(vis?'on':'off')+'" onclick="toggleDrinkVisible('+d.id+')"><div class="toggle-knob"></div></div>'
           +'<div style="flex:1;min-width:0;'+(vis?'':'opacity:0.4;')+'">'
-          +'<div style="font-size:13px;font-weight:500;">'+d.name+'</div>'
-          +'<div style="font-size:10px;color:var(--text-muted);font-family:DM Sans,sans-serif;">'+(d.nameEn||'')+' · '+catLabel+'</div>'
+          +'<input class="admin-field" style="margin:0 0 2px;padding:3px 6px;font-size:13px;font-weight:500;" value="'+d.name.replace(/"/g,'&quot;')+'" oninput="updateDrinkField('+d.id+',\'name\',this.value)">'
+          +'<div style="display:flex;gap:4px;align-items:center;"><input class="admin-field" style="margin:0;padding:2px 6px;font-size:10px;flex:1;font-family:DM Sans,sans-serif;" value="'+(d.nameEn||'').replace(/"/g,'&quot;')+'" placeholder="EN" oninput="updateDrinkField('+d.id+',\'nameEn\',this.value)"><span style="font-size:9px;color:var(--text-muted);flex-shrink:0;">'+catLabel+'</span></div>'
           +'</div>'
           +'<button class="del-btn" onclick="removeDrinkItem('+d.id+')">×</button>'
           +'</div>';
@@ -1254,6 +1254,11 @@ window.addDrinkItem = function(){
 window.toggleDrinkVisible = function(id){
   drinkMenu = drinkMenu.map(function(d){ return d.id===id ? Object.assign({},d,{visible:d.visible===false?true:false}) : d; });
   renderDrinkMenu();
+};
+
+window.updateDrinkField = function(id, field, val){
+  drinkMenu = drinkMenu.map(function(d){ if(d.id===id){var u=Object.assign({},d);u[field]=val;return u;} return d; });
+  renderDrinkPreview();
 };
 
 window.removeDrinkItem = function(id){
