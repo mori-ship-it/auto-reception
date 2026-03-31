@@ -1,19 +1,24 @@
 // ===== FIREBASE CONFIG =====
-// ===== FIREBASE INIT (遅延) =====
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
+
 let db;
 const STORE_ID = import.meta.env.VITE_STORE_ID || 'muuk-hiratsuka';
+window.STORE_ID = STORE_ID;
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDopvxzyHEcm8KChamvVVaN9YVxHCamGx0",
+  authDomain: "salon-reception.firebaseapp.com",
+  projectId: "salon-reception",
+  storageBucket: "salon-reception.firebasestorage.app",
+  messagingSenderId: "931290276865",
+  appId: "1:931290276865:web:a855857799d47926d70c00",
+  measurementId: "G-BPDQTJ4KZ6"
+};
+firebase.initializeApp(firebaseConfig);
+db = firebase.firestore();
+
 document.addEventListener('DOMContentLoaded', () => {
-  const firebaseConfig = {
-    apiKey: "AIzaSyDopvxzyHEcm8KChamvVVaN9YVxHCamGx0",
-    authDomain: "salon-reception.firebaseapp.com",
-    projectId: "salon-reception",
-    storageBucket: "salon-reception.firebasestorage.app",
-    messagingSenderId: "931290276865",
-    appId: "1:931290276865:web:a855857799d47926d70c00",
-    measurementId: "G-BPDQTJ4KZ6"
-  };
-  firebase.initializeApp(firebaseConfig);
-  db = firebase.firestore();
   loadFromStorage();
 });
 

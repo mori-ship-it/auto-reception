@@ -1,10 +1,3 @@
-// ===== Firebase SDK (npm — バージョン固定・CDN不要) =====
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/firestore';
-
-// グローバルに公開（既存コードとの互換性）
-window.firebase = firebase;
-
 // ===== CSS =====
 import './style.css';
 
@@ -12,5 +5,5 @@ import './style.css';
 import htmlContent from '../html_body.txt?raw';
 document.getElementById('app').innerHTML = htmlContent;
 
-// ===== アプリロジック =====
+// ===== アプリロジック（Firebase初期化含む） =====
 import './app.js';
