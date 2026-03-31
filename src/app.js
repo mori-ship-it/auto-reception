@@ -1,7 +1,7 @@
 // ===== FIREBASE CONFIG =====
 // ===== FIREBASE INIT (遅延) =====
 let db;
-const STORE_ID = 'muuk-hiratsuka';
+const STORE_ID = import.meta.env.VITE_STORE_ID || 'muuk-hiratsuka';
 document.addEventListener('DOMContentLoaded', () => {
   const firebaseConfig = {
     apiKey: "AIzaSyDopvxzyHEcm8KChamvVVaN9YVxHCamGx0",
