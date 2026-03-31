@@ -791,3 +791,27 @@ window.onerror = function(msg, src, line, col, err) {
 window.addEventListener('unhandledrejection', function(e) {
   console.error('[Reception Promise Error]', e.reason);
 });
+
+window.switchAdminTab = function(btn) {
+  document.querySelectorAll('.amt').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+  document.querySelectorAll('.admin-panel').forEach(function(p){p.classList.remove('active')});
+  var t = document.getElementById(btn.getAttribute('data-amt'));
+  if(t) t.classList.add('active');
+  if(btn.getAttribute('data-amt')==='admin-analytics' && typeof switchDataPeriod==='function') switchDataPeriod('today');
+};
+window.switchEditTab = function(btn) {
+  var p = btn.closest('.admin-section');
+  if(!p) return;
+  p.querySelectorAll('.edit-tab').forEach(function(t){t.classList.remove('active')});
+  btn.classList.add('active');
+  p.querySelectorAll('.edit-panel').forEach(function(el){el.classList.remove('active')});
+  var panel = document.getElementById(btn.getAttribute('data-tab'));
+  if(panel) panel.classList.add('active');
+};
+window.setAnalyticsRange = function(range) {
+  document.querySelectorAll('[id^="ar-"]').forEach(function(b){b.classList.remove('active')});
+  var btn = document.getElementById('ar-'+range);
+  if(btn) btn.classList.add('active');
+  if(typeof switchDataPeriod==='function') switchDataPeriod(range==='day'?'today':range);
+};
