@@ -331,7 +331,7 @@ function openHomePanel(){
   document.getElementById('c-pleaseWaitVendor').value=custom.pleaseWaitVendor;
   document.getElementById('c-coming').value=custom.coming;
   document.getElementById('c-pin').value='';
-  renderAdminStaff(); initHistory();
+  renderAdminStaff(); renderLog();
   document.getElementById('homeScreen').classList.add('active');
 }
 function closeHome(){document.getElementById('homeScreen').classList.remove('active');}
@@ -463,20 +463,13 @@ function uploadPhoto(id,input){
 }
 
 // ===== LOG =====
-let historyLogs = [];      // 期間検索で取得した全ログ
-let filteredLogs = [];     // フィルター適用後
-let historyShowCount = 20; // 一覧の表示件数
-
 function addLog(name,type,stylist){
   visitLog.unshift({time:nowFull(),name,type,stylist:stylist||null});
   renderLog();
   saveToStorage();
 }
-
-// 既存互換: 今日のログをlogContainerに描画（もし要素が残っていれば）
 function renderLog(){
   const el=document.getElementById('logContainer');
-  if(!el) return;
   if(!visitLog.length){el.innerHTML=`<div class="log-empty">${tx('log-empty')}</div>`;return;}
   el.innerHTML=visitLog.map(l=>{
     const badge=tx('log-'+l.type);
@@ -488,235 +481,6 @@ function renderLog(){
       <span class="log-badge ${l.type}">${badge}</span>
     </div>`;
   }).join('');
-}
-
-// ===== HISTORY FILTER =====
-function initHistory(){
-  const todayStr = new Date().toISOString().slice(0,10);
-  const fromEl = document.getElementById('histFrom');
-  const toEl = document.getElementById('histTo');
-  if(fromEl) fromEl.value = todayStr;
-  if(toEl) toEl.value = todayStr;
-  // スタイリスト選択肢を動的生成
-  const sel = document.getElementById('histStylist');
-  if(sel){
-    sel.innerHTML = '<option value="all">スタイリスト：すべて</option>';
-    staffList.forEach(s=>{
-      sel.innerHTML += `<option value="${s.name}">${s.name}</option>`;
-    });
-  }
-  // クイックボタン初期状態
-  document.querySelectorAll('.history-quick-btn').forEach(b=>b.classList.remove('active'));
-  const todayBtn = document.querySelector('.history-quick-btn');
-  if(todayBtn) todayBtn.classList.add('active');
-  onHistorySearch();
-}
-
-function toDocKey(d){
-  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-}
-
-async function fetchLogsByRange(fromStr, toStr){
-  const logs = [];
-  const from = new Date(fromStr + 'T00:00:00');
-  const to = new Date(toStr + 'T00:00:00');
-  if(isNaN(from)||isNaN(to)) return logs;
-
-  // 今日のデータはメモリ上の visitLog を使う
-  const todayKey = today();
-  const cur = new Date(from);
-  const promises = [];
-  while(cur <= to){
-    const key = toDocKey(cur);
-    if(key === todayKey){
-      // メモリ上のログを使用
-      logs.push(...visitLog.map(e=>({...e, _dateKey:key})));
-    } else if(db){
-      const k = key; // closure
-      promises.push(
-        db.collection('logs').doc(k).get().then(snap=>{
-          if(snap.exists && snap.data().entries){
-            return snap.data().entries.map(e=>({...e, _dateKey:k}));
-          }
-          return [];
-        }).catch(()=>[])
-      );
-    }
-    cur.setDate(cur.getDate()+1);
-  }
-  if(promises.length){
-    const results = await Promise.all(promises);
-    results.forEach(r=> logs.push(...r));
-  }
-  return logs;
-}
-
-async function onHistorySearch(){
-  const fromEl = document.getElementById('histFrom');
-  const toEl = document.getElementById('histTo');
-  if(!fromEl||!toEl) return;
-  const from = fromEl.value;
-  const to = toEl.value;
-  if(!from||!to) return;
-  // loading
-  const listEl = document.getElementById('histList');
-  if(listEl) listEl.innerHTML = '<div class="log-empty">読み込み中...</div>';
-  try{
-    historyLogs = await fetchLogsByRange(from, to);
-  }catch(e){
-    historyLogs = [];
-    console.warn('History fetch error:', e);
-  }
-  historyShowCount = 20;
-  onHistoryFilter();
-}
-
-function onHistoryFilter(){
-  const stylist = document.getElementById('histStylist')?.value || 'all';
-  const type = document.getElementById('histType')?.value || 'all';
-  filteredLogs = historyLogs.filter(l=>{
-    if(stylist !== 'all'){
-      if(!l.stylist || l.stylist !== stylist) return false;
-    }
-    if(type !== 'all' && l.type !== type) return false;
-    return true;
-  });
-  renderHourlyChart(filteredLogs);
-  renderTypeSummary(filteredLogs);
-  renderHistoryList(filteredLogs);
-}
-
-function setQuickRange(preset){
-  const d = new Date();
-  let from, to;
-  if(preset==='today'){
-    from = to = d.toISOString().slice(0,10);
-  } else if(preset==='week'){
-    const day = d.getDay(); // 0=Sun
-    const mon = new Date(d); mon.setDate(d.getDate()-(day===0?6:day-1));
-    from = mon.toISOString().slice(0,10);
-    to = d.toISOString().slice(0,10);
-  } else if(preset==='month'){
-    from = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0,10);
-    to = d.toISOString().slice(0,10);
-  } else if(preset==='lastMonth'){
-    from = new Date(d.getFullYear(), d.getMonth()-1, 1).toISOString().slice(0,10);
-    to = new Date(d.getFullYear(), d.getMonth(), 0).toISOString().slice(0,10);
-  }
-  document.getElementById('histFrom').value = from;
-  document.getElementById('histTo').value = to;
-  document.querySelectorAll('.history-quick-btn').forEach(b=>b.classList.remove('active'));
-  event.target.classList.add('active');
-  onHistorySearch();
-}
-
-function renderHourlyChart(logs){
-  const el = document.getElementById('histHourlyChart');
-  if(!el) return;
-  // 9時〜21時の集計
-  const hours = {};
-  for(let h=9;h<=21;h++) hours[h]=0;
-  logs.forEach(l=>{
-    const parts = l.time.split(' ');
-    const timePart = parts.length>=2 ? parts[1] : parts[0];
-    const h = parseInt(timePart.split(':')[0]);
-    if(h>=9 && h<=21) hours[h]++;
-  });
-  const max = Math.max(...Object.values(hours), 1);
-  if(logs.length===0){
-    el.innerHTML = '<div class="log-empty" style="padding:20px 0;">データなし</div>';
-    return;
-  }
-  el.innerHTML = Object.entries(hours).map(([h,c])=>{
-    const pct = Math.round((c/max)*100);
-    return `<div class="history-bar-row">
-      <span class="history-bar-label">${h}:00</span>
-      <div class="history-bar-track">
-        <div class="history-bar-fill" style="width:${pct}%"></div>
-      </div>
-      <span class="history-bar-count">${c}</span>
-    </div>`;
-  }).join('');
-}
-
-function renderTypeSummary(logs){
-  const el = document.getElementById('histTypeSummary');
-  if(!el) return;
-  const counts = {total:logs.length, reserved:0, walkin:0, vendor:0, call:0};
-  logs.forEach(l=>{ if(counts[l.type]!==undefined) counts[l.type]++; });
-  el.innerHTML = `
-    <div class="history-summary-card">
-      <div class="history-summary-num" style="color:var(--accent);">${counts.total}</div>
-      <div class="history-summary-label">TOTAL</div>
-    </div>
-    <div class="history-summary-card">
-      <div class="history-summary-num" style="color:var(--success);">${counts.reserved}</div>
-      <div class="history-summary-label">予約</div>
-    </div>
-    <div class="history-summary-card">
-      <div class="history-summary-num" style="color:var(--warn);">${counts.walkin}</div>
-      <div class="history-summary-label">飛び込み</div>
-    </div>
-    <div class="history-summary-card">
-      <div class="history-summary-num" style="color:var(--vendor);">${counts.vendor}</div>
-      <div class="history-summary-label">業者</div>
-    </div>`;
-}
-
-function renderHistoryList(logs){
-  const el = document.getElementById('histList');
-  const moreWrap = document.getElementById('histMoreWrap');
-  if(!el) return;
-  if(!logs.length){
-    el.innerHTML = '<div class="log-empty">該当するデータがありません</div>';
-    if(moreWrap) moreWrap.style.display='none';
-    return;
-  }
-  // 日付でグルーピング
-  const grouped = {};
-  logs.forEach(l=>{
-    const dk = l._dateKey || 'unknown';
-    if(!grouped[dk]) grouped[dk]=[];
-    grouped[dk].push(l);
-  });
-  // 日付キーをソート（降順）
-  const sortedKeys = Object.keys(grouped).sort((a,b)=>{
-    const pa = a.split('-').map(Number);
-    const pb = b.split('-').map(Number);
-    return (pb[0]-pa[0])||(pb[1]-pa[1])||(pb[2]-pa[2]);
-  });
-  let html = '';
-  let shown = 0;
-  const dayNames = ['日','月','火','水','木','金','土'];
-  for(const dk of sortedKeys){
-    if(shown >= historyShowCount) break;
-    const parts = dk.split('-').map(Number);
-    const dateObj = new Date(parts[0], parts[1]-1, parts[2]);
-    const dayName = dayNames[dateObj.getDay()];
-    const entries = grouped[dk];
-    html += `<div class="history-date-header">${parts[1]}/${parts[2]}（${dayName}）— ${entries.length}件</div>`;
-    for(const l of entries){
-      if(shown >= historyShowCount) break;
-      const badge = l.type==='reserved'?'予約':l.type==='walkin'?'飛び込み':l.type==='vendor'?'業者':l.type==='call'?'呼び出し':l.type;
-      const timePart = l.time.split(' ');
-      const timeStr = timePart.length>=2 ? timePart[1] : timePart[0];
-      const dn = l.name ? l.name : '飛び込み';
-      const st = l.stylist ? `<span style="font-size:10px;color:var(--accent);margin-left:6px;font-family:'DM Sans',sans-serif;">/ ${l.stylist}</span>` : '';
-      html += `<div class="log-card">
-        <span class="log-time">${timeStr}</span>
-        <span class="log-name">${dn}${st}</span>
-        <span class="log-badge ${l.type}">${badge}</span>
-      </div>`;
-      shown++;
-    }
-  }
-  el.innerHTML = html;
-  if(moreWrap) moreWrap.style.display = (shown < logs.length) ? 'block' : 'none';
-}
-
-function showMoreHistory(){
-  historyShowCount += 20;
-  renderHistoryList(filteredLogs);
 }
 
 // ===== SLACK =====
@@ -814,8 +578,7 @@ const _fns = {
   toggleStaff, updateStaff, updateSlackId, uploadPhoto,
   pinInput, pinDelete, showToast, saveCustom, saveWebhook,
   saveBotToken, savePin, toggleLang,
-  onDragStart, onDragOver, onDrop, onDragEnd,
-  onHistorySearch, onHistoryFilter, setQuickRange, showMoreHistory
+  onDragStart, onDragOver, onDrop, onDragEnd
 };
 Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
 

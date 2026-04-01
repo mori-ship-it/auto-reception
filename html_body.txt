@@ -300,55 +300,8 @@
 
     <!-- 来店履歴 -->
     <div class="admin-section">
-      <span class="admin-label">来店履歴</span>
-
-      <!-- フィルター -->
-      <div class="history-filters">
-        <div class="history-date-row">
-          <div class="history-date-box">
-            <div class="history-date-label">FROM</div>
-            <input type="date" class="admin-field history-date-input" id="histFrom" onchange="onHistorySearch()">
-          </div>
-          <span class="history-date-sep">〜</span>
-          <div class="history-date-box">
-            <div class="history-date-label">TO</div>
-            <input type="date" class="admin-field history-date-input" id="histTo" onchange="onHistorySearch()">
-          </div>
-        </div>
-        <div class="history-quick-btns">
-          <button class="history-quick-btn active" onclick="setQuickRange('today')">今日</button>
-          <button class="history-quick-btn" onclick="setQuickRange('week')">今週</button>
-          <button class="history-quick-btn" onclick="setQuickRange('month')">今月</button>
-          <button class="history-quick-btn" onclick="setQuickRange('lastMonth')">先月</button>
-        </div>
-        <div class="history-select-row">
-          <select class="admin-field history-select" id="histStylist" onchange="onHistoryFilter()">
-            <option value="all">スタイリスト：すべて</option>
-          </select>
-          <select class="admin-field history-select" id="histType" onchange="onHistoryFilter()">
-            <option value="all">タイプ：すべて</option>
-            <option value="reserved">予約</option>
-            <option value="walkin">飛び込み</option>
-            <option value="vendor">業者</option>
-            <option value="call">呼び出し</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- ① 時間帯別来店数 -->
-      <div class="history-section-title">時間帯別来店数</div>
-      <div id="histHourlyChart" class="history-hourly"></div>
-
-      <!-- ② 訪問タイプ内訳 -->
-      <div class="history-section-title">訪問タイプ内訳</div>
-      <div id="histTypeSummary" class="history-summary"></div>
-
-      <!-- ③ 来店一覧 -->
-      <div class="history-section-title">来店一覧</div>
-      <div id="histList"></div>
-      <div id="histMoreWrap" style="text-align:center;padding:12px 0;display:none;">
-        <button class="history-more-btn" onclick="showMoreHistory()">さらに表示</button>
-      </div>
+      <span class="admin-label">本日の来店履歴</span>
+      <div id="logContainer"><div class="log-empty">まだ来店記録がありません</div></div>
     </div>
 
     <!-- 保存 -->
