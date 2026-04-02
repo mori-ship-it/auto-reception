@@ -22,6 +22,31 @@ let webhookUrl = '';
 let drinkMenu = [];
 let currentCategory = 'hot';
 
+// ===== Log helpers =====
+function today(){
+  const d=new Date();
+  return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+function nowFull(){
+  const d=new Date();
+  return (d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
+}
+async function addDrinkLog(name, type){
+  try{
+    const dateKey = today();
+    const logRef = db.collection('logs').doc(dateKey);
+    const snap = await logRef.get();
+    const entries = (snap.exists && snap.data().entries) ? snap.data().entries : [];
+    entries.unshift({
+      time: nowFull(),
+      name: name,
+      type: type,
+      stylist: null
+    });
+    await logRef.set({ entries }, { merge: true });
+  }catch(e){ console.warn('Drink log write error:', e); }
+}
+
 // ===== Seat =====
 function initSeat(){
   const params = new URLSearchParams(window.location.search);
@@ -148,6 +173,10 @@ async function orderDrink(item){
   }
 
   showOverlay('doneOverlay', 5000);
+
+  // Firestore log
+  const seatInfo = seat ? '（'+seat+'席）' : '';
+  addDrinkLog(item.name + seatInfo, 'drink');
 }
 
 function showOverlay(id, duration){
