@@ -68,7 +68,7 @@ const TX = {
     'wait-here3':'そのままお待ちください','wait-here-vendor':'そのままお待ちください',
     'cd-note':'しばらくお待ちください',
     'suffix':'様','log-reserved':'予約','log-walkin':'飛び込み',
-    'log-call':'呼び出し','log-vendor':'業者','log-empty':'まだ来店記録がありません',
+    'log-call':'呼び出し','log-vendor':'業者','log-drink':'ドリンク','log-empty':'まだ来店記録がありません',
     'stylist-heading':'担当スタイリスト','stylist-title':'担当のお名前を入力してください',
     'search-ph':'例）田中','skip-stylist':'指名なし・わからない',
     'no-results':'一致するスタイリストが見つかりません',
@@ -93,7 +93,7 @@ const TX = {
     'wait-here3':'Please wait here','wait-here-vendor':'Please wait here',
     'cd-note':'Please wait a moment',
     'suffix':'','log-reserved':'Reserved','log-walkin':'Walk-in',
-    'log-call':'Called','log-vendor':'Vendor','log-empty':'No check-ins yet',
+    'log-call':'Called','log-vendor':'Vendor','log-drink':'Drink','log-empty':'No check-ins yet',
     'stylist-heading':'Select Stylist','stylist-title':'Enter your stylist\'s name',
     'search-ph':'e.g. Tanaka','skip-stylist':'No preference / Not sure',
     'no-results':'No matching stylist found',
@@ -118,7 +118,7 @@ const TX = {
     'wait-here3':'请在此等候','wait-here-vendor':'请在此等候',
     'cd-note':'请稍候',
     'suffix':'','log-reserved':'预约','log-walkin':'直接来访',
-    'log-call':'已呼叫','log-vendor':'供应商','log-empty':'暂无到访记录',
+    'log-call':'已呼叫','log-vendor':'供应商','log-drink':'饮品','log-empty':'暂无到访记录',
     'stylist-heading':'选择造型师','stylist-title':'请输入您的造型师姓名',
     'search-ph':'例）田中','skip-stylist':'无指定／不确定',
     'no-results':'未找到匹配的造型师',
@@ -143,7 +143,7 @@ const TX = {
     'wait-here3':'그 자리에서 기다려 주세요','wait-here-vendor':'그 자리에서 기다려 주세요',
     'cd-note':'잠시만 기다려 주세요',
     'suffix':'','log-reserved':'예약','log-walkin':'워크인',
-    'log-call':'호출됨','log-vendor':'업체','log-empty':'아직 방문 기록이 없습니다',
+    'log-call':'호출됨','log-vendor':'업체','log-drink':'음료','log-empty':'아직 방문 기록이 없습니다',
     'stylist-heading':'스타일리스트 선택','stylist-title':'담당 스타일리스트 이름을 입력해 주세요',
     'search-ph':'예）다나카','skip-stylist':'지정 없음／모름',
     'no-results':'일치하는 스타일리스트를 찾을 수 없습니다',
@@ -168,7 +168,7 @@ const TX = {
     'wait-here3':'Por favor espere aquí','wait-here-vendor':'Por favor espere aquí',
     'cd-note':'Por favor espere un momento',
     'suffix':'','log-reserved':'Reservación','log-walkin':'Sin cita',
-    'log-call':'Llamado','log-vendor':'Proveedor','log-empty':'No hay registros aún',
+    'log-call':'Llamado','log-vendor':'Proveedor','log-drink':'Bebida','log-empty':'No hay registros aún',
     'stylist-heading':'Seleccionar estilista','stylist-title':'Ingrese el nombre de su estilista',
     'search-ph':'ej.) Tanaka','skip-stylist':'Sin preferencia / No sé',
     'no-results':'No se encontró estilista',
@@ -664,8 +664,8 @@ function parseHour(entry){
 function renderDataContent(entries, period, prevCount, days){
   var el = document.getElementById('dataContent');
   if(!el) return;
-  var total = entries.length;
-  var types = {reserved:0, walkin:0, vendor:0, call:0};
+  var total = entries.filter(function(e){ return e.type !== 'drink'; }).length;
+  var types = {reserved:0, walkin:0, vendor:0, call:0, drink:0};
   entries.forEach(function(e){ if(types[e.type]!==undefined) types[e.type]++; });
 
   var hours = {};
@@ -707,7 +707,7 @@ function renderDataContent(entries, period, prevCount, days){
 
   var html = '';
   html += '<div class="data-summary"><div class="data-card"><div class="data-card-label">'+(period==='today'?'本日の来店数':days+'日間の来店数')+'</div><div class="data-card-value">'+total+'</div></div><div class="data-card"><div class="data-card-label">'+compareLabel+'</div><div class="data-card-value" style="color:'+compareColor+'">'+compareValue+'</div></div></div>';
-  html += '<div class="data-sub-label">種別内訳</div><div class="data-types"><div class="data-type-card" style="background:rgba(90,106,150,.08);"><div class="data-type-num" style="color:#3a4a70;">'+types.reserved+'</div><div class="data-type-name" style="color:#5a6a96;">予約</div></div><div class="data-type-card" style="background:rgba(184,144,64,.08);"><div class="data-type-num" style="color:#8a6820;">'+types.walkin+'</div><div class="data-type-name" style="color:#b89040;">飛び込み</div></div><div class="data-type-card" style="background:rgba(80,136,160,.08);"><div class="data-type-num" style="color:#3a6878;">'+types.vendor+'</div><div class="data-type-name" style="color:#5088a0;">業者</div></div><div class="data-type-card" style="background:rgba(160,96,96,.08);"><div class="data-type-num" style="color:#8a4040;">'+types.call+'</div><div class="data-type-name" style="color:#c45050;">呼び出し</div></div></div>';
+  html += '<div class="data-sub-label">種別内訳</div><div class="data-types"><div class="data-type-card" style="background:rgba(90,106,150,.08);"><div class="data-type-num" style="color:#3a4a70;">'+types.reserved+'</div><div class="data-type-name" style="color:#5a6a96;">予約</div></div><div class="data-type-card" style="background:rgba(184,144,64,.08);"><div class="data-type-num" style="color:#8a6820;">'+types.walkin+'</div><div class="data-type-name" style="color:#b89040;">飛び込み</div></div><div class="data-type-card" style="background:rgba(80,136,160,.08);"><div class="data-type-num" style="color:#3a6878;">'+types.vendor+'</div><div class="data-type-name" style="color:#5088a0;">業者</div></div><div class="data-type-card" style="background:rgba(160,96,96,.08);"><div class="data-type-num" style="color:#8a4040;">'+types.call+'</div><div class="data-type-name" style="color:#c45050;">呼び出し</div></div><div class=\"data-type-card\" style=\"background:rgba(106,160,120,.08);\"><div class=\"data-type-num\" style=\"color:#4a8a5a;\">'+types.drink+'</div><div class=\"data-type-name\" style=\"color:#5a9a6a;\">ドリンク</div></div></div>';
   if(peakHour>=0 && peakCount>0){
     html += '<div class="data-peak"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span>ピーク：'+peakHour+'時台（'+peakCount+'件）</span></div>';
   }
