@@ -13,7 +13,7 @@ const firebaseConfig = {
   appId: "1:931290276865:web:a855857799d47926d70c00",
   measurementId: "G-BPDQTJ4KZ6"
 };
-firebase.initializeApp(firebaseConfig);
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let seat = '';
@@ -34,7 +34,7 @@ function nowFull(){
 async function addDrinkLog(name, type){
   try{
     const dateKey = today();
-  const logRef = db.collection('logs').doc(STORE_ID + '_' + dateKey);
+    const logRef = db.collection('logs').doc(STORE_ID + '_' + dateKey);
     const snap = await logRef.get();
     const entries = (snap.exists && snap.data().entries) ? snap.data().entries : [];
     entries.unshift({
@@ -172,11 +172,11 @@ async function orderDrink(item){
     }catch(e){ console.warn('Slack error:', e); }
   }
 
-  showOverlay('doneOverlay', 5000);
-
   // Firestore log
   const seatInfo = seat ? '（'+seat+'席）' : '';
-  addDrinkLog(item.name + seatInfo, 'drink');
+  await addDrinkLog(item.name + seatInfo, 'drink');
+
+  showOverlay('doneOverlay', 5000);
 }
 
 function showOverlay(id, duration){
@@ -206,6 +206,7 @@ async function callStaff(){
       await fetch(webhookUrl, {method:'POST', body:JSON.stringify({text:msg})});
     }catch(e){ console.warn('Slack error:', e); }
   }
+  await addDrinkLog(seatLabel + ' - スタッフ呼び出し', 'call');
   showOverlay('callOverlay', 5000);
 }
 
