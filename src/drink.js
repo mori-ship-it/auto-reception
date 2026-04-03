@@ -34,7 +34,7 @@ function nowFull(){
 async function addDrinkLog(name, type){
   try{
     const dateKey = today();
-    const logRef = db.collection('logs').doc(dateKey);
+  const logRef = db.collection('logs').doc(STORE_ID + '_' + dateKey);
     const snap = await logRef.get();
     const entries = (snap.exists && snap.data().entries) ? snap.data().entries : [];
     entries.unshift({
