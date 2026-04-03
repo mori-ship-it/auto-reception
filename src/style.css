@@ -443,3 +443,167 @@ body {
 
 .preview-panel { display: none; }
 .preview-panel.active { display: block; }
+
+/* ══ HISTORY FILTER ══ */
+.history-filters { margin-bottom:20px; }
+.history-date-row {
+  display:flex; align-items:center; gap:4px; margin-bottom:10px;
+}
+.history-date-row .admin-field {
+  flex:1; margin:0; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:12px;
+}
+.history-quick-btns {
+  display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;
+}
+.history-quick-btn {
+  padding:6px 16px; border-radius:20px; border:1px solid var(--border);
+  background:transparent; font-family:'Noto Sans JP',sans-serif; font-size:11px;
+  color:var(--text-muted); cursor:pointer; transition:all 0.2s; letter-spacing:0.05em;
+}
+.history-quick-btn:hover { border-color:var(--accent); color:var(--accent); }
+.history-quick-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.history-select-row {
+  display:flex; gap:8px;
+}
+.history-select-row .admin-field {
+  flex:1; margin:0; border-radius:10px; font-size:12px;
+}
+
+/* ══ HISTORY HOURLY CHART ══ */
+.history-hourly { margin-bottom:20px; }
+.history-hourly-bars {
+  display:flex; align-items:flex-end; height:140px; gap:2px; padding:0 2px;
+  background:var(--glass); border:1px solid var(--glass-border); border-radius:12px;
+  padding:12px 8px 4px;
+}
+.history-bar-col {
+  flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;
+}
+.history-bar-val {
+  font-family:'DM Sans',sans-serif; font-size:8px; color:var(--text-muted); margin-bottom:2px;
+}
+.history-bar-track {
+  width:100%; flex:1; display:flex; align-items:flex-end; justify-content:center;
+}
+.history-bar {
+  width:80%; background:rgba(124,139,191,0.4); border-radius:3px 3px 0 0; min-height:2px;
+  transition:height 0.3s;
+}
+.history-bar-label {
+  font-family:'DM Sans',sans-serif; font-size:8px; color:var(--text-muted); margin-top:2px;
+}
+
+/* ══ HISTORY SUMMARY CARDS ══ */
+.history-summary {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:20px;
+}
+.history-summary-card {
+  background:var(--glass); border:1px solid var(--glass-border); border-radius:12px;
+  padding:10px 8px; text-align:center;
+  backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+}
+.history-summary-label {
+  font-family:'DM Sans',sans-serif; font-size:9px; color:var(--text-muted);
+  letter-spacing:0.08em; margin-bottom:2px;
+}
+.history-summary-val {
+  font-family:'DM Sans',sans-serif; font-size:20px; font-weight:500; color:var(--text);
+}
+
+/* ══ HISTORY LIST ══ */
+.history-date-header {
+  font-family:'DM Sans',sans-serif; font-size:11px; color:var(--text-mid);
+  letter-spacing:0.06em; padding:12px 0 6px; border-bottom:1px solid var(--border);
+  margin-bottom:8px;
+}
+.history-more-btn {
+  display:block; width:100%; padding:12px; margin-top:8px; border:1px solid var(--border);
+  border-radius:10px; background:transparent; font-family:'Noto Sans JP',sans-serif;
+  font-size:12px; color:var(--text-muted); cursor:pointer; text-align:center;
+  transition:all 0.2s; letter-spacing:0.05em;
+}
+.history-more-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+/* ===== ドリンクタブ サブタブ ===== */
+.drink-subtabs { display:flex; gap:6px; margin-bottom:16px; }
+.drink-subtab {
+  padding:6px 16px; border-radius:20px; border:none;
+  font-size:12px; cursor:pointer;
+  background:var(--accent-light); color:var(--text-mid);
+  font-family:'Noto Sans JP',sans-serif;
+}
+.drink-subtab.active { background:var(--accent); color:#fff; }
+.drink-subpanel { display:none; }
+.drink-subpanel.active { display:block; }
+
+/* ===== 注文履歴 ===== */
+.drink-stat-row { display:flex; gap:8px; margin-bottom:14px; }
+.drink-stat {
+  flex:1; background:var(--accent-light); border-radius:12px;
+  padding:10px 14px;
+}
+.drink-stat-label { font-size:11px; color:var(--text-muted); }
+.drink-stat-num { font-size:20px; font-weight:500; color:var(--text); }
+.drink-stat.hot .drink-stat-num { color:#c45050; }
+.drink-stat.cold .drink-stat-num { color:#5088a0; }
+
+.drink-history-header {
+  display:flex; padding:6px 10px; font-size:11px; color:var(--text-muted);
+  border-bottom:1px solid var(--border);
+}
+.drink-history-row {
+  display:flex; padding:10px; font-size:13px; align-items:center;
+  border-bottom:1px solid var(--border);
+}
+.dh-time { flex:0 0 60px; font-size:12px; color:var(--text-muted); }
+.dh-name { flex:1; }
+.dh-seat { flex:0 0 40px; text-align:center; font-weight:500; color:var(--accent); font-size:12px; }
+.drink-cat-badge {
+  font-size:10px; padding:1px 6px; border-radius:8px; color:#fff;
+  margin-left:4px;
+}
+.drink-cat-badge.hot { background:#c45050; }
+.drink-cat-badge.cold { background:#5088a0; }
+
+/* ===== デバイス管理 ===== */
+.drink-device-card {
+  display:flex; padding:12px; align-items:flex-start;
+  border-bottom:1px solid var(--border);
+}
+.drink-device-icon {
+  width:36px; height:36px; border-radius:8px;
+  background:var(--accent-light); color:var(--accent);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:500; font-size:14px; margin-right:12px; flex-shrink:0;
+}
+.drink-device-info { flex:1; min-width:0; }
+.drink-device-title { font-size:13px; font-weight:500; margin-bottom:2px; }
+.drink-device-url {
+  font-size:11px; font-family:'DM Sans',monospace; color:var(--accent);
+  word-break:break-all; background:var(--accent-light);
+  padding:4px 8px; border-radius:4px; margin-top:4px;
+}
+.drink-copy-btn {
+  cursor:pointer; opacity:0.6; font-size:10px;
+  border:1px solid var(--border); padding:1px 6px; border-radius:4px;
+  margin-left:4px;
+}
+.drink-copy-btn:hover { opacity:1; }
+.drink-device-remove {
+  font-size:16px; color:var(--text-muted); cursor:pointer;
+  flex-shrink:0; margin-left:8px; padding:4px;
+}
+.drink-device-remove:hover { color:var(--danger); }
+.drink-device-add { display:flex; gap:8px; margin-top:12px; }
+.drink-device-add input {
+  border:1px solid var(--border); border-radius:8px;
+  padding:8px 12px; font-size:13px; background:var(--surface);
+  font-family:'Noto Sans JP',sans-serif;
+}
+.drink-device-add input:first-child { flex:0 0 80px; }
+.drink-device-add input:nth-child(2) { flex:1; }
+.drink-device-add button {
+  padding:8px 16px; border-radius:8px; border:none;
+  background:var(--accent); color:#fff; font-size:12px; cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;
+}

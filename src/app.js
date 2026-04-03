@@ -66,6 +66,7 @@ let drinkMenu = [
 ];
 let drinkEnabled = true;
 let nextDrinkId = 16;
+var drinkDevices = [];
 
 // ===== i18n =====
 const TX = {
@@ -544,8 +545,9 @@ function addLog(name,type,stylist){
 function renderLog(){
   const el=document.getElementById('logContainer');
   if(!el) return;
-  if(!visitLog.length){el.innerHTML=`<div class="log-empty">${tx('log-empty')}</div>`;return;}
-  el.innerHTML=visitLog.map(l=>{
+  var filtered=visitLog.filter(function(l){ return l.type !== 'drink'; });
+  if(!filtered.length){el.innerHTML=`<div class="log-empty">${tx('log-empty')}</div>`;return;}
+  el.innerHTML=filtered.map(l=>{
     const badge=tx('log-'+l.type);
     const dn=l.name?l.name+tx('suffix'):(lang==='ja'?'飛び込み':'Walk-in');
     const st=l.stylist?`<span style="font-size:10px;color:var(--accent);margin-left:6px;font-family:'DM Sans',sans-serif;">/ ${l.stylist}</span>`:'';
@@ -647,6 +649,7 @@ async function loadFromStorage(){
       if(d.drinkMenu&&d.drinkMenu.length)drinkMenu=d.drinkMenu;
       if(d.drinkEnabled!==undefined)drinkEnabled=d.drinkEnabled;
       if(drinkMenu.length){nextDrinkId=Math.max.apply(null,drinkMenu.map(function(x){return x.id;}))+1;}
+      if(d.drinkDevices)drinkDevices=d.drinkDevices;
       if(d.txCache){
         if(d.txCache.en) Object.assign(TX.en, d.txCache.en);
         if(d.txCache.zh) Object.assign(TX.zh, d.txCache.zh);
@@ -753,6 +756,7 @@ function parseHour(entry){
 function renderDataContent(entries, period, prevCount, days){
   const el = document.getElementById('dataContent');
   if(!el) return;
+  entries = entries.filter(function(e){ return e.type !== 'drink'; });
   const total = entries.length;
 
   // 種別集計
@@ -883,6 +887,262 @@ function renderDataContent(entries, period, prevCount, days){
   el.innerHTML = html;
 }
 
+// ===== 来店履歴フィルター =====
+let _historyLogs = [];
+let _historyShowCount = 20;
+
+function toDateInputVal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function toFirestoreKey(dateInput){ const p=dateInput.split('-'); return parseInt(p[0])+'-'+parseInt(p[1])+'-'+parseInt(p[2]); }
+
+async function fetchLogsByRange(fromDate, toDate){
+  if(!db) return [];
+  const logs = [];
+  const current = new Date(fromDate+'T00:00:00');
+  const end = new Date(toDate+'T00:00:00');
+  if(current > end) return [];
+  const promises = [];
+  const keys = [];
+  while(current <= end){
+    const key = `${current.getFullYear()}-${current.getMonth()+1}-${current.getDate()}`;
+    keys.push(key);
+    current.setDate(current.getDate()+1);
+  }
+  const results = await Promise.all(keys.map(k => {
+    return db.collection('logs').doc(logDocId(k)).get().then(snap => {
+      if(!snap.exists) return db.collection('logs').doc(k).get();
+      return snap;
+    }).catch(() => null);
+  }));
+  results.forEach((snap, i) => {
+    if(snap && snap.exists && snap.data().entries){
+      snap.data().entries.forEach(e => logs.push({...e, dateKey: keys[i]}));
+    }
+  });
+  return logs;
+}
+
+function filterLogs(logs, stylist, type){
+  return logs.filter(l => {
+    if(stylist !== 'all' && (l.stylist||null) !== stylist) return false;
+    if(type !== 'all' && l.type !== type) return false;
+    return true;
+  });
+}
+
+function renderHourlyChart(logs){
+  const el = document.getElementById('historyHourly');
+  if(!el) return;
+  const hours = {};
+  for(let h=9;h<=21;h++) hours[h]=0;
+  logs.forEach(e => { const h=parseHour(e); if(h>=9&&h<=21) hours[h]++; });
+  const max = Math.max(...Object.values(hours),1);
+  let html = '<div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.08em;">時間帯別 来店数</div>';
+  html += '<div class="history-hourly-bars">';
+  for(let h=9;h<=21;h++){
+    const pct = (hours[h]/max*100);
+    const count = hours[h];
+    html += `<div class="history-bar-col">
+      <div class="history-bar-val">${count>0?count:''}</div>
+      <div class="history-bar-track"><div class="history-bar" style="height:${Math.max(pct,2)}%"></div></div>
+      <div class="history-bar-label">${h}</div>
+    </div>`;
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function renderTypeSummary(logs){
+  const el = document.getElementById('historySummary');
+  if(!el) return;
+  const total = logs.length;
+  const reserved = logs.filter(l=>l.type==='reserved').length;
+  const walkin = logs.filter(l=>l.type==='walkin').length;
+  const vendor = logs.filter(l=>l.type==='vendor').length;
+  el.innerHTML = `
+    <div class="history-summary-card" style="border-top:3px solid var(--accent);">
+      <div class="history-summary-label">合計</div>
+      <div class="history-summary-val">${total}</div>
+    </div>
+    <div class="history-summary-card" style="border-top:3px solid #5a8a6a;">
+      <div class="history-summary-label">予約</div>
+      <div class="history-summary-val" style="color:#5a8a6a;">${reserved}</div>
+    </div>
+    <div class="history-summary-card" style="border-top:3px solid #b89040;">
+      <div class="history-summary-label">飛び込み</div>
+      <div class="history-summary-val" style="color:#b89040;">${walkin}</div>
+    </div>
+    <div class="history-summary-card" style="border-top:3px solid #5088a0;">
+      <div class="history-summary-label">業者</div>
+      <div class="history-summary-val" style="color:#5088a0;">${vendor}</div>
+    </div>`;
+}
+
+function renderHistoryList(logs){
+  const el = document.getElementById('historyList');
+  if(!el) return;
+  if(!logs.length){ el.innerHTML='<div class="log-empty">データなし</div>'; return; }
+
+  const dowNames = ['日','月','火','水','木','金','土'];
+  const grouped = {};
+  logs.forEach(l => {
+    const dk = l.dateKey || today();
+    if(!grouped[dk]) grouped[dk] = [];
+    grouped[dk].push(l);
+  });
+
+  const sortedKeys = Object.keys(grouped).sort((a,b) => {
+    const pa=a.split('-').map(Number), pb=b.split('-').map(Number);
+    return new Date(pb[0],pb[1]-1,pb[2]) - new Date(pa[0],pa[1]-1,pa[2]);
+  });
+
+  let html = '';
+  let shown = 0;
+  const limit = _historyShowCount;
+
+  for(const dk of sortedKeys){
+    if(shown >= limit) break;
+    const parts = dk.split('-').map(Number);
+    const d = new Date(parts[0], parts[1]-1, parts[2]);
+    const dow = dowNames[d.getDay()];
+    const entries = grouped[dk];
+    const remaining = limit - shown;
+    const toShow = entries.slice(0, remaining);
+
+    html += `<div class="history-date-header">${parts[1]}/${parts[2]}（${dow}）— ${entries.length}件</div>`;
+    toShow.forEach(l => {
+      const badge = l.type==='reserved'?'予約':l.type==='walkin'?'飛び込み':l.type==='vendor'?'業者':'呼び出し';
+      const dn = l.name ? l.name+'様' : (l.type==='walkin'?'飛び込み':'—');
+      const timePart = l.time ? l.time.split(' ').pop() : '';
+      const st = l.stylist ? `<span style="font-size:10px;color:var(--accent);margin-left:6px;font-family:'DM Sans',sans-serif;">/ ${l.stylist}</span>` : '';
+      html += `<div class="log-card">
+        <span class="log-time">${timePart}</span>
+        <span class="log-name">${dn}${st}</span>
+        <span class="log-badge ${l.type}">${badge}</span>
+      </div>`;
+    });
+    shown += toShow.length;
+  }
+
+  const totalEntries = logs.length;
+  if(shown < totalEntries){
+    html += `<button class="history-more-btn" onclick="showMoreHistory()">さらに読み込む（残り${totalEntries - shown}件）</button>`;
+  }
+
+  el.innerHTML = html;
+}
+
+function renderHistorySection(filteredLogs){
+  renderHourlyChart(filteredLogs);
+  renderTypeSummary(filteredLogs);
+  renderHistoryList(filteredLogs);
+}
+
+async function onHistorySearch(){
+  const fromEl = document.getElementById('historyFrom');
+  const toEl = document.getElementById('historyTo');
+  if(!fromEl||!toEl) return;
+  const from = fromEl.value;
+  const to = toEl.value;
+  if(!from||!to) return;
+
+  // FROM > TO なら入れ替え
+  if(from > to){ fromEl.value = to; toEl.value = from; }
+  const actualFrom = fromEl.value;
+  const actualTo = toEl.value;
+
+  const stylist = document.getElementById('historyStylist')?.value || 'all';
+  const type = document.getElementById('historyType')?.value || 'all';
+
+  // 今日のデータはメモリ上のvisitLogを優先
+  const todayKey = today();
+  const todayInput = toDateInputVal(new Date());
+
+  let logs;
+  if(actualFrom === todayInput && actualTo === todayInput){
+    logs = visitLog.map(e => ({...e, dateKey: todayKey}));
+  } else {
+    logs = await fetchLogsByRange(actualFrom, actualTo);
+    // 期間に今日が含まれていたらvisitLogで上書き
+    if(actualFrom <= todayInput && todayInput <= actualTo){
+      logs = logs.filter(l => l.dateKey !== todayKey);
+      visitLog.forEach(e => logs.push({...e, dateKey: todayKey}));
+    }
+  }
+
+  _historyLogs = logs;
+  _historyShowCount = 20;
+
+  const filtered = filterLogs(logs, stylist, type);
+
+  // スタイリストドロップダウンを動的更新
+  const stylistEl = document.getElementById('historyStylist');
+  if(stylistEl){
+    const currentVal = stylistEl.value;
+    const names = new Set();
+    logs.forEach(e => { if(e.stylist) names.add(e.stylist); });
+    // staffList からも追加
+    staffList.forEach(s => { if(s.name) names.add(s.name); });
+    const sorted = [...names].sort();
+    let opts = '<option value="all">すべてのスタイリスト</option>';
+    sorted.forEach(n => { opts += `<option value="${n.replace(/"/g,'&quot;')}"${n===currentVal?' selected':''}>${n}</option>`; });
+    stylistEl.innerHTML = opts;
+  }
+
+  renderHistorySection(filtered);
+}
+
+function setQuickRange(preset){
+  const fromEl = document.getElementById('historyFrom');
+  const toEl = document.getElementById('historyTo');
+  if(!fromEl||!toEl) return;
+
+  const now = new Date();
+  let from, to;
+
+  if(preset === 'today'){
+    from = to = new Date();
+  } else if(preset === 'week'){
+    const day = now.getDay();
+    from = new Date(now); from.setDate(now.getDate() - day);
+    to = new Date();
+  } else if(preset === 'month'){
+    from = new Date(now.getFullYear(), now.getMonth(), 1);
+    to = new Date();
+  } else if(preset === 'lastMonth'){
+    from = new Date(now.getFullYear(), now.getMonth()-1, 1);
+    to = new Date(now.getFullYear(), now.getMonth(), 0);
+  }
+
+  fromEl.value = toDateInputVal(from);
+  toEl.value = toDateInputVal(to);
+
+  // アクティブボタン切替
+  document.querySelectorAll('.history-quick-btn').forEach(b => b.classList.remove('active'));
+  const btns = document.querySelectorAll('.history-quick-btn');
+  const presetMap = {today:0, week:1, month:2, lastMonth:3};
+  if(btns[presetMap[preset]]) btns[presetMap[preset]].classList.add('active');
+
+  onHistorySearch();
+}
+
+function showMoreHistory(){
+  _historyShowCount += 20;
+  const stylist = document.getElementById('historyStylist')?.value || 'all';
+  const type = document.getElementById('historyType')?.value || 'all';
+  const filtered = filterLogs(_historyLogs, stylist, type);
+  renderHistoryList(filtered);
+}
+
+function initHistoryDefaults(){
+  const fromEl = document.getElementById('historyFrom');
+  const toEl = document.getElementById('historyTo');
+  if(!fromEl||!toEl) return;
+  const todayStr = toDateInputVal(new Date());
+  fromEl.value = todayStr;
+  toEl.value = todayStr;
+  onHistorySearch();
+}
+
 // ===== グローバル公開（HTML onclick互換） =====
 const _fns = {
   goTo, submitName, doWalkin, doVendor, doCallStaff, skipStylist,
@@ -892,7 +1152,7 @@ const _fns = {
   pinInput, pinDelete, showToast, saveCustom, saveWebhook,
   saveBotToken, savePin, toggleLang,
   onDragStart, onDragOver, onDrop, onDragEnd,
-  switchDataPeriod
+  switchDataPeriod, onHistorySearch, setQuickRange, showMoreHistory
 };
 Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
 
@@ -910,7 +1170,7 @@ window.switchAdminTab = function(btn) {
   document.querySelectorAll('.admin-panel').forEach(function(p){p.classList.remove('active')});
   var t = document.getElementById(btn.getAttribute('data-amt'));
   if(t) t.classList.add('active');
-  if(btn.getAttribute('data-amt')==='admin-analytics') window.setAnalyticsRange('day');
+  if(btn.getAttribute('data-amt')==='admin-analytics') initHistoryDefaults();
 };
 window.switchEditTab = function(btn) {
   var p = btn.closest('.admin-section');
@@ -995,6 +1255,7 @@ window.setAnalyticsRange = async function(range) {
 };
 
 function renderAnalyticsUI(entries, range){
+  entries = entries.filter(function(e){ return e.type !== 'drink'; });
   // 統計カード
   var total = entries.length;
   var reserved = entries.filter(function(e){return e.type==='reserved';}).length;
@@ -1302,3 +1563,139 @@ window.onDrinkDrop = function(e, targetId){
   renderDrinkMenu();
 };
 window.onDrinkDragEnd = function(e){ e.currentTarget.style.opacity='1'; };
+
+// ===== ドリンク サブタブ =====
+window.switchDrinkSubtab = function(sub) {
+  document.querySelectorAll('.drink-subtab').forEach(function(btn){
+    btn.classList.toggle('active', btn.dataset.sub === sub);
+  });
+  document.querySelectorAll('.drink-subpanel').forEach(function(panel){
+    panel.classList.remove('active');
+  });
+  var target = document.getElementById(
+    sub === 'menu' ? 'drinkSubMenu' :
+    sub === 'history' ? 'drinkSubHistory' : 'drinkSubDevices'
+  );
+  if(target) target.classList.add('active');
+  if(sub === 'history') loadDrinkHistory();
+  if(sub === 'devices') renderDrinkDevices();
+};
+
+window.loadDrinkHistory = async function() {
+  var el = document.getElementById('drinkHistoryList');
+  var sumEl = document.getElementById('drinkHistorySummary');
+  if(!el) return;
+
+  try {
+    var snap = await db.collection('logs').doc(logDocId(today())).get();
+    var entries = (snap.exists && snap.data().entries) ? snap.data().entries : [];
+    var drinks = entries.filter(function(e){ return e.type === 'drink'; });
+
+    // カテゴリマップ
+    var catMap = {};
+    (drinkMenu || []).forEach(function(d){ catMap[d.name] = d.category; });
+
+    var total = drinks.length;
+    var hotCount = 0, coldCount = 0;
+    drinks.forEach(function(d){
+      var pureName = d.name.replace(/（.*?）/g, '').trim();
+      var cat = catMap[pureName] || '';
+      if(cat === 'hot') hotCount++;
+      else if(cat === 'cold') coldCount++;
+    });
+
+    if(sumEl) {
+      sumEl.innerHTML =
+        '<div class="drink-stat-row">' +
+          '<div class="drink-stat"><div class="drink-stat-label">注文数</div><div class="drink-stat-num">'+total+'</div></div>' +
+          '<div class="drink-stat hot"><div class="drink-stat-label">HOT</div><div class="drink-stat-num">'+hotCount+'</div></div>' +
+          '<div class="drink-stat cold"><div class="drink-stat-label">COLD</div><div class="drink-stat-num">'+coldCount+'</div></div>' +
+        '</div>';
+    }
+
+    if(!drinks.length){
+      el.innerHTML = '<div class="log-empty">まだ注文がありません</div>';
+      return;
+    }
+
+    el.innerHTML =
+      '<div class="drink-history-header">' +
+        '<span class="dh-time">時間</span>' +
+        '<span class="dh-name">メニュー</span>' +
+        '<span class="dh-seat">席</span>' +
+      '</div>' +
+      drinks.map(function(d){
+        var seatMatch = d.name.match(/（(.+?)席）/);
+        var seat = seatMatch ? seatMatch[1] : '-';
+        var pureName = d.name.replace(/（.*?）/g, '').trim();
+        var cat = catMap[pureName] || '';
+        var catBadge = cat === 'hot' ? '<span class="drink-cat-badge hot">HOT</span>' :
+                       cat === 'cold' ? '<span class="drink-cat-badge cold">COLD</span>' : '';
+        var timeOnly = d.time ? d.time.split(' ').pop() : '';
+        return '<div class="drink-history-row">' +
+          '<span class="dh-time">'+timeOnly+'</span>' +
+          '<span class="dh-name">'+pureName+' '+catBadge+'</span>' +
+          '<span class="dh-seat">'+seat+'</span>' +
+        '</div>';
+      }).join('');
+  } catch(e) { console.warn('Drink history load error:', e); }
+};
+
+window.renderDrinkDevices = function() {
+  var el = document.getElementById('drinkDeviceList');
+  if(!el) return;
+
+  var baseUrl = window.location.origin + '/drink.html?seat=';
+
+  if(!drinkDevices.length) {
+    el.innerHTML = '<div class="log-empty">デバイスが登録されていません</div>';
+    return;
+  }
+
+  el.innerHTML = drinkDevices.map(function(dev, i){
+    var url = baseUrl + encodeURIComponent(dev.seat);
+    return '<div class="drink-device-card">' +
+      '<div class="drink-device-icon">' + dev.seat + '</div>' +
+      '<div class="drink-device-info">' +
+        '<div class="drink-device-title">席' + dev.seat + ' — ' + (dev.name || '未設定') + '</div>' +
+        '<div class="drink-device-url">' + url +
+          ' <span class="drink-copy-btn" onclick="copyDrinkUrl(\'' + url + '\')">コピー</span>' +
+        '</div>' +
+      '</div>' +
+      '<span class="drink-device-remove" onclick="removeDrinkDevice('+i+')">×</span>' +
+    '</div>';
+  }).join('');
+};
+
+window.addDrinkDevice = async function() {
+  var seatInput = document.getElementById('newDeviceSeat');
+  var nameInput = document.getElementById('newDeviceName');
+  if(!seatInput || !seatInput.value.trim()) return;
+
+  drinkDevices.push({
+    seat: seatInput.value.trim(),
+    name: nameInput ? nameInput.value.trim() : ''
+  });
+
+  await db.collection('salon').doc(STORE_ID).set(
+    { drinkDevices: drinkDevices }, { merge: true }
+  );
+
+  seatInput.value = '';
+  if(nameInput) nameInput.value = '';
+  renderDrinkDevices();
+};
+
+window.removeDrinkDevice = async function(index) {
+  drinkDevices.splice(index, 1);
+  await db.collection('salon').doc(STORE_ID).set(
+    { drinkDevices: drinkDevices }, { merge: true }
+  );
+  renderDrinkDevices();
+};
+
+window.copyDrinkUrl = function(url) {
+  navigator.clipboard.writeText(url).then(function(){
+    showToast('URLをコピーしました');
+  });
+};

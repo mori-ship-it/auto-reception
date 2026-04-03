@@ -189,63 +189,99 @@
     <div class="admin-section"><span class="admin-label">スタッフ管理</span><div id="adminStaffList" style="margin-bottom:12px;"></div><div class="admin-row"><input class="admin-field" id="newName" placeholder="名前（日本語）" style="margin:0;flex:2;"><input class="admin-field" id="newNameEn" placeholder="Name (EN)" style="margin:0;flex:2;"><select class="admin-field" id="newRole" style="margin:0;flex:1;"><option value="スタイリスト">スタイリスト</option><option value="アシスタント">アシスタント</option></select><button class="admin-btn" onclick="addStaff()">追加</button></div></div>
   </div>
 
-  <!-- ══ データ ══ -->
+  <!-- ══ 来店履歴 ══ -->
   <div class="home-body admin-panel" id="admin-analytics">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
-      <button class="edit-tab active" id="ar-day" onclick="setAnalyticsRange('day')">日</button>
-      <button class="edit-tab" id="ar-week" onclick="setAnalyticsRange('week')">週</button>
-      <button class="edit-tab" id="ar-month" onclick="setAnalyticsRange('month')">月</button>
-      <div style="flex:1"></div>
-      <div id="analyticsLoading" style="font-size:10px;color:var(--text-muted);display:none;">読込中...</div>
+    <div class="admin-section">
+      <span class="admin-label">来店履歴</span>
+
+      <!-- ① フィルターエリア -->
+      <div class="history-filters">
+        <div class="history-date-row">
+          <input type="date" id="historyFrom" class="admin-field" onchange="onHistorySearch()">
+          <span style="font-size:12px;color:var(--text-muted);padding:0 4px;">〜</span>
+          <input type="date" id="historyTo" class="admin-field" onchange="onHistorySearch()">
+        </div>
+        <div class="history-quick-btns">
+          <button class="history-quick-btn active" onclick="setQuickRange('today')">今日</button>
+          <button class="history-quick-btn" onclick="setQuickRange('week')">今週</button>
+          <button class="history-quick-btn" onclick="setQuickRange('month')">今月</button>
+          <button class="history-quick-btn" onclick="setQuickRange('lastMonth')">先月</button>
+        </div>
+        <div class="history-select-row">
+          <select id="historyStylist" class="admin-field" onchange="onHistorySearch()">
+            <option value="all">すべてのスタイリスト</option>
+          </select>
+          <select id="historyType" class="admin-field" onchange="onHistorySearch()">
+            <option value="all">すべて</option>
+            <option value="reserved">予約</option>
+            <option value="walkin">飛び込み</option>
+            <option value="vendor">業者</option>
+            <option value="call">呼び出し</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ② 時間帯別来店数 -->
+      <div id="historyHourly" class="history-hourly"></div>
+
+      <!-- ③ 訪問タイプ内訳 -->
+      <div id="historySummary" class="history-summary"></div>
+
+      <!-- ④ 来店一覧 -->
+      <div id="historyList"></div>
     </div>
-    <div class="edit-tabs" id="stylistFilter" style="margin-bottom:16px;"></div>
-    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:20px;">
-      <div class="stat-card"><div class="stat-label">来店数</div><div class="stat-val" id="a-total">0</div></div>
-      <div class="stat-card"><div class="stat-label">予約</div><div class="stat-val" id="a-reserved" style="color:var(--success);">0</div></div>
-      <div class="stat-card"><div class="stat-label">飛込み</div><div class="stat-val" id="a-walkin" style="color:var(--warn);">0</div></div>
-      <div class="stat-card"><div class="stat-label">ピーク</div><div class="stat-val" id="a-peak">—</div></div>
-    </div>
-    <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">時間帯別 来店数</div>
-    <div style="position:relative;width:100%;height:180px;margin-bottom:8px;"><canvas id="chartHour"></canvas></div>
-    <div id="drillPanel" style="display:none;background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:12px;margin-bottom:16px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span id="drillTitle" style="font-size:12px;font-weight:500;"></span><button onclick="document.getElementById('drillPanel').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;">×</button></div>
-      <div id="drillList"></div>
-    </div>
-    <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">訪問タイプ内訳</div>
-    <div id="typeLegend" style="display:flex;gap:12px;margin-bottom:6px;font-size:10px;color:var(--text-muted);"></div>
-    <div style="position:relative;width:100%;height:20px;margin-bottom:20px;"><canvas id="chartType"></canvas></div>
-    <div id="dowSection" style="display:none;">
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">曜日別 来店数</div>
-      <div style="position:relative;width:100%;height:160px;margin-bottom:20px;"><canvas id="chartDow"></canvas></div>
-    </div>
-    <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">来店一覧</div>
-    <div id="analyticsVisitList"></div>
   </div>
 
   <!-- ══ ドリンク ══ -->
   <div class="home-body admin-panel" id="admin-drink">
     <div class="admin-section">
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;">
-        <div style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--accent);letter-spacing:0.1em;">Drink Menu</div>
-        <div class="toggle" id="drinkToggle" onclick="toggleDrinkMenu()" style="flex-shrink:0;"><div class="toggle-knob"></div></div>
+      <!-- サブタブ -->
+      <div class="drink-subtabs" id="drinkSubtabs">
+        <button class="drink-subtab active" data-sub="menu" onclick="switchDrinkSubtab('menu')">メニュー管理</button>
+        <button class="drink-subtab" data-sub="history" onclick="switchDrinkSubtab('history')">注文履歴</button>
+        <button class="drink-subtab" data-sub="devices" onclick="switchDrinkSubtab('devices')">デバイス管理</button>
       </div>
-      <div id="drinkOffMsg" style="text-align:center;font-size:11px;color:var(--text-muted);padding:4px 0 8px;">顧客のデバイスにドリンクメニューが表示されません</div>
-      <div id="drinkAdminBody" style="display:none;">
-        <div class="preview-frame" style="margin-bottom:16px;">
-          <div style="background:var(--bg);border-radius:12px;padding:20px 16px;min-height:160px;">
-            <div id="drinkPreviewTabs" style="display:flex;justify-content:center;gap:6px;margin-bottom:14px;"></div>
-            <div id="drinkPreviewGrid" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;"></div>
+
+      <!-- サブタブ: メニュー管理 -->
+      <div class="drink-subpanel active" id="drinkSubMenu">
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;">
+          <div style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--accent);letter-spacing:0.1em;">Drink Menu</div>
+          <div class="toggle" id="drinkToggle" onclick="toggleDrinkMenu()" style="flex-shrink:0;"><div class="toggle-knob"></div></div>
+        </div>
+        <div id="drinkOffMsg" style="text-align:center;font-size:11px;color:var(--text-muted);padding:4px 0 8px;">顧客のデバイスにドリンクメニューが表示されません</div>
+        <div id="drinkAdminBody" style="display:none;">
+          <div class="preview-frame" style="margin-bottom:16px;">
+            <div style="background:var(--bg);border-radius:12px;padding:20px 16px;min-height:160px;">
+              <div id="drinkPreviewTabs" style="display:flex;justify-content:center;gap:6px;margin-bottom:14px;"></div>
+              <div id="drinkPreviewGrid" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;"></div>
+            </div>
+          </div>
+          <div id="drinkMenuList" style="margin-bottom:12px;"></div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input class="admin-field" id="newDrinkName" placeholder="ドリンク名" style="margin:0;flex:2;">
+            <input class="admin-field" id="newDrinkNameEn" placeholder="Name (EN)" style="margin:0;flex:2;">
+            <select class="admin-field" id="newDrinkCat" style="margin:0;flex:1;">
+              <option value="hot">HOT</option>
+              <option value="cold">COLD</option>
+            </select>
+            <button class="admin-btn" onclick="addDrinkItem()">追加</button>
           </div>
         </div>
-        <div id="drinkMenuList" style="margin-bottom:12px;"></div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <input class="admin-field" id="newDrinkName" placeholder="ドリンク名" style="margin:0;flex:2;">
-          <input class="admin-field" id="newDrinkNameEn" placeholder="Name (EN)" style="margin:0;flex:2;">
-          <select class="admin-field" id="newDrinkCat" style="margin:0;flex:1;">
-            <option value="hot">HOT</option>
-            <option value="cold">COLD</option>
-          </select>
-          <button class="admin-btn" onclick="addDrinkItem()">追加</button>
+      </div>
+
+      <!-- サブタブ: 注文履歴 -->
+      <div class="drink-subpanel" id="drinkSubHistory">
+        <div class="drink-history-summary" id="drinkHistorySummary"></div>
+        <div class="drink-history-list" id="drinkHistoryList"></div>
+      </div>
+
+      <!-- サブタブ: デバイス管理 -->
+      <div class="drink-subpanel" id="drinkSubDevices">
+        <div id="drinkDeviceList"></div>
+        <div class="drink-device-add">
+          <input type="text" id="newDeviceSeat" placeholder="席名（例: D）">
+          <input type="text" id="newDeviceName" placeholder="端末名（例: Fire HD 8）">
+          <button onclick="addDrinkDevice()">追加</button>
         </div>
       </div>
     </div>
