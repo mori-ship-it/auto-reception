@@ -220,3 +220,5 @@ var confirmNo = document.getElementById('confirmNo');
 if(confirmNo) confirmNo.addEventListener('click', hideConfirm);
 var confirmBg = document.getElementById('confirmBg');
 if(confirmBg) confirmBg.addEventListener('click', function(e){ if(e.target===confirmBg) hideConfirm(); });
+
+// force rebuild
