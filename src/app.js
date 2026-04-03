@@ -1447,27 +1447,31 @@ function initDrinkAdmin(){
 }
 
 var _drinkPreviewCat = 'hot';
+var _drinkMenuCat = 'hot';
 
 function renderDrinkMenu(){
   var el = document.getElementById('drinkMenuList');
   if(el){
-    if(!drinkMenu.length){
-      el.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:8px 0;">メニューがありません</div>';
+    var filtered = drinkMenu.filter(function(d){ return d.category === _drinkMenuCat; });
+    if(!filtered.length){
+      el.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:8px 0;">このカテゴリにメニューはありません</div>';
     } else {
-      el.innerHTML = drinkMenu.map(function(d){
-        var catLabel = d.category==='hot'?'HOT':'COLD';
+      el.innerHTML = filtered.map(function(d){
         var vis = d.visible!==false;
         return '<div class="staff-card" draggable="true" data-drink-id="'+d.id+'" ondragstart="onDrinkDragStart(event,'+d.id+')" ondragover="onDrinkDragOver(event)" ondrop="onDrinkDrop(event,'+d.id+')" ondragend="onDrinkDragEnd(event)" style="padding:8px 12px;">'
           +'<div style="cursor:grab;color:var(--text-muted);font-size:16px;padding:0 4px;flex-shrink:0;">⠿</div>'
           +'<div class="toggle '+(vis?'on':'off')+'" onclick="toggleDrinkVisible('+d.id+')"><div class="toggle-knob"></div></div>'
           +'<input class="admin-field" style="margin:0;padding:0 8px;font-size:12px;height:30px;line-height:30px;flex:2;min-width:0;'+(vis?'':'opacity:0.4;')+'" value="'+d.name.replace(/"/g,'&quot;')+'" oninput="updateDrinkField('+d.id+',\'name\',this.value)">'
           +'<input class="admin-field" style="margin:0;padding:0 8px;font-size:10px;height:30px;line-height:30px;flex:2;min-width:0;font-family:DM Sans,sans-serif;'+(vis?'':'opacity:0.4;')+'" value="'+(d.nameEn||'').replace(/"/g,'&quot;')+'" placeholder="EN" oninput="updateDrinkField('+d.id+',\'nameEn\',this.value)">'
-          +'<span onclick="toggleDrinkCategory('+d.id+')" style="font-family:DM Sans,sans-serif;font-size:10px;padding:0 10px;height:30px;line-height:30px;border-radius:50px;cursor:pointer;flex-shrink:0;color:#fff;background:'+(d.category==='hot'?'#D85A30':'var(--accent)')+';letter-spacing:0.04em;display:inline-block;">'+catLabel+'</span>'
           +'<button class="del-btn" onclick="removeDrinkItem('+d.id+')">×</button>'
           +'</div>';
       }).join('');
     }
   }
+  // カテゴリタブのactive状態を更新
+  document.querySelectorAll('.drink-menu-cat-tab').forEach(function(btn){
+    btn.classList.toggle('active', btn.dataset.cat === _drinkMenuCat);
+  });
   renderDrinkPreview();
 }
 
@@ -1508,17 +1512,21 @@ window.switchDrinkPreview = function(cat){
   renderDrinkPreview();
 };
 
+window.switchDrinkMenuCat = function(cat){
+  _drinkMenuCat = cat;
+  renderDrinkMenu();
+};
+
 window.addDrinkItem = function(){
   markDirty();
   var nameEl = document.getElementById('newDrinkName'); if(!nameEl) return;
   var name = nameEl.value.trim(); if(!name) return;
   var nameEnEl = document.getElementById('newDrinkNameEn');
-  var catEl = document.getElementById('newDrinkCat');
   drinkMenu.push({
     id: nextDrinkId++,
     name: name,
     nameEn: nameEnEl ? nameEnEl.value.trim() : '',
-    category: catEl ? catEl.value : 'hot',
+    category: _drinkMenuCat,
     visible: true
   });
   nameEl.value = ''; if(nameEnEl) nameEnEl.value = '';

@@ -536,6 +536,16 @@ body {
 .drink-subpanel { display:none; }
 .drink-subpanel.active { display:block; }
 
+/* メニュー管理 HOT/COLD タブ */
+.drink-menu-cat-tabs { display:flex; gap:6px; margin-bottom:10px; }
+.drink-menu-cat-tab {
+  flex:1; padding:6px 0; border-radius:8px; border:1px solid var(--border);
+  font-size:11px; font-family:'DM Sans',sans-serif; letter-spacing:0.06em;
+  cursor:pointer; text-align:center; background:transparent; color:var(--text-muted);
+}
+.drink-menu-cat-tab.active[data-cat="hot"] { background:#D85A30; color:#fff; border-color:#D85A30; }
+.drink-menu-cat-tab.active[data-cat="cold"] { background:var(--accent); color:#fff; border-color:var(--accent); }
+
 /* ===== 注文履歴 ===== */
 .drink-stat-row { display:flex; gap:8px; margin-bottom:14px; }
 .drink-stat {

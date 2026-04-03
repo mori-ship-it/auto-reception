@@ -96,6 +96,47 @@ body{
 }
 .call-btn:active{transform:translateX(-50%) scale(0.96);}
 .overlay .icon.call{background:rgba(90,106,150,.12);color:var(--accent);}
+/* ===== リクエストUI ===== */
+.request-panel{
+  display:none;flex-direction:column;align-items:center;
+  padding:40px 24px 120px;text-align:center;flex:1;
+}
+.request-panel.active{display:flex;}
+.request-icon{
+  width:56px;height:56px;border-radius:50%;
+  background:rgba(90,106,150,.1);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+}
+.request-title{font-size:18px;font-weight:500;margin-bottom:4px;letter-spacing:0.08em;}
+.request-sub{font-size:13px;color:var(--text-muted);margin-bottom:20px;}
+.request-textarea{
+  width:100%;max-width:320px;min-height:100px;border:1px solid var(--glass-border);
+  border-radius:14px;padding:14px 16px;font-size:14px;
+  font-family:'Shippori Mincho','Noto Sans JP',serif;color:var(--text);
+  background:var(--surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  resize:none;outline:none;margin-bottom:16px;
+}
+.request-textarea::placeholder{color:var(--text-muted);}
+.request-textarea:focus{border-color:var(--accent);}
+.request-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px;}
+.request-btns .btn-fill{
+  padding:12px 0;border-radius:100px;border:none;
+  background:var(--accent);color:#fff;font-size:14px;font-weight:500;
+  cursor:pointer;letter-spacing:0.06em;
+  font-family:'Shippori Mincho','Noto Sans JP',serif;
+  box-shadow:0 4px 16px rgba(90,106,150,.2);transition:transform 0.15s;
+}
+.request-btns .btn-fill:active{transform:scale(0.97);}
+.request-btns .btn-outline{
+  padding:12px 0;border-radius:100px;
+  border:1px solid var(--glass-border);
+  background:var(--surface);color:var(--accent);font-size:13px;font-weight:500;
+  cursor:pointer;letter-spacing:0.06em;
+  font-family:'Shippori Mincho','Noto Sans JP',serif;
+  backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  transition:transform 0.15s;
+}
+.request-btns .btn-outline:active{transform:scale(0.97);}
 .confirm-bg{
   position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.35);
   display:flex;align-items:center;justify-content:center;
@@ -152,6 +193,16 @@ body{
       <button class="btn-no" id="confirmNo">いいえ</button>
       <button class="btn-yes" id="confirmYes">はい</button>
     </div>
+  </div>
+</div>
+<div class="request-panel" id="requestPanel">
+  <div class="request-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+  <div class="request-title">リクエスト</div>
+  <div class="request-sub">スタッフにメッセージを送れます</div>
+  <textarea class="request-textarea" id="requestText" placeholder="例: ブランケットお願いします"></textarea>
+  <div class="request-btns">
+    <button class="btn-fill" id="requestSendBtn">送信する</button>
+    <button class="btn-outline" id="requestCallBtn">スタッフを呼ぶ</button>
   </div>
 </div>
 <button class="call-btn" id="callStaffBtn">スタッフを呼ぶ</button>

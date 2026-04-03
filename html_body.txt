@@ -256,14 +256,14 @@
               <div id="drinkPreviewGrid" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;"></div>
             </div>
           </div>
+          <div class="drink-menu-cat-tabs" id="drinkMenuCatTabs">
+            <button class="drink-menu-cat-tab active" data-cat="hot" onclick="switchDrinkMenuCat('hot')">HOT</button>
+            <button class="drink-menu-cat-tab" data-cat="cold" onclick="switchDrinkMenuCat('cold')">COLD</button>
+          </div>
           <div id="drinkMenuList" style="margin-bottom:12px;"></div>
           <div style="display:flex;gap:6px;align-items:center;">
             <input class="admin-field" id="newDrinkName" placeholder="ドリンク名" style="margin:0;flex:2;">
             <input class="admin-field" id="newDrinkNameEn" placeholder="Name (EN)" style="margin:0;flex:2;">
-            <select class="admin-field" id="newDrinkCat" style="margin:0;flex:1;">
-              <option value="hot">HOT</option>
-              <option value="cold">COLD</option>
-            </select>
             <button class="admin-btn" onclick="addDrinkItem()">追加</button>
           </div>
         </div>

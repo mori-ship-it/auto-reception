@@ -71,9 +71,11 @@ async function loadData(){
       if(d.custom && d.custom.salonName) salonName = d.custom.salonName;
       if(d.drinkMenu) drinkMenu = d.drinkMenu;
       if(d.drinkEnabled===false){
-        document.getElementById('tabs').innerHTML='';
-        document.getElementById('menuGrid').innerHTML='<div class="empty">現在ドリンクサービスは休止中です</div>';
+        document.getElementById('tabs').style.display='none';
+        document.getElementById('menuGrid').style.display='none';
+        document.getElementById('confirmBg').style.display='none';
         var cb=document.getElementById('callStaffBtn'); if(cb) cb.style.display='none';
+        var rp=document.getElementById('requestPanel'); if(rp) rp.classList.add('active');
         return;
       }
     }
@@ -210,6 +212,43 @@ async function callStaff(){
   showOverlay('callOverlay', 5000);
 }
 
+// ===== Request =====
+const REQUEST_LIMIT_MS = 2 * 60 * 1000;
+
+async function sendRequest(){
+  var textarea = document.getElementById('requestText');
+  if(!textarea) return;
+  var text = textarea.value.trim();
+  if(!text) return;
+
+  var lastReq = parseInt(localStorage.getItem(STORE_ID + '_request_last') || '0');
+  var now = Date.now();
+  if(now - lastReq < REQUEST_LIMIT_MS){
+    var remaining = Math.ceil((REQUEST_LIMIT_MS - (now - lastReq)) / 60000);
+    var limitSub = document.getElementById('limitSub');
+    if(limitSub) limitSub.textContent = 'あと約' + remaining + '分お待ちください';
+    showOverlay('limitOverlay', 3000);
+    return;
+  }
+
+  localStorage.setItem(STORE_ID + '_request_last', String(now));
+
+  var seatLabel = seat ? '席' + seat : '不明席';
+  var storeName = salonName || STORE_ID;
+  var msg = '\uD83D\uDCAC ' + seatLabel + ' - ' + text + '（' + storeName + '）';
+  if(webhookUrl){
+    try{
+      await fetch(webhookUrl, { method: 'POST', body: JSON.stringify({ text: msg }) });
+    }catch(e){ console.warn('Slack error:', e); }
+  }
+
+  var seatInfo = seat ? '（' + seat + '席）' : '';
+  await addDrinkLog(text + seatInfo, 'request');
+
+  textarea.value = '';
+  showOverlay('doneOverlay', 5000);
+}
+
 // ===== Init =====
 initSeat();
 loadData();
@@ -221,5 +260,7 @@ var confirmNo = document.getElementById('confirmNo');
 if(confirmNo) confirmNo.addEventListener('click', hideConfirm);
 var confirmBg = document.getElementById('confirmBg');
 if(confirmBg) confirmBg.addEventListener('click', function(e){ if(e.target===confirmBg) hideConfirm(); });
-
-// force rebuild
+var requestSendBtn = document.getElementById('requestSendBtn');
+if(requestSendBtn) requestSendBtn.addEventListener('click', sendRequest);
+var requestCallBtn = document.getElementById('requestCallBtn');
+if(requestCallBtn) requestCallBtn.addEventListener('click', callStaff);
