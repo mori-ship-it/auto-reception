@@ -1621,8 +1621,8 @@ window.loadDrinkHistory = async function() {
     el.innerHTML =
       '<div class="drink-history-header">' +
         '<span class="dh-time">時間</span>' +
-        '<span class="dh-name">メニュー</span>' +
         '<span class="dh-seat">席</span>' +
+        '<span class="dh-name">メニュー</span>' +
       '</div>' +
       drinks.map(function(d){
         var seatMatch = d.name.match(/（(.+?)席）/);
@@ -1634,8 +1634,8 @@ window.loadDrinkHistory = async function() {
         var timeOnly = d.time ? d.time.split(' ').pop() : '';
         return '<div class="drink-history-row">' +
           '<span class="dh-time">'+timeOnly+'</span>' +
-          '<span class="dh-name">'+pureName+' '+catBadge+'</span>' +
           '<span class="dh-seat">'+seat+'</span>' +
+          '<span class="dh-name">'+pureName+' '+catBadge+'</span>' +
         '</div>';
       }).join('');
   } catch(e) { console.warn('Drink history load error:', e); }
