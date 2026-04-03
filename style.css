@@ -386,6 +386,7 @@ body {
 .log-badge.walkin   { background:rgba(154,128,96,.1);  color:var(--warn); }
 .log-badge.call     { background:rgba(160,96,96,.1);   color:var(--danger); }
 .log-badge.vendor   { background:rgba(96,120,128,.1);  color:var(--vendor); }
+.log-badge.drink    { background:rgba(106,160,120,.1); color:#4a8a5a; }
 .log-empty { text-align:center; color:var(--text-muted); font-size:12px; padding:48px 0; letter-spacing:0.15em; font-family:'DM Sans',sans-serif; }
 
 /* ── HISTORY FILTER ──────────── */
