@@ -1,13 +1,12 @@
 import { defineConfig } from 'vite'
-import { resolve } from 'path'
 export default defineConfig({
   build: {
     outDir: 'dist',
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-        register: resolve(__dirname, 'register.html'),
-        drink: resolve(__dirname, 'drink.html'),
+        main: 'index.html',
+        drink: 'drink.html',
+        register: 'register.html'
       }
     }
   }
