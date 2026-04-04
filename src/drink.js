@@ -74,6 +74,7 @@ async function loadData(){
         document.getElementById('tabs').style.display='none';
         document.getElementById('menuGrid').style.display='none';
         document.getElementById('confirmBg').style.display='none';
+        var hdr=document.querySelector('.header'); if(hdr) hdr.style.display='none';
         var cb=document.getElementById('callStaffBtn'); if(cb) cb.style.display='none';
         var rp=document.getElementById('requestPanel'); if(rp) rp.classList.add('active');
         return;
@@ -212,6 +213,30 @@ async function callStaff(){
   showOverlay('callOverlay', 5000);
 }
 
+// ===== Request mode call (2min limit) =====
+async function callStaffRequest(){
+  var lastCall = parseInt(localStorage.getItem(STORE_ID + '_req_call_last')||'0');
+  var now = Date.now();
+  if(now - lastCall < REQUEST_LIMIT_MS){
+    var remaining = Math.ceil((REQUEST_LIMIT_MS - (now - lastCall)) / 60000);
+    var sub = document.getElementById('callLimitSub');
+    if(sub) sub.textContent = 'あと約'+remaining+'分お待ちください';
+    showOverlay('callLimitOverlay', 3000);
+    return;
+  }
+  localStorage.setItem(STORE_ID + '_req_call_last', String(now));
+  var seatLabel = seat ? '席'+seat : '不明席';
+  var storeName = salonName || STORE_ID;
+  var msg = '\uD83D\uDD14 '+seatLabel+' - スタッフ呼び出し（'+storeName+'）';
+  if(webhookUrl){
+    try{
+      await fetch(webhookUrl, {method:'POST', body:JSON.stringify({text:msg})});
+    }catch(e){ console.warn('Slack error:', e); }
+  }
+  await addDrinkLog(seatLabel + ' - スタッフ呼び出し', 'call');
+  showOverlay('callOverlay', 5000);
+}
+
 // ===== Request =====
 const REQUEST_LIMIT_MS = 2 * 60 * 1000;
 
@@ -263,4 +288,4 @@ if(confirmBg) confirmBg.addEventListener('click', function(e){ if(e.target===con
 var requestSendBtn = document.getElementById('requestSendBtn');
 if(requestSendBtn) requestSendBtn.addEventListener('click', sendRequest);
 var requestCallBtn = document.getElementById('requestCallBtn');
-if(requestCallBtn) requestCallBtn.addEventListener('click', callStaff);
+if(requestCallBtn) requestCallBtn.addEventListener('click', callStaffRequest);
