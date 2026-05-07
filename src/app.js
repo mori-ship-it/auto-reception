@@ -564,21 +564,15 @@ async function sendSlack(msg){
   if(!webhookUrl)return;
   try{await fetch(webhookUrl,{method:'POST',body:JSON.stringify({text:msg})});}catch(e){}
 }
-async function sendSlackDM(uid,msg){
-  if(!botToken||!uid){await sendSlack(msg);return;}
-  try{
-    await fetch('https://slack.com/api/chat.postMessage',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${botToken}`},
-      body:JSON.stringify({channel:uid,text:msg})
-    });
-  }catch(e){await sendSlack(msg);}
-}
-async function notifyCheckin(name,stylist){
-  const t=now();
-  if(stylist&&stylist.slackId) await sendSlackDM(stylist.slackId,`${t} ${name}${tx('suffix')}がご来店されました`);
-  else if(stylist) await sendSlack(`${t} ${name}${tx('suffix')}ご来店（担当：${stylist.name}）`);
-  else await sendSlack(`${t} ${name}${tx('suffix')}ご来店（指名なし）`);
+async function notifyCheckin(name, stylist){
+  const t = now();
+  if (stylist && stylist.slackId) {
+    await sendSlack(`${t} <@${stylist.slackId}> ${name}${tx('suffix')}ご来店（担当：${stylist.name}）`);
+  } else if (stylist) {
+    await sendSlack(`${t} ${name}${tx('suffix')}ご来店（担当：${stylist.name}）`);
+  } else {
+    await sendSlack(`${t} ${name}${tx('suffix')}ご来店（指名なし）`);
+  }
 }
 
 // ===== UTILS =====
