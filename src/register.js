@@ -27,8 +27,19 @@ window.onPhotoSelect = function(input) {
   var file = input.files[0]; if (!file) return;
   var reader = new FileReader();
   reader.onload = function(e) {
-    photoData = e.target.result;
-    document.getElementById('photoPreview').innerHTML = '<img src="' + photoData + '">';
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var MAX = 200;
+      var w = img.width, h = img.height;
+      if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
+      else       { if (h > MAX) { w = w * MAX / h; h = MAX; } }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      photoData = canvas.toDataURL('image/jpeg', 0.85);
+      document.getElementById('photoPreview').innerHTML = '<img src="' + photoData + '">';
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 };

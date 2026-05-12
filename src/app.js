@@ -532,7 +532,23 @@ function addStaff(){
 function uploadPhoto(id,input){
   const file=input.files[0]; if(!file)return;
   const reader=new FileReader();
-  reader.onload=e=>{staffList=staffList.map(s=>s.id===id?{...s,photo:e.target.result}:s);renderAdminStaff();showToast('写真を登録しました');};
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const MAX=200;
+      let w=img.width, h=img.height;
+      if(w>h){ if(w>MAX){ h=h*MAX/w; w=MAX; } }
+      else   { if(h>MAX){ w=w*MAX/h; h=MAX; } }
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const dataUrl=canvas.toDataURL('image/jpeg',0.85);
+      staffList=staffList.map(s=>s.id===id?{...s,photo:dataUrl}:s);
+      renderAdminStaff();
+      showToast('写真を登録しました');
+    };
+    img.src=e.target.result;
+  };
   reader.readAsDataURL(file);
 }
 
