@@ -551,6 +551,37 @@ function uploadPhoto(id,input){
   };
   reader.readAsDataURL(file);
 }
+async function compressOldPhotos(){
+  let changed = false;
+  for (let i = 0; i < staffList.length; i++) {
+    const s = staffList[i];
+    if (!s.photo || s.photo.length < 50000) continue;
+    try {
+      const compressed = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX = 200;
+          let w = img.width, h = img.height;
+          if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
+          else      { if (h > MAX) { w = w * MAX / h; h = MAX; } }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        };
+        img.onerror = reject;
+        img.src = s.photo;
+      });
+      staffList[i] = {...s, photo: compressed};
+      changed = true;
+    } catch(e) { console.warn('compress failed for', s.name, e); }
+  }
+  if (changed) {
+    renderAdminStaff();
+    await saveToStorage();
+    console.log('既存写真を自動圧縮しました');
+  }
+}
 
 // ===== LOG =====
 function addLog(name,type,stylist){
@@ -677,6 +708,7 @@ async function loadFromStorage(){
     if(!logSnap.exists) logSnap = await db.collection('logs').doc(today()).get();
     if(logSnap.exists&&logSnap.data().entries) visitLog=logSnap.data().entries;
     applyLang();
+    compressOldPhotos();
   }catch(e){ console.warn('Storage load error:', e); applyLang(); }
 }
 
