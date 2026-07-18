@@ -65,6 +65,7 @@ let drinkMenu = [
   {id:15,name:'お水',nameEn:'Water',category:'cold',visible:true},
 ];
 let drinkEnabled = true;
+let stylistEnabled = true;
 let nextDrinkId = 16;
 var drinkDevices = [];
 
@@ -267,6 +268,7 @@ function submitName(){
   if(!v){document.getElementById('errMsg').classList.add('show');return;}
   currentName=v; document.getElementById('nameInput').value='';
   selectedStylist=null;
+  if(!stylistEnabled){finishCheckin();return;}
   document.getElementById('stylistSearch').value='';
   onStylistSearch(''); goTo('s3b');
 }
@@ -380,7 +382,7 @@ function openHomePanel(){
   _s('c-coming',custom.coming);
   _s('c-pin','');
   populatePreview();
-  renderAdminStaff(); renderLog(); initDrinkAdmin();
+  renderAdminStaff(); renderLog(); initDrinkAdmin(); initStylistToggle();
   var hs=document.getElementById('homeScreen'); if(hs) hs.classList.add('active');
 }
 function populatePreview(){
@@ -651,7 +653,7 @@ async function saveToStorage(){
     await db.collection('salon').doc(STORE_ID).set({
       custom, pinCode, webhookUrl, botToken,
       staffList, nextStaffId,
-      drinkMenu, drinkEnabled,
+      drinkMenu, drinkEnabled, stylistEnabled,
       txCache: {en: TX.en, zh: TX.zh, ko: TX.ko, es: TX.es},
     }, {merge: true});
     await db.collection('logs').doc(logDocId(today())).set({ entries: visitLog }, {merge: true});
@@ -689,6 +691,7 @@ async function loadFromStorage(){
       if(d.nextStaffId)nextStaffId=d.nextStaffId;
       if(d.drinkMenu&&d.drinkMenu.length)drinkMenu=d.drinkMenu;
       if(d.drinkEnabled!==undefined)drinkEnabled=d.drinkEnabled;
+      if(d.stylistEnabled!==undefined)stylistEnabled=d.stylistEnabled;
       if(drinkMenu.length){nextDrinkId=Math.max.apply(null,drinkMenu.map(function(x){return x.id;}))+1;}
       if(d.drinkDevices)drinkDevices=d.drinkDevices;
       if(d.txCache){
@@ -1464,6 +1467,19 @@ window.onInlineBlur = function(el){
   if(field && custom[field] !== undefined) custom[field] = (el.textContent||'').trim();
   applyCustom();
 };
+
+// ===== 担当スタイリスト選択画面 ON/OFF =====
+window.toggleStylistScreen = function(){
+  markDirty();
+  stylistEnabled = !stylistEnabled;
+  initStylistToggle();
+};
+function initStylistToggle(){
+  var toggle = document.getElementById('stylistToggle');
+  if(toggle) toggle.className = 'toggle '+(stylistEnabled?'on':'off');
+  var offMsg = document.getElementById('stylistOffMsg');
+  if(offMsg) offMsg.style.display = stylistEnabled ? 'none' : '';
+}
 
 // ===== ドリンクメニュー管理 =====
 window.toggleDrinkMenu = function(){
