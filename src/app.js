@@ -518,7 +518,43 @@ function onDragEnd(e){ e.currentTarget.style.opacity = '1'; }
 function toggleStaff(id){staffList=staffList.map(s=>s.id===id?{...s,on:!s.on}:s);renderAdminStaff();}
 function updateStaff(id,key,val){staffList=staffList.map(s=>s.id===id?{...s,[key]:val}:s);}
 function updateSlackId(id,val){updateStaff(id,'slackId',val);}
-function removeStaff(id){staffList=staffList.filter(s=>s.id!==id);renderAdminStaff();}
+function removeStaff(id){
+  const s = staffList.find(x=>x.id===id);
+  if(!s) return;
+
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;z-index:2000;background:rgba(26,30,46,.72);'
+    + '-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);'
+    + 'display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  const photo = s.photo
+    ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;">`
+    : `<svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#8890a4;fill:none;stroke-width:1.4;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+
+  ov.innerHTML = `
+    <div style="width:100%;max-width:340px;background:rgba(255,255,255,.95);border-radius:24px;padding:28px 22px 20px;text-align:center;font-family:'Noto Sans JP',sans-serif;">
+      <div style="width:72px;height:72px;border-radius:50%;margin:0 auto 16px;overflow:hidden;background:rgba(104,120,160,.08);border:1px solid rgba(104,120,160,.15);display:flex;align-items:center;justify-content:center;">${photo}</div>
+      <div style="font-size:17px;color:#1a1e2e;letter-spacing:0.06em;margin-bottom:4px;">${s.name||''}</div>
+      <div style="font-size:11px;color:#8890a4;letter-spacing:0.1em;margin-bottom:18px;">${s.role||''}</div>
+      <div style="font-size:14px;color:#1a1e2e;line-height:1.8;">このスタッフを削除しますか？</div>
+      <div style="font-size:12px;color:#c45050;margin-top:8px;line-height:1.7;">写真・Slack IDもすべて消えます。<br>この操作は取り消せません。</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px;">
+        <button id="delCancelBtn" style="padding:14px 0;border:1px solid rgba(104,120,160,.15);border-radius:100px;background:rgba(255,255,255,.9);color:#5a6278;font-family:'Noto Sans JP',sans-serif;font-size:14px;letter-spacing:0.08em;cursor:pointer;">キャンセル</button>
+        <button id="delOkBtn" style="padding:14px 0;border:none;border-radius:100px;background:#c45050;color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:14px;letter-spacing:0.08em;cursor:pointer;">削除する</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(ov);
+
+  const close = () => { if(ov.parentNode) document.body.removeChild(ov); };
+  ov.querySelector('#delCancelBtn').addEventListener('click', close);
+  ov.addEventListener('click', e => { if(e.target === ov) close(); });
+  ov.querySelector('#delOkBtn').addEventListener('click', () => {
+    staffList = staffList.filter(x => x.id !== id);
+    close();
+    renderAdminStaff();
+  });
+}
 function addStaff(){
   const nn=document.getElementById('newName'); if(!nn) return;
   const name=nn.value.trim();
