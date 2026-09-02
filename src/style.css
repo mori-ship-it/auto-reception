@@ -43,7 +43,7 @@ body {
 }
 .top-logo {
   font-family:'DM Sans', sans-serif; font-size:13px; letter-spacing:0.3em;
-  font-weight:400; color:var(--text-mid); text-transform:uppercase;
+  font-weight:400; color:var(--text-mid);
 }
 .top-actions { display:flex; gap:8px; align-items:center; }
 .icon-btn {
