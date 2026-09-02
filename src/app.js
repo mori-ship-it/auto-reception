@@ -572,22 +572,102 @@ function uploadPhoto(id,input){
   const reader=new FileReader();
   reader.onload=e=>{
     const img=new Image();
-    img.onload=()=>{
-      const canvas=document.createElement('canvas');
-      const MAX=200;
-      let w=img.width, h=img.height;
-      if(w>h){ if(w>MAX){ h=h*MAX/w; w=MAX; } }
-      else   { if(h>MAX){ w=w*MAX/h; h=MAX; } }
-      canvas.width=w; canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      const dataUrl=canvas.toDataURL('image/jpeg',0.85);
-      staffList=staffList.map(s=>s.id===id?{...s,photo:dataUrl}:s);
-      renderAdminStaff();
-      showToast('写真を登録しました');
-    };
+    img.onload=()=>{ openPhotoCropper(id, img); };
     img.src=e.target.result;
   };
   reader.readAsDataURL(file);
+  input.value='';
+}
+
+function openPhotoCropper(id, img){
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;z-index:2000;background:rgba(26,30,46,.72);'
+    +'-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);'
+    +'display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  ov.innerHTML=`
+    <div style="width:100%;max-width:360px;background:rgba(255,255,255,.95);border-radius:24px;padding:24px 20px 18px;text-align:center;font-family:'Noto Sans JP',sans-serif;">
+      <div style="font-family:'Shippori Mincho',serif;font-size:17px;letter-spacing:0.08em;color:#1a1e2e;">写真の位置を調整</div>
+      <div style="font-size:11px;color:#5a6278;margin:5px 0 16px;">ドラッグで移動・スライダーで拡大縮小</div>
+      <div id="cropStage" style="position:relative;width:100%;aspect-ratio:1;background:#e4e8f0;border-radius:16px;overflow:hidden;touch-action:none;cursor:grab;">
+        <canvas id="cropCanvas" style="display:block;width:100%;height:100%;"></canvas>
+        <div style="position:absolute;inset:8%;border-radius:50%;pointer-events:none;box-shadow:0 0 0 9999px rgba(255,255,255,.72);border:2px solid rgba(255,255,255,.9);"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin:16px 4px 2px;">
+        <span style="font-size:11px;color:#8890a4;">小</span>
+        <input type="range" id="cropZoom" min="100" max="300" value="100" style="flex:1;">
+        <span style="font-size:11px;color:#8890a4;">大</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:16px;">
+        <button id="cropCancel" style="padding:14px 0;border:1px solid rgba(104,120,160,.15);border-radius:100px;background:rgba(255,255,255,.9);color:#5a6278;font-family:'Noto Sans JP',sans-serif;font-size:14px;letter-spacing:0.08em;cursor:pointer;">やめる</button>
+        <button id="cropOk" style="padding:14px 0;border:none;border-radius:100px;background:linear-gradient(135deg,#5a6a96,#7080b0);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:14px;letter-spacing:0.08em;cursor:pointer;">この位置で決定</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(ov);
+
+  const stage=ov.querySelector('#cropStage');
+  const canvas=ov.querySelector('#cropCanvas');
+  const ctx=canvas.getContext('2d');
+  const size=Math.round(stage.clientWidth);
+  canvas.width=size; canvas.height=size;
+
+  const circle=size*0.84;
+  const base=circle/Math.min(img.width,img.height);
+  let scale=base, cx=size/2, cy=size/2;
+  let dragging=false, lastX=0, lastY=0;
+
+  function draw(){
+    ctx.clearRect(0,0,size,size);
+    ctx.fillStyle='#e4e8f0';
+    ctx.fillRect(0,0,size,size);
+    const w=img.width*scale, h=img.height*scale;
+    ctx.drawImage(img, cx-w/2, cy-h/2, w, h);
+  }
+  draw();
+
+  ov.querySelector('#cropZoom').addEventListener('input', function(){
+    scale=base*(this.value/100); draw();
+  });
+
+  const start=(x,y)=>{ dragging=true; lastX=x; lastY=y; };
+  const move=(x,y)=>{ if(!dragging)return; cx+=x-lastX; cy+=y-lastY; lastX=x; lastY=y; draw(); };
+  const end=()=>{ dragging=false; };
+
+  stage.addEventListener('mousedown', e=>start(e.clientX,e.clientY));
+  const onMove=e=>move(e.clientX,e.clientY);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', end);
+  stage.addEventListener('touchstart', e=>{const t=e.touches[0];start(t.clientX,t.clientY);},{passive:true});
+  stage.addEventListener('touchmove', e=>{e.preventDefault();const t=e.touches[0];move(t.clientX,t.clientY);},{passive:false});
+  stage.addEventListener('touchend', end);
+
+  const close=()=>{
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('mouseup', end);
+    if(ov.parentNode) document.body.removeChild(ov);
+  };
+
+  ov.querySelector('#cropCancel').addEventListener('click', close);
+  ov.addEventListener('click', e=>{ if(e.target===ov) close(); });
+
+  ov.querySelector('#cropOk').addEventListener('click', ()=>{
+    const out=200;
+    const c2=document.createElement('canvas');
+    c2.width=out; c2.height=out;
+    const g=c2.getContext('2d');
+    g.fillStyle='#ffffff';
+    g.fillRect(0,0,out,out);
+    const k=out/circle;
+    const w=img.width*scale*k, h=img.height*scale*k;
+    const ox=(cx-(size-circle)/2)*k, oy=(cy-(size-circle)/2)*k;
+    g.drawImage(img, ox-w/2, oy-h/2, w, h);
+    const dataUrl=c2.toDataURL('image/jpeg',0.85);
+    staffList=staffList.map(s=>s.id===id?{...s,photo:dataUrl}:s);
+    close();
+    renderAdminStaff();
+    showToast('写真を登録しました');
+  });
 }
 async function compressOldPhotos(){
   let changed = false;
