@@ -67,6 +67,7 @@ body {
 }
 .field-label .ja { font-family:'Noto Sans JP', sans-serif; letter-spacing:0.08em; text-transform:none; }
 .field-label .req { color:var(--accent); margin-left:5px; }
+.field-label .opt { color:var(--text-muted); font-weight:300; margin-left:6px; font-size:10px; }
 .name-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .name-cell { display:flex; flex-direction:column; }
 .name-cap {
@@ -347,36 +348,12 @@ body {
       </div>
 
       <div class="field-group">
-        <span class="field-label">Slack ID</span>
+        <span class="field-label">Slack ID<span class="opt">任意</span></span>
         <input class="text-input" id="slackId" type="text" maxlength="20" placeholder="U01AB2CD3EF"
                autocapitalize="off" autocorrect="off" spellcheck="false"
                oninput="clearError('slackId')">
         <div class="field-error" id="err-slackId"></div>
-        <div class="field-hint">Slackアプリでプロフィールを開くと確認できます。<br>「U」から始まる英数字をコピー＆ペーストしてください。</div>
-        <div class="howto">
-          <div class="howto-toggle" id="howtoToggle" onclick="toggleHowto()">
-            <span class="howto-toggle-label">Slack IDの見つけ方</span>
-            <span class="howto-toggle-arrow">▼</span>
-          </div>
-          <div class="howto-content" id="howtoContent">
-            <div class="howto-inner">
-              <div class="howto-tab-row">
-                <div class="howto-tab active" onclick="switchTab('sp',this)">スマホ</div>
-                <div class="howto-tab" onclick="switchTab('pc',this)">PC</div>
-              </div>
-              <div class="howto-steps active" id="tab-sp">
-                <div class="step"><div class="step-num">1</div><div><div class="step-text">Slackアプリを開いて、画面下の<strong>「あなた」</strong>タブをタップ</div></div></div>
-                <div class="step"><div class="step-num">2</div><div><div class="step-text">自分のプロフィール画面の右上 <strong>「⋯」</strong>をタップ</div></div></div>
-                <div class="step"><div class="step-num">3</div><div><div class="step-text"><strong>「メンバーIDをコピー」</strong>をタップ</div><div class="step-note">これがSlack IDです。このページに貼り付けてください</div><div class="id-example">例: U01AB2CD3EF</div></div></div>
-              </div>
-              <div class="howto-steps" id="tab-pc">
-                <div class="step"><div class="step-num">1</div><div><div class="step-text">Slackの左サイドバーで<strong>自分の名前</strong>をクリック</div></div></div>
-                <div class="step"><div class="step-num">2</div><div><div class="step-text"><strong>「プロフィールを表示」</strong>をクリック</div></div></div>
-                <div class="step"><div class="step-num">3</div><div><div class="step-text">プロフィール画面の <strong>「⋯」→「メンバーIDをコピー」</strong></div><div class="step-note">これがSlack IDです。このページに貼り付けてください</div><div class="id-example">例: U01AB2CD3EF</div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="field-hint">わからない場合は空欄のままで構いません。<br>登録後に管理者が設定します。</div>
       </div>
 
     </div>
@@ -668,16 +645,6 @@ async function submitForm() {
 }
 
 /* ── UI ─────────────────── */
-function toggleHowto() {
-  document.getElementById('howtoToggle').classList.toggle('open');
-  document.getElementById('howtoContent').classList.toggle('open');
-}
-function switchTab(id, el) {
-  document.querySelectorAll('.howto-tab').forEach(function (t) { t.classList.remove('active'); });
-  document.querySelectorAll('.howto-steps').forEach(function (s) { s.classList.remove('active'); });
-  el.classList.add('active');
-  document.getElementById('tab-' + id).classList.add('active');
-}
 function showToast(msg) {
   var el = document.getElementById('toast');
   el.textContent = msg;
