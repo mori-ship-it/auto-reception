@@ -256,6 +256,8 @@ function langLabel(){ return lang; }
 
 // ===== NAV =====
 function goTo(id){
+  // iPad: 画面遷移時にソフトキーボードを閉じる
+  if(document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
   if(cdTimer){clearTimeout(cdTimer);cdTimer=null;}
   document.getElementById(current).classList.remove('active');
   document.getElementById(id).classList.add('active');
@@ -1316,6 +1318,26 @@ const _fns = {
   switchDataPeriod, onHistorySearch, setQuickRange, showMoreHistory
 };
 Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
+
+// ===== iPad キーボード対策（Enterで確定＆キーボードを閉じる） =====
+(function setupEnterKey(){
+  function bind(id, action){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.setAttribute('enterkeyhint','done');
+    el.addEventListener('keydown', function(e){
+      // 日本語変換中のEnter（確定）は無視する
+      if(e.isComposing || e.keyCode === 229) return;
+      if(e.key === 'Enter' || e.keyCode === 13){
+        e.preventDefault();
+        el.blur();
+        if(action) action();
+      }
+    });
+  }
+  bind('nameInput', function(){ submitName(); });
+  bind('stylistSearch', null);
+})();
 
 // ===== エラー監視 =====
 window.onerror = function(msg, src, line, col, err) {
