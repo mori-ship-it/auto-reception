@@ -1339,6 +1339,52 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
   bind('stylistSearch', null);
 })();
 
+// ===== iPad: キーボードで入力欄・ボタンが隠れないよう画面を持ち上げる =====
+(function setupKeyboardShift(){
+  var vv = window.visualViewport;
+  if(!vv) return;
+  var TARGETS = { nameInput:1, stylistSearch:1 };
+  var shifted = null;
+
+  function reset(){
+    if(shifted){ shifted.style.transform = ''; shifted = null; }
+  }
+
+  function apply(){
+    var el = document.activeElement;
+    if(!el || !TARGETS[el.id]){ reset(); return; }
+    var scr = el.closest ? el.closest('.screen') : null;
+    if(!scr){ reset(); return; }
+
+    // キーボードの高さ
+    var kb = window.innerHeight - vv.height - vv.offsetTop;
+    if(kb < 80){ reset(); return; }
+
+    scr.style.transform = '';  // 素の位置で測り直す
+    var bottom = el.getBoundingClientRect().bottom;
+    var btns = scr.children;
+    for(var i = 0; i < btns.length; i++){
+      if(!btns[i].classList || !btns[i].classList.contains('btn')) continue;
+      var b = btns[i].getBoundingClientRect().bottom;
+      if(b > bottom) bottom = b;
+    }
+
+    var shift = bottom - (vv.offsetTop + vv.height) + 24;
+    if(shift > 0){
+      scr.style.transition = 'transform .25s ease';
+      scr.style.transform = 'translateY(' + (-Math.round(shift)) + 'px)';
+      shifted = scr;
+    } else {
+      reset();
+    }
+  }
+
+  vv.addEventListener('resize', apply);
+  vv.addEventListener('scroll', apply);
+  document.addEventListener('focusin', function(){ setTimeout(apply, 300); });
+  document.addEventListener('focusout', function(){ setTimeout(apply, 100); });
+})();
+
 // ===== エラー監視 =====
 window.onerror = function(msg, src, line, col, err) {
   console.error('[Reception Error]', msg, src, line);
