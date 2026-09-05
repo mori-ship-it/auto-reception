@@ -33,6 +33,7 @@ let selectedStylist = null;
 let visitLog = [];
 let cdTimer = null;
 let current = 's1';
+let firestoreReady = false;  // Firestore読み込み完了までFirestoreへの書き込みを禁止
 let currentDataPeriod = 'today';
 
 let custom = {
@@ -707,7 +708,7 @@ async function compressOldPhotos(){
 function addLog(name,type,stylist){
   visitLog.unshift({time:nowFull(),name,type,stylist:stylist||null});
   renderLog();
-  saveToStorage();
+  saveLogOnly();
 }
 function renderLog(){
   const el=document.getElementById('logContainer');
@@ -757,6 +758,17 @@ function showToast(msg){
 // ===== Firestoreログキー（STORE_ID付き） =====
 function logDocId(dateStr){ return `${STORE_ID}_${dateStr}`; }
 
+// ログ（来店記録）だけを保存する。設定は絶対に書き戻さない。
+async function saveLogOnly(){
+  try{
+    const logKey = `${STORE_ID}_log_${today()}`;
+    localStorage.setItem(logKey, JSON.stringify(visitLog));
+    if(!db) return;
+    if(!firestoreReady){ console.warn('Firestore未読込のためログ保存を中止'); return; }
+    await db.collection('logs').doc(logDocId(today())).set({ entries: visitLog }, {merge: true});
+  }catch(e){ console.warn('Log save error:', e); }
+}
+
 async function saveToStorage(){
   try{
     localStorage.setItem(`${STORE_ID}_custom`, JSON.stringify(custom));
@@ -768,6 +780,7 @@ async function saveToStorage(){
     const logKey = `${STORE_ID}_log_${today()}`;
     localStorage.setItem(logKey, JSON.stringify(visitLog));
     if(!db) return;
+    if(!firestoreReady){ console.warn('Firestore未読込のため設定の保存を中止'); return; }
     await db.collection('salon').doc(STORE_ID).set({
       custom, pinCode, webhookUrl, botToken,
       staffList, nextStaffId,
@@ -819,6 +832,7 @@ async function loadFromStorage(){
         if(d.txCache.es) Object.assign(TX.es, d.txCache.es);
       }
     }
+    firestoreReady = true;  // ここまで来ればFirestoreの最新値がメモリに載っている
     // Firestore に drinkMenu がなければデフォルト（初期値）を保存
     var fsMenu = snap.exists ? snap.data().drinkMenu : null;
     if(!fsMenu || !Array.isArray(fsMenu) || fsMenu.length === 0){
@@ -830,7 +844,7 @@ async function loadFromStorage(){
     if(logSnap.exists&&logSnap.data().entries) visitLog=logSnap.data().entries;
     applyLang();
     compressOldPhotos();
-  }catch(e){ console.warn('Storage load error:', e); applyLang(); }
+  }catch(e){ console.warn('Storage load error:', e); firestoreReady = true; applyLang(); }
 }
 
 const defaultDrinkMenu = [
