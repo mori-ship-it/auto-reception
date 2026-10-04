@@ -52,13 +52,28 @@
 <!-- ══ S3b スタイリスト検索 ══════════════════════ -->
 <div class="screen" id="s3b">
   <div class="top-bar"><div class="top-logo">SALON</div><div class="top-actions"><button class="icon-btn" onclick="goTo('s1')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button></div></div>
-  <div class="eyebrow" id="t-stylist-heading">担当スタイリスト</div>
-  <div class="display" id="t-stylist-title" style="font-size:clamp(22px,5vw,34px);">担当のお名前を入力してください</div>
-  <div class="divider"></div>
-  <div class="search-wrap"><span class="search-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b8aaa4" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span><input class="search-field" id="stylistSearch" type="text" placeholder="例）田中" maxlength="10" oninput="onStylistSearch(this.value)"></div>
-  <div class="stylist-list" id="stylistResults"></div>
-  <div style="height:8px"></div>
-  <button class="btn btn-outline" style="margin-top:10px;" onclick="skipStylist()"><span id="t-skip-stylist">指名なし・わからない</span></button>
+  <input type="hidden" id="stylistSearch" value="">
+  <div class="st-wrap">
+    <div class="st-side">
+      <div class="st-title" id="t-stylist-title2">担当スタイリストを<br>お選びください</div>
+      <div class="st-rule"></div>
+      <div class="st-sub" id="t-stylist-sub">お名前の頭文字でしぼりこめます</div>
+      <div class="st-chips" id="stylistChips"></div>
+      <div class="st-spacer"></div>
+      <div class="st-actions">
+        <button type="button" class="st-confirm" id="stylistConfirm" style="display:none;" onclick="confirmStylist()"><span class="st-confirm-who" id="stylistConfirmWho"></span><span class="st-confirm-go" id="t-stylist-next">次へ進む</span></button>
+        <button type="button" class="st-skip" onclick="skipStylist()"><span id="t-skip-stylist">指名なし・わからない</span></button>
+      </div>
+    </div>
+    <div class="st-main">
+      <div class="st-grid" id="stylistResults"></div>
+      <div class="st-pager" id="stylistPager" style="display:none;">
+        <button type="button" class="st-page-btn" id="stylistPrev" onclick="stylistPage(-1)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg><span id="t-page-prev">前へ</span></button>
+        <div class="st-page-num" id="stylistPageNum"></div>
+        <button type="button" class="st-page-btn" id="stylistNext" onclick="stylistPage(1)"><span id="t-page-next">次へ</span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ S4 受付完了 ═══════════════════════════════ -->
@@ -187,7 +202,7 @@
     <div class="admin-section"><span class="admin-label">受付フロー</span><div style="display:flex;align-items:center;gap:12px;margin-top:6px;"><div style="font-size:12px;">担当スタイリスト選択画面を表示</div><div class="toggle on" id="stylistToggle" onclick="toggleStylistScreen()" style="flex-shrink:0;"><div class="toggle-knob"></div></div></div><div id="stylistOffMsg" style="font-size:10px;color:var(--text-muted);margin-top:6px;display:none;">オフの場合、お名前入力後すぐに受付完了へ進みます（Slack通知は担当なしで送信されます）</div></div>
     <div class="admin-section"><span class="admin-label">PINコード</span><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">4桁の数字を入力</div><input class="admin-field" id="c-pin" placeholder="新しいPINコードを入力" maxlength="4" type="tel" style="letter-spacing:0.3em;"></div>
     <div class="admin-section"><span class="admin-label">Slack 設定</span><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">Webhook URL</div><input class="admin-field" id="webhookInput" placeholder="https://hooks.slack.com/services/..."><div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">Bot Token</div><input class="admin-field" id="botTokenInput" placeholder="xoxb-..."></div>
-    <div class="admin-section"><span class="admin-label">スタッフ管理</span><div id="adminStaffList" style="margin-bottom:12px;"></div><div class="admin-row"><input class="admin-field" id="newName" placeholder="名前（日本語）" style="margin:0;flex:2;"><input class="admin-field" id="newNameEn" placeholder="Name (EN)" style="margin:0;flex:2;"><select class="admin-field" id="newRole" style="margin:0;flex:1;"><option value="スタイリスト">スタイリスト</option><option value="アシスタント">アシスタント</option></select><button class="admin-btn" onclick="addStaff()">追加</button></div></div>
+    <div class="admin-section"><span class="admin-label">スタッフ管理</span><div id="adminStaffList" style="margin-bottom:12px;"></div><div class="admin-row"><input class="admin-field" id="newName" placeholder="名前（日本語）" style="margin:0;flex:2;"><input class="admin-field" id="newKana" placeholder="よみがな" style="margin:0;flex:2;"><input class="admin-field" id="newNameEn" placeholder="Name (EN)" style="margin:0;flex:2;"><select class="admin-field" id="newRole" style="margin:0;flex:1;"><option value="スタイリスト">スタイリスト</option><option value="アシスタント">アシスタント</option></select><button class="admin-btn" onclick="addStaff()">追加</button></div></div>
   </div>
 
   <!-- ══ 来店履歴 ══ -->
