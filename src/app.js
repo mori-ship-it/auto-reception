@@ -296,7 +296,8 @@ function submitName(){
 function clearErr(){document.getElementById('errMsg').classList.remove('show');}
 
 // ===== 担当スタイリスト選択（左：頭文字しぼりこみ／右：顔写真カード） =====
-const STYLIST_PER_PAGE = 6;
+// 1ページの人数：通常は4列×3段＝12人、スマホ幅（600px以下）は2列×3段＝6人
+function stylistPerPage(){ return (window.matchMedia && window.matchMedia('(max-width: 600px)').matches) ? 6 : 12; }
 const KANA_ROWS = ['あ','か','さ','た','な','は','ま','や','ら','わ'];
 const KANA_ROW_CHARS = {
   'あ':'あいうえおぁぃぅぇぉゔ','か':'かきくけこがぎぐげご','さ':'さしすせそざじずぜぞ',
@@ -342,7 +343,8 @@ function renderStylists(){
   if(sub) sub.style.display=useKana?'':'none';
 
   const list=stylistRow==='all'?active:active.filter(s=>kanaRowOf(s)===stylistRow);
-  const pages=Math.max(1,Math.ceil(list.length/STYLIST_PER_PAGE));
+  const perPage=stylistPerPage();
+  const pages=Math.max(1,Math.ceil(list.length/perPage));
   if(stylistPageIdx>pages-1) stylistPageIdx=pages-1;
   if(stylistPageIdx<0) stylistPageIdx=0;
   if(pendingStylistId!==null && !active.some(s=>s.id===pendingStylistId)) pendingStylistId=null;
@@ -350,16 +352,16 @@ function renderStylists(){
   if(!list.length){
     container.innerHTML=`<div class="st-empty">${tx('no-results')}</div>`;
   }else{
-    container.innerHTML=list.slice(stylistPageIdx*STYLIST_PER_PAGE,(stylistPageIdx+1)*STYLIST_PER_PAGE).map(s=>{
+    container.innerHTML=list.slice(stylistPageIdx*perPage,(stylistPageIdx+1)*perPage).map(s=>{
       const dn=lang==='en'?(s.nameEn||s.name):s.name;
       const init=String(dn||'').replace(/\s/g,'')[0]||'?';
       const ava=s.photo?`<img src="${s.photo}" alt="">`:`<span>${escHtml(init)}</span>`;
-      const subline=lang==='ja'?(s.kana||s.role||''):'';
+      const subline=lang==='ja'?(s.kana||''):'';  // よみがなだけ表示（役職名は出さない）
       // 姓と名のあいだ（空白）でだけ改行されるようにする
       const nameHtml=String(dn||'').trim().split(/\s+/).map(part=>`<span class="st-nm">${escHtml(part)}</span>`).join(' ');
       return `<button type="button" class="st-card${pendingStylistId===s.id?' on':''}" onclick="pickStylist(${s.id})">
         <span class="st-photo">${ava}</span>
-        <span class="st-text"><span class="st-name">${nameHtml}</span><span class="st-kana">${escHtml(subline)}</span></span>
+        <span class="st-text"><span class="st-name">${nameHtml}</span>${subline?`<span class="st-kana">${escHtml(subline)}</span>`:''}</span>
         <span class="st-check"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
       </button>`;
     }).join('');
