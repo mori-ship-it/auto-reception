@@ -617,3 +617,117 @@ body {
   background:var(--accent); color:#fff; font-size:12px; cursor:pointer;
   font-family:'Noto Sans JP',sans-serif;
 }
+
+/* ── STYLIST SELECT v2（左：頭文字しぼりこみ／右：顔写真カード） ── */
+#s3b { align-items:stretch; justify-content:flex-start; padding:92px 48px 32px; }
+.st-wrap { flex:1; min-height:0; display:flex; gap:40px; }
+.st-side { width:320px; flex-shrink:0; display:flex; flex-direction:column; }
+.st-title {
+  font-family:'Shippori Mincho', serif; font-weight:500;
+  font-size:32px; line-height:1.45; letter-spacing:0.04em; color:var(--text);
+}
+.st-rule { width:40px; height:3px; border-radius:2px; background:#3a4a70; margin:16px 0; flex-shrink:0; }
+.st-sub { font-size:15px; line-height:1.6; letter-spacing:0.08em; color:var(--text-mid); }
+.st-chips { margin-top:20px; display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px; }
+.st-chip {
+  height:56px; padding:0; border-radius:16px;
+  border:1px solid rgba(104,120,160,.3); background:#fff; color:var(--text);
+  font-family:'Noto Sans JP', sans-serif; font-size:21px; cursor:pointer;
+}
+.st-chip.all { grid-column:span 2; }
+.st-chip.on { background:#3a4a70; border-color:#3a4a70; color:#fff; }
+.st-chip:disabled { opacity:.32; cursor:default; }
+.st-spacer { flex:1; min-height:16px; }
+.st-actions { display:flex; flex-direction:column; gap:12px; flex-shrink:0; }
+.st-confirm {
+  display:none; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  min-height:84px; padding:10px 20px; border:none; border-radius:42px;
+  background:#3a4a70; color:#fff; cursor:pointer; font-family:'Noto Sans JP', sans-serif;
+  box-shadow:0 6px 18px rgba(58,74,112,.25);
+}
+.st-confirm.show { display:flex; }
+.st-confirm-who { font-size:14px; line-height:1.4; letter-spacing:0.08em; overflow-wrap:anywhere; }
+.st-confirm-go { font-size:21px; line-height:1.4; letter-spacing:0.18em; }
+.st-skip {
+  height:64px; border-radius:32px; border:1px solid rgba(104,120,160,.35);
+  background:#fff; color:var(--text); cursor:pointer;
+  font-family:'Noto Sans JP', sans-serif; font-size:17px; letter-spacing:0.1em;
+}
+.st-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:16px; }
+.st-grid {
+  flex:1; min-height:0; display:grid; gap:16px;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  grid-template-rows:repeat(2, minmax(0,1fr));
+}
+.st-card {
+  position:relative; min-width:0; min-height:0; padding:10px;
+  border-radius:26px; border:3px solid rgba(104,120,160,.2);
+  background:rgba(255,255,255,.84); box-shadow:0 2px 10px rgba(26,30,46,.04);
+  color:var(--text); cursor:pointer; font-family:'Noto Sans JP', sans-serif;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  transition:border-color .15s, box-shadow .15s, transform .1s;
+}
+.st-card:active { transform:scale(.98); }
+.st-card.on { border-color:#3a4a70; background:#fff; box-shadow:0 10px 28px rgba(58,74,112,.22); }
+.st-photo {
+  flex:1 1 0; min-height:0; aspect-ratio:1 / 1; max-width:100%;
+  border-radius:18px; overflow:hidden; background:#e1e6f0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Shippori Mincho', serif; font-size:64px; color:#5a6a96;
+}
+.st-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+.st-text { display:flex; flex-direction:column; align-items:center; gap:2px; max-width:100%; flex-shrink:0; }
+.st-name {
+  font-family:'Shippori Mincho', serif; font-weight:600;
+  font-size:clamp(20px, 2.4vw, 28px); line-height:1.3; letter-spacing:0.08em; text-align:center;
+}
+.st-nm { display:inline-block; max-width:100%; overflow-wrap:anywhere; }
+.st-kana { font-size:15px; line-height:1.4; letter-spacing:0.1em; color:var(--text-mid); min-height:21px; text-align:center; }
+.st-check {
+  position:absolute; top:16px; right:16px; width:38px; height:38px;
+  border-radius:50%; border:2px solid #fff; background:#3a4a70;
+  display:none; align-items:center; justify-content:center;
+}
+.st-card.on .st-check { display:flex; }
+.st-empty {
+  grid-column:1 / -1; grid-row:1 / -1; align-self:center; text-align:center;
+  font-size:16px; letter-spacing:0.1em; color:var(--text-mid);
+}
+.st-pager { flex-shrink:0; display:flex; align-items:center; justify-content:center; gap:20px; }
+.st-page-btn {
+  height:56px; padding:0 22px; border-radius:28px;
+  border:1px solid rgba(104,120,160,.3); background:#fff; color:var(--text); cursor:pointer;
+  font-family:'Noto Sans JP', sans-serif; font-size:17px; letter-spacing:0.1em;
+  display:flex; align-items:center; gap:8px;
+}
+.st-page-btn:disabled { opacity:.35; cursor:default; }
+.st-page-num { min-width:64px; text-align:center; font-family:'DM Sans', sans-serif; font-size:19px; font-weight:500; color:var(--text); }
+
+/* 縦置き・幅の狭い画面：見出し→頭文字→カード→ボタンの順に縦に積む */
+@media (max-width: 900px), (orientation: portrait) {
+  #s3b { padding:84px 24px 24px; }
+  .st-wrap { flex-direction:column; gap:14px; }
+  .st-side { display:contents; }
+  .st-title { order:1; font-size:26px; }
+  .st-title br { display:none; }
+  .st-rule, .st-sub, .st-spacer { display:none !important; }
+  .st-chips { order:2; margin-top:0; grid-template-columns:repeat(6, minmax(0,1fr)); }
+  .st-chip { height:48px; font-size:18px; }
+  .st-main { order:3; }
+  .st-actions { order:4; }
+  .st-grid { gap:12px; }
+  .st-name { font-size:22px; }
+  .st-confirm { min-height:72px; }
+}
+@media (max-width: 600px) {
+  .st-grid { grid-template-columns:repeat(2, minmax(0,1fr)); grid-template-rows:repeat(3, minmax(0,1fr)); gap:10px; }
+  .st-title { font-size:22px; }
+  .st-card { flex-direction:row; justify-content:flex-start; border-radius:18px; padding:8px; gap:8px; }
+  .st-photo { flex:0 0 auto; height:100%; max-width:46%; font-size:32px; border-radius:12px; }
+  .st-text { flex:1 1 0; min-width:0; align-items:flex-start; }
+  .st-name { font-size:16px; letter-spacing:0.02em; text-align:left; }
+  .st-kana { font-size:11px; letter-spacing:0.02em; min-height:0; text-align:left; }
+  .st-check { top:6px; right:6px; width:24px; height:24px; }
+  .st-check svg { width:13px; height:13px; }
+  .st-page-btn { height:48px; padding:0 16px; font-size:15px; }
+}

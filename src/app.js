@@ -48,6 +48,15 @@ let custom = {
 
 let staffList = [];
 let nextStaffId = 1;
+
+// ===== スタイリスト写真 =====
+// 写真本体は salon/{STORE_ID}/photos/{スタッフID} に1人1ドキュメントで保存する。
+// 店舗ドキュメントの staffList には hasPhoto:true だけを残す（1ドキュメント1MBの上限対策）。
+// 写真ドキュメントに書けない場合は、従来どおり staffList に写真を入れたまま保存する。
+const PHOTO_SIZE = 400;          // 保存する写真の一辺（px）
+const photoSaved = {};           // スタッフID → 写真ドキュメントに保存済みの写真の目印
+let photoDeleteQueue = [];       // 削除したスタッフのID（次の保存時に写真ドキュメントも消す）
+let photoSplitOk = true;         // 写真ドキュメントへの書き込みを拒否されたら false
 let drinkMenu = [
   {id:1,name:'ホットコーヒー',nameEn:'Hot Coffee',category:'hot',visible:true},
   {id:2,name:'カプチーノ',nameEn:'Cappuccino',category:'hot',visible:true},
@@ -98,6 +107,8 @@ const TX = {
     'log-call':'呼び出し','log-vendor':'業者','log-empty':'まだ来店記録がありません',
     'stylist-heading':'担当スタイリスト','stylist-title':'担当のお名前を入力してください',
     'search-ph':'例）田中','skip-stylist':'指名なし・わからない',
+    'stylist-title2':'担当スタイリストを<br>お選びください','stylist-sub':'お名前の頭文字でしぼりこめます',
+    'stylist-label':'担当：','stylist-next':'次へ進む','kana-all':'すべて','page-prev':'前へ','page-next':'次へ',
     'no-results':'一致するスタイリストが見つかりません',
     'call-staff':'スタッフを呼ぶ',
   },
@@ -127,6 +138,8 @@ const TX = {
     'log-call':'Called','log-vendor':'Vendor','log-empty':'No check-ins yet',
     'stylist-heading':'Select Stylist','stylist-title':'Enter your stylist\'s name',
     'search-ph':'e.g. Tanaka','skip-stylist':'No preference / Not sure',
+    'stylist-title2':'Choose your stylist','stylist-sub':'',
+    'stylist-label':'Stylist: ','stylist-next':'Continue','kana-all':'All','page-prev':'Back','page-next':'Next',
     'no-results':'No matching stylist found',
     'call-staff':'Call Staff',
   },
@@ -156,6 +169,8 @@ const TX = {
     'log-call':'已呼叫','log-vendor':'供应商','log-empty':'暂无到访记录',
     'stylist-heading':'选择造型师','stylist-title':'请输入您的造型师姓名',
     'search-ph':'例）田中','skip-stylist':'无指定／不确定',
+    'stylist-title2':'请选择您的造型师','stylist-sub':'',
+    'stylist-label':'造型师：','stylist-next':'下一步','kana-all':'全部','page-prev':'上一页','page-next':'下一页',
     'no-results':'未找到匹配的造型师',
     'call-staff':'呼叫工作人员',
   },
@@ -185,6 +200,8 @@ const TX = {
     'log-call':'호출됨','log-vendor':'업체','log-empty':'아직 방문 기록이 없습니다',
     'stylist-heading':'스타일리스트 선택','stylist-title':'담당 스타일리스트 이름을 입력해 주세요',
     'search-ph':'예）다나카','skip-stylist':'지정 없음／모름',
+    'stylist-title2':'담당 스타일리스트를<br>선택해 주세요','stylist-sub':'',
+    'stylist-label':'담당: ','stylist-next':'다음으로','kana-all':'전체','page-prev':'이전','page-next':'다음',
     'no-results':'일치하는 스타일리스트를 찾을 수 없습니다',
     'call-staff':'직원 호출',
   },
@@ -214,6 +231,8 @@ const TX = {
     'log-call':'Llamado','log-vendor':'Proveedor','log-empty':'No hay registros aún',
     'stylist-heading':'Seleccionar estilista','stylist-title':'Ingrese el nombre de su estilista',
     'search-ph':'ej.) Tanaka','skip-stylist':'Sin preferencia / No sé',
+    'stylist-title2':'Elija a su estilista','stylist-sub':'',
+    'stylist-label':'Estilista: ','stylist-next':'Continuar','kana-all':'Todos','page-prev':'Anterior','page-next':'Siguiente',
     'no-results':'No se encontró estilista',
     'call-staff':'Llamar al personal',
   }
@@ -231,7 +250,7 @@ function applyLang(){
   const ss=document.getElementById('stylistSearch'); if(ss) ss.placeholder = tx('search-ph');
   const lb=document.getElementById('langBtn'); if(lb) lb.value = lang;
   applyCustom(); renderLog();
-  if(ss) onStylistSearch(ss.value);
+  renderStylists();
 }
 
 function applyCustom(){
@@ -272,33 +291,110 @@ function submitName(){
   currentName=v; document.getElementById('nameInput').value='';
   selectedStylist=null;
   if(!stylistEnabled){finishCheckin();return;}
-  document.getElementById('stylistSearch').value='';
-  onStylistSearch(''); goTo('s3b');
+  resetStylistPicker(); renderStylists(); goTo('s3b');
 }
 function clearErr(){document.getElementById('errMsg').classList.remove('show');}
 
-function onStylistSearch(q){
-  const container=document.getElementById('stylistResults');
-  const active=staffList.filter(s=>s.on);
-  const results=q.trim()===''?active:active.filter(s=>{
-    const n=lang==='en'?(s.nameEn||s.name):s.name;
-    return n.toLowerCase().includes(q.toLowerCase())||(s.nameEn||'').toLowerCase().includes(q.toLowerCase());
-  });
-  if(!results.length){container.innerHTML=`<div class="search-empty">${tx('no-results')}</div>`;return;}
-  container.innerHTML=results.map(s=>{
-    const dn=lang==='en'?(s.nameEn||s.name):s.name;
-    const init=dn.replace(/\s/g,'')[0]||'?';
-    const ava=s.photo?`<img src="${s.photo}" alt="${dn}">`:`<span>${init}</span>`;
-    return `<div class="stylist-row" onclick="selectStylist(${s.id})">
-      <div class="stylist-ava">${ava}</div>
-      <div class="stylist-meta">
-        <div class="stylist-name">${dn}</div>
-        <div class="stylist-role">${s.role}</div>
-      </div>
-      <span class="stylist-arr">›</span>
-    </div>`;
-  }).join('');
+// ===== 担当スタイリスト選択（左：頭文字しぼりこみ／右：顔写真カード） =====
+const STYLIST_PER_PAGE = 6;
+const KANA_ROWS = ['あ','か','さ','た','な','は','ま','や','ら','わ'];
+const KANA_ROW_CHARS = {
+  'あ':'あいうえおぁぃぅぇぉゔ','か':'かきくけこがぎぐげご','さ':'さしすせそざじずぜぞ',
+  'た':'たちつてとだぢづでどっ','な':'なにぬねの','は':'はひふへほばびぶべぼぱぴぷぺぽ',
+  'ま':'まみむめも','や':'やゆよゃゅょ','ら':'らりるれろ','わ':'わをん'
+};
+let stylistRow = 'all';
+let stylistPageIdx = 0;
+let pendingStylistId = null;
+
+function escHtml(v){
+  return String(v==null?'':v).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+// よみがな（なければ名前）の先頭1文字から「あ・か・さ…」の行を返す。判定できなければ ''。
+function kanaRowOf(s){
+  let ch=String((s.kana||'').trim()||(s.name||'').trim()).charAt(0);
+  if(!ch) return '';
+  const code=ch.charCodeAt(0);
+  if(code>=0x30A1 && code<=0x30F6) ch=String.fromCharCode(code-0x60);  // カタカナ→ひらがな
+  for(const r of KANA_ROWS){ if(KANA_ROW_CHARS[r].indexOf(ch)>=0) return r; }
+  return '';
+}
+function resetStylistPicker(){ stylistRow='all'; stylistPageIdx=0; pendingStylistId=null; }
+
+function renderStylists(){
+  const container=document.getElementById('stylistResults');
+  if(!container) return;
+  const active=staffList.filter(s=>s.on);
+  const rowsInUse={};
+  active.forEach(s=>{ const r=kanaRowOf(s); if(r) rowsInUse[r]=true; });
+  const useKana=(lang==='ja') && Object.keys(rowsInUse).length>0;
+  if(!useKana || (stylistRow!=='all' && !rowsInUse[stylistRow])) stylistRow='all';
+
+  // 頭文字ボタン（日本語表示で、よみがなが1人でも登録されているときだけ出す）
+  const chips=document.getElementById('stylistChips');
+  const sub=document.getElementById('t-stylist-sub');
+  if(chips){
+    chips.style.display=useKana?'':'none';
+    chips.innerHTML=!useKana?'':
+      `<button type="button" class="st-chip all${stylistRow==='all'?' on':''}" onclick="setStylistRow('all')">${tx('kana-all')}</button>`
+      + KANA_ROWS.map(r=>`<button type="button" class="st-chip${stylistRow===r?' on':''}" ${rowsInUse[r]?'':'disabled'} onclick="setStylistRow('${r}')">${r}</button>`).join('');
+  }
+  if(sub) sub.style.display=useKana?'':'none';
+
+  const list=stylistRow==='all'?active:active.filter(s=>kanaRowOf(s)===stylistRow);
+  const pages=Math.max(1,Math.ceil(list.length/STYLIST_PER_PAGE));
+  if(stylistPageIdx>pages-1) stylistPageIdx=pages-1;
+  if(stylistPageIdx<0) stylistPageIdx=0;
+  if(pendingStylistId!==null && !active.some(s=>s.id===pendingStylistId)) pendingStylistId=null;
+
+  if(!list.length){
+    container.innerHTML=`<div class="st-empty">${tx('no-results')}</div>`;
+  }else{
+    container.innerHTML=list.slice(stylistPageIdx*STYLIST_PER_PAGE,(stylistPageIdx+1)*STYLIST_PER_PAGE).map(s=>{
+      const dn=lang==='en'?(s.nameEn||s.name):s.name;
+      const init=String(dn||'').replace(/\s/g,'')[0]||'?';
+      const ava=s.photo?`<img src="${s.photo}" alt="">`:`<span>${escHtml(init)}</span>`;
+      const subline=lang==='ja'?(s.kana||s.role||''):'';
+      // 姓と名のあいだ（空白）でだけ改行されるようにする
+      const nameHtml=String(dn||'').trim().split(/\s+/).map(part=>`<span class="st-nm">${escHtml(part)}</span>`).join(' ');
+      return `<button type="button" class="st-card${pendingStylistId===s.id?' on':''}" onclick="pickStylist(${s.id})">
+        <span class="st-photo">${ava}</span>
+        <span class="st-text"><span class="st-name">${nameHtml}</span><span class="st-kana">${escHtml(subline)}</span></span>
+        <span class="st-check"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+      </button>`;
+    }).join('');
+  }
+
+  // ページ送り
+  const pager=document.getElementById('stylistPager');
+  if(pager){
+    pager.style.display=pages>1?'':'none';
+    const num=document.getElementById('stylistPageNum'); if(num) num.textContent=(stylistPageIdx+1)+' / '+pages;
+    const pv=document.getElementById('stylistPrev'); if(pv) pv.disabled=stylistPageIdx===0;
+    const nx=document.getElementById('stylistNext'); if(nx) nx.disabled=stylistPageIdx>=pages-1;
+  }
+
+  // 確認ボタン（「担当：〇〇」＋「次へ進む」）
+  const cf=document.getElementById('stylistConfirm');
+  if(cf){
+    const p=staffList.find(s=>s.id===pendingStylistId);
+    cf.classList.toggle('show', !!p);
+    cf.style.display=p?'flex':'none';
+    const who=document.getElementById('stylistConfirmWho');
+    if(who) who.textContent=p?tx('stylist-label')+(lang==='en'?(p.nameEn||p.name):p.name):'';
+  }
+}
+// 旧名の互換（古い html_body.txt の検索欄から呼ばれても動くように残す）
+function onStylistSearch(){ renderStylists(); }
+function setStylistRow(r){ stylistRow=r; stylistPageIdx=0; renderStylists(); }
+function stylistPage(d){ stylistPageIdx+=d; renderStylists(); }
+function pickStylist(id){
+  // 確認ボタンのない古い画面では、従来どおりタップで即決定する
+  if(!document.getElementById('stylistConfirm')){ selectStylist(id); return; }
+  pendingStylistId=(pendingStylistId===id)?null:id;
+  renderStylists();
+}
+function confirmStylist(){ if(pendingStylistId!==null) selectStylist(pendingStylistId); }
 
 function selectStylist(id){selectedStylist=staffList.find(s=>s.id===id)||null;finishCheckin();}
 function skipStylist(){selectedStylist=null;finishCheckin();}
@@ -418,10 +514,10 @@ function saveAll(){
   applyCustom();
   var hs=document.getElementById('homeScreen'); if(hs) hs.classList.remove('active');
   showToast('保存中...');
-  autoTranslateCustom().then(()=>{
-    saveToStorage();
+  autoTranslateCustom().then(()=>saveToStorage()).then(ok=>{
+    if(ok===false){ showToast('保存に失敗しました。通信状況を確認して、もう一度保存してください'); return; }
     _adminDirty = false;
-    showToast('保存しました');
+    showToast(photoSplitOk?'保存しました':'保存しました（写真は従来の保存方法のままです）');
   });
 }
 function saveCustom(){saveAll();}
@@ -486,7 +582,10 @@ function renderAdminStaff(){
         <input type="file" accept="image/*" onchange="uploadPhoto(${s.id},this)">
       </label>
       <div class="staff-info" style="flex:1;min-width:0;">
-        <input class="admin-field" style="margin:0 0 4px;padding:4px 8px;font-family:'Shippori Mincho',serif;font-size:14px;" value="${s.name}" oninput="updateStaff(${s.id},'name',this.value)">
+        <div style="display:flex;gap:4px;margin:0 0 4px;">
+          <input class="admin-field" style="margin:0;padding:4px 8px;font-family:'Shippori Mincho',serif;font-size:14px;flex:1;min-width:0;" value="${s.name}" oninput="updateStaff(${s.id},'name',this.value)">
+          <input class="admin-field" style="margin:0;padding:4px 8px;font-size:11px;flex:1;min-width:0;" value="${escHtml(s.kana||'')}" placeholder="よみがな（例：たなか みさき）" oninput="updateStaff(${s.id},'kana',this.value)">
+        </div>
         <div style="display:flex;gap:4px;">
           <input class="admin-field" style="margin:0;padding:4px 8px;font-size:11px;flex:1;" value="${s.nameEn||''}" placeholder="Name (EN)" oninput="updateStaff(${s.id},'nameEn',this.value)">
           <select class="admin-field" style="margin:0;padding:4px 6px;font-size:11px;flex:1;" onchange="updateStaff(${s.id},'role',this.value)">
@@ -554,6 +653,7 @@ function removeStaff(id){
   ov.addEventListener('click', e => { if(e.target === ov) close(); });
   ov.querySelector('#delOkBtn').addEventListener('click', () => {
     staffList = staffList.filter(x => x.id !== id);
+    photoDeleteQueue.push(id);
     close();
     renderAdminStaff();
   });
@@ -565,9 +665,11 @@ function addStaff(){
   const nameEn=ne?ne.value.trim():'';
   const nr=document.getElementById('newRole');
   const role=nr?nr.value:'スタイリスト';
+  const nk=document.getElementById('newKana');
+  const kana=nk?nk.value.trim():'';
   if(!name)return;
-  staffList.push({id:nextStaffId++,name,nameEn,role,on:true,slackId:'',photo:''});
-  nn.value=''; if(ne) ne.value=''; if(nr) nr.value='スタイリスト';
+  staffList.push({id:nextStaffId++,name,nameEn,kana,role,on:true,slackId:'',photo:''});
+  nn.value=''; if(ne) ne.value=''; if(nk) nk.value=''; if(nr) nr.value='スタイリスト';
   renderAdminStaff(); showToast(`${name} を追加しました`);
 }
 function uploadPhoto(id,input){
@@ -591,10 +693,10 @@ function openPhotoCropper(id, img){
   ov.innerHTML=`
     <div style="width:100%;max-width:360px;background:rgba(255,255,255,.95);border-radius:24px;padding:24px 20px 18px;text-align:center;font-family:'Noto Sans JP',sans-serif;">
       <div style="font-family:'Shippori Mincho',serif;font-size:17px;letter-spacing:0.08em;color:#1a1e2e;">写真の位置を調整</div>
-      <div style="font-size:11px;color:#5a6278;margin:5px 0 16px;">ドラッグで移動・スライダーで拡大縮小</div>
+      <div style="font-size:11px;color:#5a6278;margin:5px 0 16px;line-height:1.7;">お顔が枠いっぱいに大きく入るように合わせてください<br>ドラッグで移動・スライダーで拡大縮小</div>
       <div id="cropStage" style="position:relative;width:100%;aspect-ratio:1;background:#e4e8f0;border-radius:16px;overflow:hidden;touch-action:none;cursor:grab;">
         <canvas id="cropCanvas" style="display:block;width:100%;height:100%;"></canvas>
-        <div style="position:absolute;inset:8%;border-radius:50%;pointer-events:none;box-shadow:0 0 0 9999px rgba(255,255,255,.72);border:2px solid rgba(255,255,255,.9);"></div>
+        <div style="position:absolute;inset:8%;border-radius:9%;pointer-events:none;box-shadow:0 0 0 9999px rgba(255,255,255,.72);border:2px solid rgba(255,255,255,.9);"></div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;margin:16px 4px 2px;">
         <span style="font-size:11px;color:#8890a4;">小</span>
@@ -655,7 +757,7 @@ function openPhotoCropper(id, img){
   ov.addEventListener('click', e=>{ if(e.target===ov) close(); });
 
   ov.querySelector('#cropOk').addEventListener('click', ()=>{
-    const out=200;
+    const out=PHOTO_SIZE;
     const c2=document.createElement('canvas');
     c2.width=out; c2.height=out;
     const g=c2.getContext('2d');
@@ -676,13 +778,13 @@ async function compressOldPhotos(){
   let changed = false;
   for (let i = 0; i < staffList.length; i++) {
     const s = staffList[i];
-    if (!s.photo || s.photo.length < 50000) continue;
+    if (!s.photo || s.photo.length < 150000) continue;
     try {
       const compressed = await new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX = 200;
+          const MAX = PHOTO_SIZE;
           let w = img.width, h = img.height;
           if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
           else      { if (h > MAX) { w = w * MAX / h; h = MAX; } }
@@ -769,26 +871,87 @@ async function saveLogOnly(){
   }catch(e){ console.warn('Log save error:', e); }
 }
 
+function photoRef(id){ return db.collection('salon').doc(STORE_ID).collection('photos').doc(String(id)); }
+function photoSig(p){ return p ? p.length+':'+p.slice(-32) : ''; }
+function isPhotoSplit(s){ return !!(s.photo && s.hasPhoto && photoSaved[s.id]===photoSig(s.photo)); }
+
+// スタッフ一覧を端末内に控える。容量オーバーのときは、写真ドキュメントに保存済みの写真だけ省いて控える。
+function saveStaffLocal(){
+  const key=`${STORE_ID}_staff`;
+  try{ localStorage.setItem(key, JSON.stringify(staffList)); return; }catch(e){}
+  try{
+    localStorage.setItem(key, JSON.stringify(staffList.map(s=>isPhotoSplit(s)?{...s,photo:''}:s)));
+  }catch(e){ console.warn('スタッフ一覧を端末内に保存できませんでした:', e); }
+}
+
+// 写真を1人1ドキュメントに保存し、店舗ドキュメントに入れる staffList を返す。
+async function splitPhotosForSave(){
+  const out=[];
+  for(const s of staffList){
+    if(!s.photo){ out.push(s); continue; }      // 写真なし、または未読込（hasPhoto はそのまま残す）
+    const sig=photoSig(s.photo);
+    let ok = photoSplitOk && s.hasPhoto===true && photoSaved[s.id]===sig;
+    if(!ok && photoSplitOk){
+      try{
+        await photoRef(s.id).set({ storeId: STORE_ID, staffId: s.id, photo: s.photo, updatedAt: Date.now() }, {merge: true});
+        photoSaved[s.id]=sig; ok=true;
+      }catch(e){
+        console.warn('写真ドキュメントの保存に失敗（店舗データに同梱して保存します）:', e);
+        if(e && e.code==='permission-denied') photoSplitOk=false;
+      }
+    }
+    s.hasPhoto = ok;
+    out.push(ok ? {...s, photo:'', hasPhoto:true} : {...s, hasPhoto:false});
+  }
+  return out;
+}
+
+// 写真ドキュメントを読み込んで staffList に載せる。
+async function loadStaffPhotos(){
+  if(!staffList.some(s=>s.hasPhoto)) return;
+  try{
+    const qs = await db.collection('salon').doc(STORE_ID).collection('photos').get();
+    const map={};
+    qs.forEach(doc=>{ const d=doc.data(); if(d && d.photo) map[doc.id]=d.photo; });
+    let changed=false;
+    staffList.forEach(s=>{
+      const p=map[String(s.id)];
+      if(s.hasPhoto && p){ if(s.photo!==p){ s.photo=p; changed=true; } photoSaved[s.id]=photoSig(p); }
+    });
+    if(changed){ saveStaffLocal(); renderStylists(); renderAdminStaff(); }
+  }catch(e){ console.warn('写真の読み込みに失敗:', e); }
+}
+
+// 保存できたら true、Firestore への保存に失敗したら false を返す。
 async function saveToStorage(){
   try{
     localStorage.setItem(`${STORE_ID}_custom`, JSON.stringify(custom));
     localStorage.setItem(`${STORE_ID}_pin`, pinCode);
     localStorage.setItem(`${STORE_ID}_webhook`, webhookUrl);
     localStorage.setItem(`${STORE_ID}_bottoken`, botToken);
-    localStorage.setItem(`${STORE_ID}_staff`, JSON.stringify(staffList));
     localStorage.setItem(`${STORE_ID}_nextid`, nextStaffId);
     const logKey = `${STORE_ID}_log_${today()}`;
     localStorage.setItem(logKey, JSON.stringify(visitLog));
-    if(!db) return;
-    if(!firestoreReady){ console.warn('Firestore未読込のため設定の保存を中止'); return; }
+  }catch(e){ console.warn('端末内への保存に失敗:', e); }
+  saveStaffLocal();
+  try{
+    if(!db) return true;
+    if(!firestoreReady){ console.warn('Firestore未読込のため設定の保存を中止'); return false; }
+    const staffForDoc = await splitPhotosForSave();
     await db.collection('salon').doc(STORE_ID).set({
       custom, pinCode, webhookUrl, botToken,
-      staffList, nextStaffId,
+      staffList: staffForDoc, nextStaffId,
       drinkMenu, drinkEnabled, stylistEnabled,
       txCache: {en: TX.en, zh: TX.zh, ko: TX.ko, es: TX.es},
     }, {merge: true});
+    saveStaffLocal();
+    // 削除したスタッフの写真ドキュメントを消す（失敗しても受付には影響しない）
+    const gone = photoDeleteQueue.filter(id=>!staffList.some(s=>s.id===id));
+    photoDeleteQueue = [];
+    gone.forEach(id=>{ delete photoSaved[id]; photoRef(id).delete().catch(()=>{}); });
     await db.collection('logs').doc(logDocId(today())).set({ entries: visitLog }, {merge: true});
-  }catch(e){ console.warn('Storage error:', e); }
+    return true;
+  }catch(e){ console.warn('Storage error:', e); return false; }
 }
 
 async function loadFromStorage(){
@@ -818,7 +981,14 @@ async function loadFromStorage(){
       if(d.pinCode)pinCode=d.pinCode;
       if(d.webhookUrl)webhookUrl=d.webhookUrl;
       if(d.botToken)botToken=d.botToken;
-      if(d.staffList)staffList=d.staffList;
+      if(d.staffList){
+        // 端末内に控えてある写真を、写真ドキュメントの読み込みが終わるまでの表示に使う
+        const cached={}; staffList.forEach(x=>{ if(x.photo) cached[x.id]=x.photo; });
+        staffList=d.staffList.map(x=>{
+          if(x.hasPhoto && !x.photo && cached[x.id]){ photoSaved[x.id]=photoSig(cached[x.id]); return {...x, photo:cached[x.id]}; }
+          return x;
+        });
+      }
       if(d.nextStaffId)nextStaffId=d.nextStaffId;
       if(d.drinkMenu&&d.drinkMenu.length)drinkMenu=d.drinkMenu;
       if(d.drinkEnabled!==undefined)drinkEnabled=d.drinkEnabled;
@@ -843,6 +1013,7 @@ async function loadFromStorage(){
     if(!logSnap.exists) logSnap = await db.collection('logs').doc(today()).get();
     if(logSnap.exists&&logSnap.data().entries) visitLog=logSnap.data().entries;
     applyLang();
+    await loadStaffPhotos();
     compressOldPhotos();
   }catch(e){ console.warn('Storage load error:', e); firestoreReady = true; applyLang(); }
 }
@@ -1324,6 +1495,7 @@ function initHistoryDefaults(){
 const _fns = {
   goTo, submitName, doWalkin, doVendor, doCallStaff, skipStylist,
   selectStylist, onStylistSearch, setLang, clearErr,
+  setStylistRow, stylistPage, pickStylist, confirmStylist,
   openHome, closeHome, saveAll, addStaff, removeStaff,
   toggleStaff, updateStaff, updateSlackId, uploadPhoto,
   pinInput, pinDelete, showToast, saveCustom, saveWebhook,
