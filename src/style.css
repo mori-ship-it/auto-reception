@@ -672,7 +672,8 @@ body {
 .st-card:active { transform:scale(.98); }
 .st-card.on { border-color:#3a4a70; background:#fff; box-shadow:0 6px 18px rgba(58,74,112,.22); }
 .st-photo {
-  flex:1 1 0; min-height:0; min-width:0; width:auto; max-width:100%; aspect-ratio:1 / 1;
+  flex:0 1 auto; min-height:0; min-width:0;
+  width:auto; max-width:100%; max-height:100%; aspect-ratio:1 / 1;
   margin-inline:auto;
   border-radius:10px; overflow:hidden; background:#e1e6f0;
   display:flex; align-items:center; justify-content:center;
