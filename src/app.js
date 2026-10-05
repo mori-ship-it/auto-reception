@@ -22,6 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
   loadFromStorage();
 });
 
+let _stylistNameHRAF = 0;
+window.addEventListener('resize', () => {
+  if(_stylistNameHRAF) cancelAnimationFrame(_stylistNameHRAF);
+  _stylistNameHRAF = requestAnimationFrame(() => { _stylistNameHRAF = 0; updateStylistNameH(); });
+});
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(() => updateStylistNameH());
+}
+
 // ===== STATE =====
 let lang = 'ja';
 let webhookUrl = '';
@@ -385,6 +394,20 @@ function renderStylists(){
     const who=document.getElementById('stylistConfirmWho');
     if(who) who.textContent=p?tx('stylist-label')+(lang==='en'?(p.nameEn||p.name):p.name):'';
   }
+  updateStylistNameH();
+}
+function updateStylistNameH(){
+  const grid=document.getElementById('stylistResults');
+  if(!grid) return;
+  requestAnimationFrame(()=>{
+    let maxH=0;
+    grid.querySelectorAll('.st-text').forEach(t=>{
+      const h=t.getBoundingClientRect().height;
+      if(h>maxH) maxH=h;
+    });
+    if(maxH>0) grid.style.setProperty('--st-name-h', maxH+'px');
+    else grid.style.removeProperty('--st-name-h');
+  });
 }
 // 旧名の互換（古い html_body.txt の検索欄から呼ばれても動くように残す）
 function onStylistSearch(){ renderStylists(); }

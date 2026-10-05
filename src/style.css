@@ -674,7 +674,7 @@ body {
 .st-card.on { border-color:#3a4a70; background:#fff; box-shadow:0 6px 18px rgba(58,74,112,.22); }
 .st-photo {
   flex:none; min-height:0; min-width:0;
-  width:min(100%, calc(100cqh - 15px - 55px));
+  width:min(100%, calc(100cqh - 15px - var(--st-name-h, 55px)));
   aspect-ratio:1 / 1;
   margin-inline:auto;
   border-radius:10px; overflow:hidden; background:#e1e6f0;
