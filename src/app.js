@@ -1647,8 +1647,20 @@ var _lastActivityAt = Date.now();
 })();
 
 // ===== 遠隔バージョン確認：salon/${STORE_ID}.appVersion を merge: true で書く =====
-// firestoreReady が true になるのを待ってから書き込むので、既存 settings は上書きしない。
+// ホーム画面から起動した PWA（display-mode: standalone もしくは
+// navigator.standalone）のときだけ書き込む。これで Vercel のスクリーンショット
+// bot や通常のブラウザタブからのアクセスを除外し、実機 iPad の起動情報だけが
+// Firestore に残る。firestoreReady が true になるのを待ってから書き込むので、
+// 既存 settings は上書きしない。
+function _isStandalonePWA(){
+  try {
+    if(window.navigator && window.navigator.standalone === true) return true;  // iOS Safari
+    if(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+  } catch(e){ /* ignore */ }
+  return false;
+}
 (function setupAppVersionBeacon(){
+  if(!_isStandalonePWA()) return;
   function waitReady(resolve){
     if(firestoreReady) return resolve();
     setTimeout(function(){ waitReady(resolve); }, 500);
