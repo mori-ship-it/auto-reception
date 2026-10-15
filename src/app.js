@@ -1598,6 +1598,81 @@ setTimeout(function(){
   if(bi) bi.textContent = 'build ' + __COMMIT_HASH__ + ' · ' + __BUILD_TIME__;
 }, 0);
 
+// ===== 操作アイドル検知（自動更新で使う） =====
+var _lastActivityAt = Date.now();
+(function trackActivity(){
+  var opts = { capture:true, passive:true };
+  var evs = ['touchstart','touchmove','touchend','click','keydown','focusin','pointerdown'];
+  evs.forEach(function(ev){
+    document.addEventListener(ev, function(){ _lastActivityAt = Date.now(); }, opts);
+  });
+})();
+
+// ===== 自動更新：5分ごとに /version.json をチェックし、
+// ハッシュが変わっていてトップ画面(s1)で操作がないときだけ再読み込み =====
+(function setupAutoUpdate(){
+  var INTERVAL_MS = 5 * 60 * 1000;
+  var IDLE_MS = 30 * 1000;
+
+  async function checkOnce(){
+    if(__COMMIT_HASH__ === 'unknown') return;  // ローカルビルド等では無効化
+    try {
+      var res = await fetch('/version.json?t=' + Date.now(), { cache: 'no-store' });
+      if(!res.ok) return;
+      var info = await res.json();
+      if(!info || !info.commitHash) return;
+      if(info.commitHash === __COMMIT_HASH__) return;
+
+      // トップ画面(s1)、管理画面・PINモーダル閉、直近操作なしの時だけ再読み込み
+      if(current !== 's1') return;
+      var hs = document.getElementById('homeScreen');
+      if(hs && hs.classList.contains('active')) return;
+      var pm = document.getElementById('pinModal');
+      if(pm && pm.classList.contains('active')) return;
+      if(Date.now() - _lastActivityAt < IDLE_MS) return;
+
+      // Service Worker も同時更新を試みる
+      if('serviceWorker' in navigator){
+        try {
+          var regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(function(r){ return r.update(); }));
+        } catch(e){ /* ignore */ }
+      }
+      window.location.reload();
+    } catch(e){ /* ネットワークエラーは静かに握りつぶす */ }
+  }
+
+  setTimeout(checkOnce, 10 * 1000);     // 起動10秒後に初回
+  setInterval(checkOnce, INTERVAL_MS);  // 以降5分ごと
+})();
+
+// ===== 遠隔バージョン確認：salon/${STORE_ID}.appVersion を merge: true で書く =====
+// firestoreReady が true になるのを待ってから書き込むので、既存 settings は上書きしない。
+(function setupAppVersionBeacon(){
+  function waitReady(resolve){
+    if(firestoreReady) return resolve();
+    setTimeout(function(){ waitReady(resolve); }, 500);
+  }
+  function screenSize(){
+    return (window.screen && window.screen.width && window.screen.height)
+      ? (window.screen.width + 'x' + window.screen.height)
+      : (window.innerWidth + 'x' + window.innerHeight);
+  }
+  new Promise(waitReady).then(function(){
+    if(!db) return;
+    db.collection('salon').doc(STORE_ID).set({
+      appVersion: {
+        commitHash: __COMMIT_HASH__,
+        buildTime: __BUILD_TIME__,
+        startedAt: new Date().toISOString(),
+        userAgent: navigator.userAgent || '',
+        screenSize: screenSize(),
+        innerSize: window.innerWidth + 'x' + window.innerHeight
+      }
+    }, { merge: true }).catch(function(e){ console.warn('appVersion write failed:', e); });
+  });
+})();
+
 // ===== iPad: キーボードで入力欄・ボタンが隠れないよう画面を持ち上げる =====
 // 名前入力(#s3)は body.kb-open の上詰めレイアウトで対応するので、
 // kb-open 中はこの画面シフトを無効化する（二重に動かさない）。
