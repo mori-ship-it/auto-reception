@@ -220,6 +220,15 @@ body.kb-open #s3 .btn.btn-fill {
   display:flex; flex-direction:column;
   opacity:0; pointer-events:none; transition:opacity 0.35s ease; z-index:50;
 }
+/* 管理画面の末尾に表示するビルド情報。お客さん向け画面には出さないので
+   .home-screen 直下に閉じ込める。 */
+.admin-build-info {
+  font-family:'DM Sans',ui-monospace,monospace;
+  font-size:10px; letter-spacing:0.06em;
+  color:var(--text-muted); opacity:0.55;
+  text-align:center; padding:8px 12px 14px;
+  user-select:text;
+}
 .home-screen.active { opacity:1; pointer-events:all; }
 .home-hd {
   display:flex; align-items:center; justify-content:space-between;

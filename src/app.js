@@ -1532,33 +1532,71 @@ const _fns = {
 };
 Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
 
-// ===== iPad キーボード対策（Enterで確定＆キーボードを閉じる） =====
+// ===== iPad キーボード対策（Enterで確定＆キーボードを閉じる、kb-open トグル） =====
+// html_body.txt の DOM 注入より前にこの IIFE が走るケース（Vite の ES モジュール
+// hoisting）があるため、特定要素への直接 addEventListener ではなく document への
+// イベント委譲で実装する。これにより要素が後から生成されても確実に拾える。
 (function setupEnterKey(){
-  function bind(id, action){
-    var el = document.getElementById(id);
-    if(!el) return;
-    el.setAttribute('enterkeyhint','done');
-    el.addEventListener('keydown', function(e){
-      // 日本語変換中のEnter（確定）は無視する
-      if(e.isComposing || e.keyCode === 229) return;
-      if(e.key === 'Enter' || e.keyCode === 13){
-        e.preventDefault();
-        el.blur();
-        if(action) action();
-      }
-    });
-  }
-  bind('nameInput', function(){ submitName(); });
-  bind('stylistSearch', null);
+  var TARGETS = { nameInput:1, stylistSearch:1 };
+  var ACTIONS = { nameInput: function(){ submitName(); } };
 
-  // nameInput の focus/blur で body.kb-open をトグルし、
-  // #s3 を上詰めレイアウトに切り替える（CSS 側で見出し縮小・小見出し非表示）
-  var ni = document.getElementById('nameInput');
-  if(ni){
-    ni.addEventListener('focus', function(){ document.body.classList.add('kb-open'); });
-    ni.addEventListener('blur',  function(){ document.body.classList.remove('kb-open'); });
+  // enterkeyhint は要素が存在するタイミングで付与
+  document.addEventListener('focusin', function(e){
+    var el = e.target;
+    if(el && TARGETS[el.id] && !el.hasAttribute('enterkeyhint')){
+      el.setAttribute('enterkeyhint', 'done');
+    }
+  });
+
+  // Enter 確定（日本語変換中は無視）
+  document.addEventListener('keydown', function(e){
+    var el = e.target;
+    if(!el || !TARGETS[el.id]) return;
+    if(e.isComposing || e.keyCode === 229) return;
+    if(e.key === 'Enter' || e.keyCode === 13){
+      e.preventDefault();
+      if(typeof el.blur === 'function') el.blur();
+      var action = ACTIONS[el.id];
+      if(action) action();
+    }
+  });
+
+  // nameInput のフォーカスで body.kb-open をトグルし、#s3 を上詰めレイアウトに切り替える
+  document.addEventListener('focusin', function(e){
+    if(e.target && e.target.id === 'nameInput'){
+      document.body.classList.add('kb-open');
+    }
+  });
+  document.addEventListener('focusout', function(e){
+    if(e.target && e.target.id === 'nameInput'){
+      document.body.classList.remove('kb-open');
+    }
+  });
+
+  // 「nameInput にフォーカスがあれば kb-open を付ける」状態を focusin と
+  // visualViewport の resize で再判定する（focus イベント欠落・外部からの
+  // 外し漏れ・残り漏れのいずれにも対応）。
+  function syncKbOpen(){
+    var ae = document.activeElement;
+    if(ae && ae.id === 'nameInput'){
+      document.body.classList.add('kb-open');
+    } else {
+      document.body.classList.remove('kb-open');
+    }
+  }
+  document.addEventListener('focusin', syncKbOpen);
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', syncKbOpen);
   }
 })();
+
+// ===== 管理画面にビルド情報を表示（お客さん向け画面には出さない） =====
+// IIFE 時点では html がまだ注入されていない場合があるので、setTimeout で
+// 現在のタスクが片付いてから adminBuildInfo を populate する。
+setTimeout(function(){
+  var bi = document.getElementById('adminBuildInfo');
+  if(bi) bi.textContent = 'build ' + __COMMIT_HASH__ + ' · ' + __BUILD_TIME__;
+}, 0);
 
 // ===== iPad: キーボードで入力欄・ボタンが隠れないよう画面を持ち上げる =====
 // 名前入力(#s3)は body.kb-open の上詰めレイアウトで対応するので、
