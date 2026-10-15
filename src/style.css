@@ -88,6 +88,17 @@ body {
 .btn-outline { background:transparent; color:var(--text-mid); border:1px solid var(--border); }
 .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
 
+/* iPad: 名前入力画面の「次へ」ボタンを visualViewport の下端に合わせて持ち上げる */
+#s3 .btn.btn-fill {
+  position:relative; z-index:20;
+  transition:transform 0.25s ease;
+  transform:translateY(calc(-1 * var(--kb-lift, 0px)));
+  will-change:transform;
+}
+#s3 .btn.btn-fill:active {
+  transform:translateY(calc(-1 * var(--kb-lift, 0px))) scale(0.97);
+}
+
 /* ── CHOICE CARDS ── */
 .choice-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; width:100%; max-width:520px; }
 .card {
@@ -199,6 +210,14 @@ body {
 }
 .admin-field:focus { border-color:var(--accent); }
 .admin-field::placeholder { color:var(--text-muted); }
+select.admin-field {
+  appearance:none; -webkit-appearance:none;
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a9a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 12px center;
+  padding:10px 36px 10px 14px; font-size:14px; color:#1a1a2e;
+  border:1px solid #e2e8f0; border-radius:8px; cursor:pointer;
+}
+select.admin-field:hover { border-color:#94a3b8; }
+select.admin-field:focus { outline:none; border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.1); }
 .admin-row { display:flex; gap:8px; align-items:center; }
 .admin-btn {
   padding:10px 18px; background:linear-gradient(135deg, #3a4a70, #5a6a96); color:#fff;

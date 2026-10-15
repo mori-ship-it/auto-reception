@@ -1551,6 +1551,8 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
 })();
 
 // ===== iPad: キーボードで入力欄・ボタンが隠れないよう画面を持ち上げる =====
+// 名前入力画面(#s3)では「次へ」ボタンの持ち上げは setupNameNextLift が担当するので、
+// ここでは nameInput の位置だけ基準に画面シフトする（ボタンの位置は見ない＝二重シフト防止）。
 (function setupKeyboardShift(){
   var vv = window.visualViewport;
   if(!vv) return;
@@ -1573,11 +1575,14 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
 
     scr.style.transform = '';  // 素の位置で測り直す
     var bottom = el.getBoundingClientRect().bottom;
-    var btns = scr.children;
-    for(var i = 0; i < btns.length; i++){
-      if(!btns[i].classList || !btns[i].classList.contains('btn')) continue;
-      var b = btns[i].getBoundingClientRect().bottom;
-      if(b > bottom) bottom = b;
+    // nameInput は入力欄の下端だけで判定（ボタンは setupNameNextLift が別途持ち上げる）
+    if(el.id !== 'nameInput'){
+      var btns = scr.children;
+      for(var i = 0; i < btns.length; i++){
+        if(!btns[i].classList || !btns[i].classList.contains('btn')) continue;
+        var b = btns[i].getBoundingClientRect().bottom;
+        if(b > bottom) bottom = b;
+      }
     }
 
     var shift = bottom - (vv.offsetTop + vv.height) + 24;
@@ -1594,6 +1599,152 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
   vv.addEventListener('scroll', apply);
   document.addEventListener('focusin', function(){ setTimeout(apply, 300); });
   document.addEventListener('focusout', function(){ setTimeout(apply, 100); });
+})();
+
+// ===== iPad: 名前入力の「次へ」ボタンを visualViewport の下端に貼り付ける =====
+// 持ち上げ量は「ボタンが可視領域からはみ出している量」で決める。
+// 入力欄に重ならないよう、ボタンの上端が nameInput の下端 + 8px より上には行かない。
+// 画面シフト(setupKeyboardShift)の transition 中に測ると補間値を拾って持ち上げすぎるので、
+// 画面要素の transitionend まで待ってから測定する（届かないケース用に 350ms フォールバック）。
+(function setupNameNextLift(){
+  var vv = window.visualViewport;
+  if(!vv) return;
+  var btn = null, input = null, screen = null;
+  var raf = 0, waitTimer = 0, teListener = null;
+
+  var debugEnabled = (function(){
+    try { return new URLSearchParams(window.location.search).get('kbdebug') === '1'; }
+    catch(e){ return false; }
+  })();
+  var debugEl = null;
+
+  function getBtn(){
+    if(!btn) btn = document.querySelector('#s3 .btn.btn-fill');
+    return btn;
+  }
+  function getInput(){
+    if(!input) input = document.getElementById('nameInput');
+    return input;
+  }
+  function getScreen(){
+    if(!screen) screen = document.getElementById('s3');
+    return screen;
+  }
+  function getScreenShift(scr){
+    var m = /translateY\(\s*(-?[\d.]+)px\s*\)/.exec(scr && scr.style && scr.style.transform || '');
+    return m ? parseFloat(m[1]) : 0;
+  }
+
+  function doMeasure(){
+    raf = 0;
+    var b = getBtn();
+    if(!b) return;
+    var scr = getScreen();
+    var inp = getInput();
+    var isNameFocused = document.activeElement && document.activeElement.id === 'nameInput';
+    if(!scr || !scr.classList.contains('active') || !isNameFocused || !inp){
+      b.style.setProperty('--kb-lift', '0px');
+      updateDebug(null);
+      return;
+    }
+
+    // 素の位置で測るため --kb-lift を一旦 0 に戻す。
+    // ボタン自身の transition が走ってると getBoundingClientRect が途中値を返すので一時無効化。
+    var prevTransition = b.style.transition;
+    b.style.transition = 'none';
+    b.style.setProperty('--kb-lift', '0px');
+    void b.offsetHeight;
+
+    var bRect = b.getBoundingClientRect();
+    var iRect = inp.getBoundingClientRect();
+    var visibleBottom = vv.offsetTop + vv.height;
+
+    // 可視領域からはみ出している量 + 余白8px
+    var desired = Math.max(0, bRect.bottom - visibleBottom + 8);
+    // 入力欄の下端 + 8px より上にはボタンの上端を上げない
+    var maxLift = Math.max(0, bRect.top - (iRect.bottom + 8));
+    var lift = Math.min(desired, maxLift);
+    if(lift < 0) lift = 0;
+
+    b.style.transition = prevTransition;
+    b.style.setProperty('--kb-lift', Math.round(lift) + 'px');
+
+    updateDebug({
+      innerH: window.innerHeight,
+      vvH: vv.height,
+      vvTop: vv.offsetTop,
+      scrShift: getScreenShift(scr),
+      bBottom: bRect.bottom,
+      visibleBottom: visibleBottom,
+      desired: desired,
+      maxLift: maxLift,
+      lift: lift
+    });
+  }
+
+  function schedule(){
+    if(raf) return;
+    raf = requestAnimationFrame(doMeasure);
+  }
+
+  // 画面シフトの transition 完了を待ってから測定する。
+  // transitionend が来ない（シフト無し or 中断）場合は 350ms で諦めて測定する。
+  function scheduleAfterShift(){
+    var scr = getScreen();
+    if(waitTimer){ clearTimeout(waitTimer); waitTimer = 0; }
+    if(scr && teListener){ scr.removeEventListener('transitionend', teListener); teListener = null; }
+    if(!scr){ schedule(); return; }
+
+    teListener = function(e){
+      if(e.target !== scr || e.propertyName !== 'transform') return;
+      scr.removeEventListener('transitionend', teListener); teListener = null;
+      if(waitTimer){ clearTimeout(waitTimer); waitTimer = 0; }
+      schedule();
+    };
+    scr.addEventListener('transitionend', teListener);
+
+    waitTimer = setTimeout(function(){
+      waitTimer = 0;
+      if(teListener && scr){ scr.removeEventListener('transitionend', teListener); teListener = null; }
+      schedule();
+    }, 350);
+  }
+
+  vv.addEventListener('resize', scheduleAfterShift);
+  vv.addEventListener('scroll', scheduleAfterShift);
+  document.addEventListener('focusin', function(){ setTimeout(scheduleAfterShift, 300); });
+  document.addEventListener('focusout', function(){
+    var b = getBtn();
+    if(b) b.style.setProperty('--kb-lift', '0px');
+    updateDebug(null);
+    setTimeout(scheduleAfterShift, 100);
+  });
+
+  // ===== デバッグ表示（?kbdebug=1 のときだけ） =====
+  function updateDebug(data){
+    if(!debugEnabled) return;
+    if(!debugEl){
+      debugEl = document.createElement('div');
+      debugEl.id = 'kbDebugOverlay';
+      debugEl.style.cssText = 'position:fixed;top:8px;left:8px;z-index:9999;'
+        + 'background:rgba(0,0,0,.78);color:#7fffd4;'
+        + 'font:11px/1.45 ui-monospace,Menlo,monospace;'
+        + 'padding:8px 10px;border-radius:6px;pointer-events:none;'
+        + 'max-width:280px;white-space:pre;letter-spacing:0.02em;';
+      document.body.appendChild(debugEl);
+    }
+    if(!data){ debugEl.textContent = 'kbdebug: (idle)'; return; }
+    debugEl.textContent =
+      'innerH        = ' + Math.round(window.innerHeight) + '\n' +
+      'vv.height     = ' + Math.round(data.vvH) + '\n' +
+      'vv.offsetTop  = ' + Math.round(data.vvTop) + '\n' +
+      'scrShift      = ' + Math.round(data.scrShift) + '\n' +
+      'bRect.bottom  = ' + Math.round(data.bBottom) + '\n' +
+      'visibleBottom = ' + Math.round(data.visibleBottom) + '\n' +
+      'desired       = ' + Math.round(data.desired) + '\n' +
+      'maxLift       = ' + Math.round(data.maxLift) + '\n' +
+      'lift          = ' + Math.round(data.lift);
+  }
 })();
 
 // ===== エラー監視 =====
