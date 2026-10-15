@@ -1620,12 +1620,6 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
   var btn = null;
   var raf = 0;
 
-  var debugEnabled = (function(){
-    try { return new URLSearchParams(window.location.search).get('kbdebug') === '1'; }
-    catch(e){ return false; }
-  })();
-  var debugEl = null;
-
   function getBtn(){
     if(!btn) btn = document.querySelector('#s3 .btn.btn-fill');
     return btn;
@@ -1634,7 +1628,6 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
   function clearLift(){
     var b = getBtn();
     if(b) b.style.setProperty('--kb-lift', '0px');
-    updateDebug(null);
   }
 
   function doMeasure(){
@@ -1657,16 +1650,6 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
 
     b.style.transition = prevTransition;
     b.style.setProperty('--kb-lift', lift + 'px');
-
-    updateDebug({
-      innerH: window.innerHeight,
-      vvH: vv.height,
-      vvTop: vv.offsetTop,
-      bBottom: bRect.bottom,
-      visibleBottom: visibleBottom,
-      overflow: overflow,
-      lift: lift
-    });
   }
 
   function schedule(){
@@ -1678,30 +1661,6 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
   vv.addEventListener('scroll', schedule);
   document.addEventListener('focusin',  function(){ setTimeout(schedule, 300); });
   document.addEventListener('focusout', function(){ clearLift(); });
-
-  // ===== デバッグ表示（?kbdebug=1 のときだけ） =====
-  function updateDebug(data){
-    if(!debugEnabled) return;
-    if(!debugEl){
-      debugEl = document.createElement('div');
-      debugEl.id = 'kbDebugOverlay';
-      debugEl.style.cssText = 'position:fixed;top:8px;left:8px;z-index:9999;'
-        + 'background:rgba(0,0,0,.78);color:#7fffd4;'
-        + 'font:11px/1.45 ui-monospace,Menlo,monospace;'
-        + 'padding:8px 10px;border-radius:6px;pointer-events:none;'
-        + 'max-width:280px;white-space:pre;letter-spacing:0.02em;';
-      document.body.appendChild(debugEl);
-    }
-    if(!data){ debugEl.textContent = 'kbdebug: (idle)'; return; }
-    debugEl.textContent =
-      'innerH        = ' + Math.round(window.innerHeight) + '\n' +
-      'vv.height     = ' + Math.round(data.vvH) + '\n' +
-      'vv.offsetTop  = ' + Math.round(data.vvTop) + '\n' +
-      'bRect.bottom  = ' + Math.round(data.bBottom) + '\n' +
-      'visibleBottom = ' + Math.round(data.visibleBottom) + '\n' +
-      'overflow      = ' + Math.round(data.overflow) + '\n' +
-      'lift          = ' + Math.round(data.lift);
-  }
 })();
 
 // ===== エラー監視 =====
