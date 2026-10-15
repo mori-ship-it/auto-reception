@@ -287,6 +287,8 @@ function langLabel(){ return lang; }
 function goTo(id){
   // iPad: 画面遷移時にソフトキーボードを閉じる
   if(document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
+  // 名前入力中の上詰めレイアウトを解除する（blur でも外れるが明示する）
+  document.body.classList.remove('kb-open');
   if(cdTimer){clearTimeout(cdTimer);cdTimer=null;}
   document.getElementById(current).classList.remove('active');
   document.getElementById(id).classList.add('active');
@@ -1548,11 +1550,19 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
   }
   bind('nameInput', function(){ submitName(); });
   bind('stylistSearch', null);
+
+  // nameInput の focus/blur で body.kb-open をトグルし、
+  // #s3 を上詰めレイアウトに切り替える（CSS 側で見出し縮小・小見出し非表示）
+  var ni = document.getElementById('nameInput');
+  if(ni){
+    ni.addEventListener('focus', function(){ document.body.classList.add('kb-open'); });
+    ni.addEventListener('blur',  function(){ document.body.classList.remove('kb-open'); });
+  }
 })();
 
 // ===== iPad: キーボードで入力欄・ボタンが隠れないよう画面を持ち上げる =====
-// 名前入力画面(#s3)では「次へ」ボタンの持ち上げは setupNameNextLift が担当するので、
-// ここでは nameInput の位置だけ基準に画面シフトする（ボタンの位置は見ない＝二重シフト防止）。
+// 名前入力(#s3)は body.kb-open の上詰めレイアウトで対応するので、
+// kb-open 中はこの画面シフトを無効化する（二重に動かさない）。
 (function setupKeyboardShift(){
   var vv = window.visualViewport;
   if(!vv) return;
@@ -1564,6 +1574,9 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
   }
 
   function apply(){
+    // 名前入力画面は上詰めレイアウト(kb-open)で対応するのでシフトしない
+    if(document.body.classList.contains('kb-open')){ reset(); return; }
+
     var el = document.activeElement;
     if(!el || !TARGETS[el.id]){ reset(); return; }
     var scr = el.closest ? el.closest('.screen') : null;
@@ -1575,14 +1588,11 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
 
     scr.style.transform = '';  // 素の位置で測り直す
     var bottom = el.getBoundingClientRect().bottom;
-    // nameInput は入力欄の下端だけで判定（ボタンは setupNameNextLift が別途持ち上げる）
-    if(el.id !== 'nameInput'){
-      var btns = scr.children;
-      for(var i = 0; i < btns.length; i++){
-        if(!btns[i].classList || !btns[i].classList.contains('btn')) continue;
-        var b = btns[i].getBoundingClientRect().bottom;
-        if(b > bottom) bottom = b;
-      }
+    var btns = scr.children;
+    for(var i = 0; i < btns.length; i++){
+      if(!btns[i].classList || !btns[i].classList.contains('btn')) continue;
+      var b = btns[i].getBoundingClientRect().bottom;
+      if(b > bottom) bottom = b;
     }
 
     var shift = bottom - (vv.offsetTop + vv.height) + 24;
@@ -1601,16 +1611,14 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
   document.addEventListener('focusout', function(){ setTimeout(apply, 100); });
 })();
 
-// ===== iPad: 名前入力の「次へ」ボタンを visualViewport の下端に貼り付ける =====
-// 持ち上げ量は「ボタンが可視領域からはみ出している量」で決める。
-// 入力欄に重ならないよう、ボタンの上端が nameInput の下端 + 8px より上には行かない。
-// 画面シフト(setupKeyboardShift)の transition 中に測ると補間値を拾って持ち上げすぎるので、
-// 画面要素の transitionend まで待ってから測定する（届かないケース用に 350ms フォールバック）。
+// ===== iPad: 名前入力中の「次へ」ボタンはみ出し保険 =====
+// 基本は body.kb-open の上詰めレイアウトで「次へ」が可視領域に収まる。
+// それでもボタン下端が visualViewport からはみ出す場合だけ、はみ出し量 + 8px を持ち上げる。
 (function setupNameNextLift(){
   var vv = window.visualViewport;
   if(!vv) return;
-  var btn = null, input = null, screen = null;
-  var raf = 0, waitTimer = 0, teListener = null;
+  var btn = null;
+  var raf = 0;
 
   var debugEnabled = (function(){
     try { return new URLSearchParams(window.location.search).get('kbdebug') === '1'; }
@@ -1622,62 +1630,41 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
     if(!btn) btn = document.querySelector('#s3 .btn.btn-fill');
     return btn;
   }
-  function getInput(){
-    if(!input) input = document.getElementById('nameInput');
-    return input;
-  }
-  function getScreen(){
-    if(!screen) screen = document.getElementById('s3');
-    return screen;
-  }
-  function getScreenShift(scr){
-    var m = /translateY\(\s*(-?[\d.]+)px\s*\)/.exec(scr && scr.style && scr.style.transform || '');
-    return m ? parseFloat(m[1]) : 0;
+
+  function clearLift(){
+    var b = getBtn();
+    if(b) b.style.setProperty('--kb-lift', '0px');
+    updateDebug(null);
   }
 
   function doMeasure(){
     raf = 0;
     var b = getBtn();
     if(!b) return;
-    var scr = getScreen();
-    var inp = getInput();
-    var isNameFocused = document.activeElement && document.activeElement.id === 'nameInput';
-    if(!scr || !scr.classList.contains('active') || !isNameFocused || !inp){
-      b.style.setProperty('--kb-lift', '0px');
-      updateDebug(null);
-      return;
-    }
+    if(!document.body.classList.contains('kb-open')){ clearLift(); return; }
 
     // 素の位置で測るため --kb-lift を一旦 0 に戻す。
-    // ボタン自身の transition が走ってると getBoundingClientRect が途中値を返すので一時無効化。
+    // ボタン自身の transition が走っていると getBoundingClientRect が途中値を返すので一時無効化。
     var prevTransition = b.style.transition;
     b.style.transition = 'none';
     b.style.setProperty('--kb-lift', '0px');
     void b.offsetHeight;
 
     var bRect = b.getBoundingClientRect();
-    var iRect = inp.getBoundingClientRect();
     var visibleBottom = vv.offsetTop + vv.height;
-
-    // 可視領域からはみ出している量 + 余白8px
-    var desired = Math.max(0, bRect.bottom - visibleBottom + 8);
-    // 入力欄の下端 + 8px より上にはボタンの上端を上げない
-    var maxLift = Math.max(0, bRect.top - (iRect.bottom + 8));
-    var lift = Math.min(desired, maxLift);
-    if(lift < 0) lift = 0;
+    var overflow = bRect.bottom - visibleBottom;
+    var lift = overflow > 0 ? Math.round(overflow + 8) : 0;
 
     b.style.transition = prevTransition;
-    b.style.setProperty('--kb-lift', Math.round(lift) + 'px');
+    b.style.setProperty('--kb-lift', lift + 'px');
 
     updateDebug({
       innerH: window.innerHeight,
       vvH: vv.height,
       vvTop: vv.offsetTop,
-      scrShift: getScreenShift(scr),
       bBottom: bRect.bottom,
       visibleBottom: visibleBottom,
-      desired: desired,
-      maxLift: maxLift,
+      overflow: overflow,
       lift: lift
     });
   }
@@ -1687,38 +1674,10 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
     raf = requestAnimationFrame(doMeasure);
   }
 
-  // 画面シフトの transition 完了を待ってから測定する。
-  // transitionend が来ない（シフト無し or 中断）場合は 350ms で諦めて測定する。
-  function scheduleAfterShift(){
-    var scr = getScreen();
-    if(waitTimer){ clearTimeout(waitTimer); waitTimer = 0; }
-    if(scr && teListener){ scr.removeEventListener('transitionend', teListener); teListener = null; }
-    if(!scr){ schedule(); return; }
-
-    teListener = function(e){
-      if(e.target !== scr || e.propertyName !== 'transform') return;
-      scr.removeEventListener('transitionend', teListener); teListener = null;
-      if(waitTimer){ clearTimeout(waitTimer); waitTimer = 0; }
-      schedule();
-    };
-    scr.addEventListener('transitionend', teListener);
-
-    waitTimer = setTimeout(function(){
-      waitTimer = 0;
-      if(teListener && scr){ scr.removeEventListener('transitionend', teListener); teListener = null; }
-      schedule();
-    }, 350);
-  }
-
-  vv.addEventListener('resize', scheduleAfterShift);
-  vv.addEventListener('scroll', scheduleAfterShift);
-  document.addEventListener('focusin', function(){ setTimeout(scheduleAfterShift, 300); });
-  document.addEventListener('focusout', function(){
-    var b = getBtn();
-    if(b) b.style.setProperty('--kb-lift', '0px');
-    updateDebug(null);
-    setTimeout(scheduleAfterShift, 100);
-  });
+  vv.addEventListener('resize', schedule);
+  vv.addEventListener('scroll', schedule);
+  document.addEventListener('focusin',  function(){ setTimeout(schedule, 300); });
+  document.addEventListener('focusout', function(){ clearLift(); });
 
   // ===== デバッグ表示（?kbdebug=1 のときだけ） =====
   function updateDebug(data){
@@ -1738,11 +1697,9 @@ Object.entries(_fns).forEach(([k, v]) => { window[k] = v; });
       'innerH        = ' + Math.round(window.innerHeight) + '\n' +
       'vv.height     = ' + Math.round(data.vvH) + '\n' +
       'vv.offsetTop  = ' + Math.round(data.vvTop) + '\n' +
-      'scrShift      = ' + Math.round(data.scrShift) + '\n' +
       'bRect.bottom  = ' + Math.round(data.bBottom) + '\n' +
       'visibleBottom = ' + Math.round(data.visibleBottom) + '\n' +
-      'desired       = ' + Math.round(data.desired) + '\n' +
-      'maxLift       = ' + Math.round(data.maxLift) + '\n' +
+      'overflow      = ' + Math.round(data.overflow) + '\n' +
       'lift          = ' + Math.round(data.lift);
   }
 })();
