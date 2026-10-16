@@ -88,25 +88,21 @@ body {
 .btn-outline { background:transparent; color:var(--text-mid); border:1px solid var(--border); }
 .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
 
-/* iPad: 名前入力画面の「次へ」ボタン持ち上げ用 CSS 変数（通常 0px、保険 JS が上書き） */
-#s3 .btn.btn-fill {
-  position:relative; z-index:20;
-  transition:transform 0.25s ease;
-  transform:translateY(calc(-1 * var(--kb-lift, 0px)));
-  will-change:transform;
-}
-#s3 .btn.btn-fill:active {
-  transform:translateY(calc(-1 * var(--kb-lift, 0px))) scale(0.97);
-}
-
 /* iPad 横向き＋日本語キーボードで名前入力欄と「次へ」が隠れないよう、
-   nameInput フォーカス中は #s3 を上詰めレイアウトに切り替える。
-   小見出し・区切り線は非表示、見出しは縮小し、入力欄・注意書き・「次へ」を
-   画面上部40%以内に収める。 */
+   nameInput フォーカス中は #s3 を visualViewport の可視範囲に固定する。
+   position / top / left / width / height は setupNameFixedLayout が JS で設定する。
+   iOS の自動スクロールと二重に動かないよう html / body の overflow も止める。 */
+html.kb-open, body.kb-open { overflow:hidden !important; }
 body.kb-open #s3 {
-  justify-content:flex-start;
-  padding-top:72px;
+  padding:16px 24px !important;
+  justify-content:center;
+  overflow:hidden;
+  z-index:100;
+  /* .screen の inset:0 を無効化しないと JS の height が効かない */
+  bottom:auto !important;
+  right:auto !important;
 }
+body.kb-open #s3 .top-bar { display:none; }
 body.kb-open #s3 .eyebrow,
 body.kb-open #s3 .divider { display:none; }
 body.kb-open #s3 .display {
@@ -121,9 +117,15 @@ body.kb-open #s3 .field-err {
 /* html_body.txt 内の <div style="height:20px"> スペーサーを圧縮 */
 body.kb-open #s3 > div[style*="height:20px"] { height:8px !important; }
 body.kb-open #s3 .btn.btn-fill {
-  padding:16px 36px;
-  margin-top:0;
+  padding:14px 36px;
+  margin-top:8px;
 }
+/* 可視高さが小さい時のさらなる縮小（setupNameFixedLayout が #s3 にクラス付与） */
+body.kb-open #s3.kb-tight .display {
+  font-size:14px !important;
+  margin-bottom:6px;
+}
+body.kb-open #s3.kb-very-tight .display { display:none; }
 
 /* ── CHOICE CARDS ── */
 .choice-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; width:100%; max-width:520px; }

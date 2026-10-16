@@ -1686,12 +1686,12 @@ function _isStandalonePWA(){
 })();
 
 // ===== iPad: キーボードで入力欄・ボタンが隠れないよう画面を持ち上げる =====
-// 名前入力(#s3)は body.kb-open の上詰めレイアウトで対応するので、
-// kb-open 中はこの画面シフトを無効化する（二重に動かさない）。
+// 名前入力(#s3)は setupNameFixedLayout で visualViewport に固定するので対象外。
+// スタイリスト検索のみ translateY で持ち上げる。
 (function setupKeyboardShift(){
   var vv = window.visualViewport;
   if(!vv) return;
-  var TARGETS = { nameInput:1, stylistSearch:1 };
+  var TARGETS = { stylistSearch:1 };
   var shifted = null;
 
   function reset(){
@@ -1699,9 +1699,6 @@ function _isStandalonePWA(){
   }
 
   function apply(){
-    // 名前入力画面は上詰めレイアウト(kb-open)で対応するのでシフトしない
-    if(document.body.classList.contains('kb-open')){ reset(); return; }
-
     var el = document.activeElement;
     if(!el || !TARGETS[el.id]){ reset(); return; }
     var scr = el.closest ? el.closest('.screen') : null;
@@ -1736,56 +1733,79 @@ function _isStandalonePWA(){
   document.addEventListener('focusout', function(){ setTimeout(apply, 100); });
 })();
 
-// ===== iPad: 名前入力中の「次へ」ボタンはみ出し保険 =====
-// 基本は body.kb-open の上詰めレイアウトで「次へ」が可視領域に収まる。
-// それでもボタン下端が visualViewport からはみ出す場合だけ、はみ出し量 + 8px を持ち上げる。
-(function setupNameNextLift(){
+// ===== iPad: 名前入力中は #s3 を visualViewport の可視範囲に固定する =====
+// kb-open が付いている間、#s3 を position:fixed にして
+// top = visualViewport.offsetTop / height = visualViewport.height に合わせる。
+// iOS の自動スクロールに引きずられないよう window.scrollTo(0, 0) を実行し、
+// html / body の overflow は CSS で止める。
+// 可視高さに応じて見出しを縮小・非表示にするクラスも付与する。
+(function setupNameFixedLayout(){
   var vv = window.visualViewport;
-  if(!vv) return;
-  var btn = null;
-  var raf = 0;
+  var s3 = null;
 
-  function getBtn(){
-    if(!btn) btn = document.querySelector('#s3 .btn.btn-fill');
-    return btn;
+  function getS3(){
+    if(!s3) s3 = document.getElementById('s3');
+    return s3;
   }
 
-  function clearLift(){
-    var b = getBtn();
-    if(b) b.style.setProperty('--kb-lift', '0px');
+  function resetS3(){
+    var el = getS3();
+    if(!el) return;
+    el.style.position = '';
+    el.style.top = '';
+    el.style.left = '';
+    el.style.width = '';
+    el.style.height = '';
+    el.classList.remove('kb-tight', 'kb-very-tight');
   }
 
-  function doMeasure(){
-    raf = 0;
-    var b = getBtn();
-    if(!b) return;
-    if(!document.body.classList.contains('kb-open')){ clearLift(); return; }
-
-    // 素の位置で測るため --kb-lift を一旦 0 に戻す。
-    // ボタン自身の transition が走っていると getBoundingClientRect が途中値を返すので一時無効化。
-    var prevTransition = b.style.transition;
-    b.style.transition = 'none';
-    b.style.setProperty('--kb-lift', '0px');
-    void b.offsetHeight;
-
-    var bRect = b.getBoundingClientRect();
-    var visibleBottom = vv.offsetTop + vv.height;
-    var overflow = bRect.bottom - visibleBottom;
-    var lift = overflow > 0 ? Math.round(overflow + 8) : 0;
-
-    b.style.transition = prevTransition;
-    b.style.setProperty('--kb-lift', lift + 'px');
+  function apply(){
+    var el = getS3();
+    if(!el) return;
+    var open = document.body.classList.contains('kb-open');
+    document.documentElement.classList.toggle('kb-open', open);
+    if(!open){
+      resetS3();
+      return;
+    }
+    var h = vv ? vv.height : window.innerHeight;
+    var t = vv ? vv.offsetTop : 0;
+    el.style.position = 'fixed';
+    el.style.top = Math.round(t) + 'px';
+    el.style.left = '0';
+    el.style.width = '100%';
+    el.style.height = Math.round(h) + 'px';
+    el.classList.toggle('kb-tight', h < 400);
+    el.classList.toggle('kb-very-tight', h < 280);
+    try { window.scrollTo(0, 0); } catch(e) { /* ignore */ }
   }
 
-  function schedule(){
-    if(raf) return;
-    raf = requestAnimationFrame(doMeasure);
+  if(vv){
+    vv.addEventListener('resize', apply);
+    vv.addEventListener('scroll', apply);
   }
+  window.addEventListener('resize', apply);
 
-  vv.addEventListener('resize', schedule);
-  vv.addEventListener('scroll', schedule);
-  document.addEventListener('focusin',  function(){ setTimeout(schedule, 300); });
-  document.addEventListener('focusout', function(){ clearLift(); });
+  // nameInput にフォーカスが入ったとき、iOS の自動スクロールを打ち消す
+  document.addEventListener('focusin', function(e){
+    if(!(e.target && e.target.id === 'nameInput')) return;
+    try { window.scrollTo(0, 0); } catch(err) { /* ignore */ }
+    apply();
+    setTimeout(function(){
+      try { window.scrollTo(0, 0); } catch(err) { /* ignore */ }
+      apply();
+    }, 50);
+    setTimeout(function(){
+      try { window.scrollTo(0, 0); } catch(err) { /* ignore */ }
+      apply();
+    }, 300);
+  });
+
+  // body.kb-open の付け外しに追従
+  if(typeof MutationObserver !== 'undefined'){
+    var mo = new MutationObserver(apply);
+    mo.observe(document.body, { attributes:true, attributeFilter:['class'] });
+  }
 })();
 
 // ===== エラー監視 =====
